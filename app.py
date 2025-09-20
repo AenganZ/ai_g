@@ -1,16 +1,14 @@
-# app.py - 모듈화된 Flask 앱 (AenganZ 통합)
+# app.py - Flask 2.2+ 호환 AenganZ 통합 버전
 import os
 import json
 from datetime import datetime
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-
-# 프로젝트 모듈들
 from pseudonymization.manager import get_manager
 from utils.logging import append_json_to_file
 
 # 설정
-LOG_PATH = "pseudo-log.txt"  # TXT 형식 로그
+LOG_PATH = "pseudo-log.json"
 
 # Flask 앱 생성
 app = Flask(__name__)
@@ -20,7 +18,7 @@ CORS(app)
 manager = None
 
 def get_initialized_manager():
-    """매니저 초기화 및 반환"""
+    """매니저 초기화 및 반환 (Flask 2.2+ 호환)"""
     global manager
     if manager is None:
         print("🚀 PseudonymizationManager 초기화 중...")
@@ -30,7 +28,6 @@ def get_initialized_manager():
 
 @app.route("/", methods=["GET", "OPTIONS"])
 def root():
-    """루트 엔드포인트"""
     if request.method == "OPTIONS":
         response = jsonify({"message": "CORS preflight OK"})
         response.headers.add('Access-Control-Allow-Origin', '*')
@@ -44,7 +41,7 @@ def root():
     return jsonify({
         "message": "GenAI Pseudonymizer (AenganZ Enhanced)", 
         "version": "2.0.0",
-        "framework": "Flask (Modular)",
+        "framework": "Flask",
         "detection_method": "NER + Regex + DataPools",
         "ready": mgr.is_ready(),
         "timestamp": datetime.now().isoformat()
@@ -52,7 +49,6 @@ def root():
 
 @app.route("/health", methods=["GET", "OPTIONS"])
 def health():
-    """헬스 체크 엔드포인트"""
     if request.method == "OPTIONS":
         response = jsonify({"message": "CORS preflight OK"})
         response.headers.add('Access-Control-Allow-Origin', '*')
@@ -72,7 +68,6 @@ def health():
 
 @app.route("/pseudonymize", methods=["POST", "OPTIONS"])
 def pseudonymize():
-    """가명화 처리 엔드포인트"""
     # CORS preflight 요청 처리
     if request.method == "OPTIONS":
         response = jsonify({"message": "CORS preflight OK"})
@@ -106,7 +101,6 @@ def pseudonymize():
     print(f"🔍 가명화 요청: {datetime.now().strftime('%H:%M:%S')}")
     print(f"🆔 ID: {req_id}")
     print(f"📄 원문: {original_prompt}")
-    print(f"🌐 요청 IP: {request.remote_addr}")
 
     try:
         # 매니저 초기화 및 가명화 처리
@@ -177,7 +171,7 @@ def pseudonymize():
 
 @app.route("/prompt_logs", methods=["GET", "OPTIONS"])
 def prompt_logs():
-    """로그 조회 엔드포인트"""
+    # CORS preflight 요청 처리
     if request.method == "OPTIONS":
         response = jsonify({"message": "CORS preflight OK"})
         response.headers.add('Access-Control-Allow-Origin', '*')
@@ -185,27 +179,41 @@ def prompt_logs():
         response.headers.add('Access-Control-Allow-Methods', '*')
         return response
 
+    # 로그 파일 반환
     try:
-        # TXT 파일에서 로그 로드
-        from utils.logging import load_logs_from_file
-        logs_data = load_logs_from_file(LOG_PATH)
+        with open(LOG_PATH, "r", encoding="utf-8") as f:
+            raw = f.read()
         
-        response = jsonify(logs_data)
+        # JSON 유효성 검사
+        json.loads(raw)
+        
+        response = app.response_class(
+            response=raw,
+            status=200,
+            mimetype="application/json; charset=utf-8"
+        )
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
         
+    except FileNotFoundError:
+        empty = {"logs": []}
+        response = app.response_class(
+            response=json.dumps(empty, ensure_ascii=False),
+            status=200,
+            mimetype="application/json; charset=utf-8"
+        )
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
     except Exception as e:
-        response = jsonify({"error": f"log_read_error: {e}", "logs": []})
+        response = jsonify({"error": f"log_read_error: {e}"})
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response, 500
 
 @app.route("/prompt_logs", methods=["DELETE"])
 def clear_logs():
-    """로그 삭제 엔드포인트"""
     try:
-        # 로그 파일 초기화
         with open(LOG_PATH, "w", encoding="utf-8") as f:
-            f.write("")  # 빈 파일로 초기화
+            json.dump({"logs": []}, f, ensure_ascii=False)
         
         response = jsonify({"success": True, "message": "Logs cleared"})
         response.headers.add('Access-Control-Allow-Origin', '*')
@@ -229,14 +237,14 @@ def internal_error(error):
     return response, 500
 
 if __name__ == "__main__":
-    print("🎭 GenAI Pseudonymizer (AenganZ Enhanced - Modular)")
-    print("🔧 프레임워크: Flask (모듈화)")
+    print("🎭 GenAI Pseudonymizer (AenganZ Enhanced)")
+    print("🔧 프레임워크: Flask (2.2+ 호환)")
     print("🧠 탐지 방식: NER + 정규식 + 데이터풀")
     print("📛 가명화: 실제 데이터 대체")
     print("🔄 복원: 양방향 매핑")
-    print("📝 로깅: TXT 형식")
     print("🌐 서버 시작 중...")
     
+    # 개발 서버 실행
     try:
         app.run(
             host="127.0.0.1",

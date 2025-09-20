@@ -52,7 +52,7 @@
       color: #555;
     }
     
-    input[type="text"], input[type="number"], select {
+    input[type="text"], input[type="number"] {
       width: 100%;
       padding: 10px;
       border: 1px solid #ddd;
@@ -82,6 +82,7 @@
       display: flex;
       gap: 10px;
       margin-top: 30px;
+      flex-wrap: wrap;
     }
     
     button {
@@ -92,6 +93,12 @@
       font-weight: 500;
       cursor: pointer;
       transition: all 0.3s;
+      min-width: 120px;
+    }
+    
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
     
     .btn-primary {
@@ -99,7 +106,7 @@
       color: white;
     }
     
-    .btn-primary:hover {
+    .btn-primary:hover:not(:disabled) {
       background: #2980b9;
     }
     
@@ -108,7 +115,7 @@
       color: white;
     }
     
-    .btn-secondary:hover {
+    .btn-secondary:hover:not(:disabled) {
       background: #7f8c8d;
     }
     
@@ -117,7 +124,7 @@
       color: white;
     }
     
-    .btn-danger:hover {
+    .btn-danger:hover:not(:disabled) {
       background: #c0392b;
     }
     
@@ -162,6 +169,17 @@
       border-left: 4px solid #f39c12;
       background: #fef9e7;
     }
+
+    .debug-info {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      padding: 10px;
+      margin-top: 10px;
+      font-family: monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+    }
   </style>
 </head>
 <body>
@@ -174,15 +192,15 @@
       
       <div class="form-group">
         <div class="checkbox-group">
-          <input type="checkbox" id="enabled">
-          <label for="enabled">가명화 기능 활성화</label>
+          <input type="checkbox" id="enabled" checked>
+          <label for="enabled">가명화 기능 활성화 (기본값: 켜짐)</label>
         </div>
         <div class="help-text">체크 해제 시 모든 요청이 가명화 없이 통과됩니다.</div>
       </div>
       
       <div class="form-group">
         <div class="checkbox-group">
-          <input type="checkbox" id="fallbackOnError">
+          <input type="checkbox" id="fallbackOnError" checked>
           <label for="fallbackOnError">오류 시 원본 요청 실행</label>
         </div>
         <div class="help-text">가명화 실패 시 원본 요청을 그대로 전송합니다.</div>
@@ -203,25 +221,13 @@
       
       <div class="form-group">
         <label for="serverUrl">서버 URL</label>
-        <input type="text" id="serverUrl" placeholder="http://127.0.0.1:5000">
+        <input type="text" id="serverUrl" value="http://127.0.0.1:5000">
         <div class="help-text">로컬 가명화 서버 주소</div>
-      </div>
-      
-      <div class="form-group">
-        <label for="model">NER 모델</label>
-        <select id="model">
-          <option value="monologg/koelectra-base-v3-naver-ner">KoELECTRA (기본)</option>
-          <option value="klue/roberta-base-ner">KLUE RoBERTa</option>
-          <option value="custom">사용자 정의</option>
-        </select>
-        <input type="text" id="customModel" placeholder="사용자 정의 모델 ID" style="margin-top: 10px; display: none;">
-        <div class="help-text">사용할 NER 모델을 선택하세요.</div>
       </div>
       
       <div class="server-status">
         <div class="status-indicator" id="serverStatusIndicator"></div>
         <span id="serverStatusText">서버 상태 확인 중...</span>
-        <button type="button" id="testConnection" class="btn-secondary" style="padding: 5px 10px; font-size: 12px;">연결 테스트</button>
       </div>
     </div>
     
@@ -236,253 +242,175 @@
       </div>
       
       <div class="form-group">
-        <label for="requestTimeout">요청 타임아웃 (초)</label>
-        <input type="number" id="requestTimeout" min="5" max="120" value="30">
+        <label for="timeout">요청 타임아웃 (초)</label>
+        <input type="number" id="timeout" min="5" max="120" value="15">
         <div class="help-text">가명화 서버 응답 대기 시간</div>
-      </div>
-      
-      <div class="form-group">
-        <label for="nerThreshold">NER 신뢰도 임계값</label>
-        <input type="number" id="nerThreshold" min="0.1" max="1.0" step="0.05" value="0.70">
-        <div class="help-text">개인정보 탐지를 위한 최소 신뢰도 (0.1-1.0)</div>
-      </div>
-      
-      <div class="form-group">
-        <label for="maxInputLength">최대 입력 길이</label>
-        <input type="number" id="maxInputLength" min="1000" max="10000" value="4000">
-        <div class="help-text">처리할 프롬프트의 최대 문자 수</div>
-      </div>
-      
-      <div class="form-group">
-        <div class="checkbox-group">
-          <input type="checkbox" id="enableCache">
-          <label for="enableCache">결과 캐싱 활성화</label>
-        </div>
-        <div class="help-text">동일한 텍스트에 대한 분석 결과를 캐시합니다.</div>
-      </div>
-    </div>
-    
-    <!-- 개인정보 유형 설정 -->
-    <div class="section">
-      <h3>탐지할 개인정보 유형</h3>
-      
-      <div class="form-group">
-        <div class="checkbox-group">
-          <input type="checkbox" id="detectNames" checked>
-          <label for="detectNames">이름</label>
-        </div>
-      </div>
-      
-      <div class="form-group">
-        <div class="checkbox-group">
-          <input type="checkbox" id="detectPhones" checked>
-          <label for="detectPhones">전화번호</label>
-        </div>
-      </div>
-      
-      <div class="form-group">
-        <div class="checkbox-group">
-          <input type="checkbox" id="detectEmails" checked>
-          <label for="detectEmails">이메일 주소</label>
-        </div>
-      </div>
-      
-      <div class="form-group">
-        <div class="checkbox-group">
-          <input type="checkbox" id="detectAddresses" checked>
-          <label for="detectAddresses">주소</label>
-        </div>
-      </div>
-      
-      <div class="form-group">
-        <div class="checkbox-group">
-          <input type="checkbox" id="detectAges" checked>
-          <label for="detectAges">나이</label>
-        </div>
-      </div>
-      
-      <div class="form-group">
-        <div class="checkbox-group">
-          <input type="checkbox" id="detectSSN">
-          <label for="detectSSN">주민등록번호</label>
-        </div>
-      </div>
-      
-      <div class="form-group">
-        <div class="checkbox-group">
-          <input type="checkbox" id="detectAccounts">
-          <label for="detectAccounts">계좌번호</label>
-        </div>
       </div>
     </div>
     
     <!-- 버튼 그룹 -->
     <div class="button-group">
-      <button id="save" class="btn-primary">설정 저장</button>
-      <button id="reset" class="btn-secondary">기본값 복원</button>
-      <button id="export" class="btn-secondary">설정 내보내기</button>
-      <button id="clearLogs" class="btn-danger">로그 삭제</button>
+      <button onclick="saveConfig()" class="btn-primary">설정 저장</button>
+      <button onclick="resetConfig()" class="btn-secondary">기본값 복원</button>
+      <button onclick="testConnection()" class="btn-secondary">연결 테스트</button>
+      <button onclick="testModel()" class="btn-secondary">모델 테스트</button>
+      <button onclick="clearLogs()" class="btn-danger">로그 삭제</button>
     </div>
     
     <!-- 상태 메시지 -->
     <div id="status" class="status"></div>
+    
+    <!-- 디버그 정보 -->
+    <div id="debugInfo" class="debug-info" style="display: none;"></div>
   </div>
 
   <script>
+    console.log('Options page script started');
+    
     // 기본값 정의
     const DEFAULT_CONFIG = {
-      enabled: true,
-      fallbackOnError: true,
-      debugMode: false,
+      enabled: true,        // 기본적으로 활성화!!!
       serverUrl: 'http://127.0.0.1:5000',
-      model: 'monologg/koelectra-base-v3-naver-ner',
-      customModel: '',
+      timeout: 15000,       // 밀리초
       maxRetries: 2,
-      requestTimeout: 30,
-      nerThreshold: 0.70,
-      maxInputLength: 4000,
-      enableCache: true,
-      detectNames: true,
-      detectPhones: true,
-      detectEmails: true,
-      detectAddresses: true,
-      detectAges: true,
-      detectSSN: false,
-      detectAccounts: false
+      fallbackOnError: true,
+      debugMode: false
     };
-
-    // DOM 요소들
-    const elements = {};
-    Object.keys(DEFAULT_CONFIG).forEach(key => {
-      elements[key] = document.getElementById(key);
-    });
-    
-    const saveBtn = document.getElementById('save');
-    const resetBtn = document.getElementById('reset');
-    const exportBtn = document.getElementById('export');
-    const clearLogsBtn = document.getElementById('clearLogs');
-    const testConnectionBtn = document.getElementById('testConnection');
-    const statusDiv = document.getElementById('status');
-    const modelSelect = document.getElementById('model');
-    const customModelInput = document.getElementById('customModel');
-    const serverStatusIndicator = document.getElementById('serverStatusIndicator');
-    const serverStatusText = document.getElementById('serverStatusText');
 
     // 설정 로드
     async function loadConfig() {
+      console.log('Loading config...');
       try {
         const stored = await chrome.storage.local.get(Object.keys(DEFAULT_CONFIG));
+        console.log('Stored config:', stored);
         
-        Object.keys(DEFAULT_CONFIG).forEach(key => {
-          const value = stored[key] ?? DEFAULT_CONFIG[key];
-          const element = elements[key];
-          
-          if (element) {
-            if (element.type === 'checkbox') {
-              element.checked = Boolean(value);
-            } else {
-              element.value = value;
-            }
-          }
-        });
-        
-        // 사용자 정의 모델 필드 표시/숨김
-        toggleCustomModelField();
+        // 각 필드에 값 설정
+        document.getElementById('enabled').checked = stored.enabled ?? DEFAULT_CONFIG.enabled;
+        document.getElementById('fallbackOnError').checked = stored.fallbackOnError ?? DEFAULT_CONFIG.fallbackOnError;
+        document.getElementById('debugMode').checked = stored.debugMode ?? DEFAULT_CONFIG.debugMode;
+        document.getElementById('serverUrl').value = stored.serverUrl ?? DEFAULT_CONFIG.serverUrl;
+        document.getElementById('maxRetries').value = stored.maxRetries ?? DEFAULT_CONFIG.maxRetries;
+        document.getElementById('timeout').value = Math.floor((stored.timeout ?? DEFAULT_CONFIG.timeout) / 1000);
         
         showStatus('설정이 로드되었습니다.', 'success');
+        updateDebugInfo('Config loaded successfully');
       } catch (error) {
+        console.error('Failed to load config:', error);
         showStatus('설정 로드 실패: ' + error.message, 'error');
+        updateDebugInfo('Config load failed: ' + error.message);
       }
     }
 
     // 설정 저장
     async function saveConfig() {
+      console.log('Saving config...');
       try {
-        const config = {};
+        const config = {
+          enabled: document.getElementById('enabled').checked,
+          fallbackOnError: document.getElementById('fallbackOnError').checked,
+          debugMode: document.getElementById('debugMode').checked,
+          serverUrl: document.getElementById('serverUrl').value,
+          maxRetries: parseInt(document.getElementById('maxRetries').value),
+          timeout: parseInt(document.getElementById('timeout').value) * 1000  // 초를 밀리초로
+        };
         
-        Object.keys(DEFAULT_CONFIG).forEach(key => {
-          const element = elements[key];
-          if (element) {
-            if (element.type === 'checkbox') {
-              config[key] = element.checked;
-            } else if (element.type === 'number') {
-              config[key] = Number(element.value);
-            } else {
-              config[key] = element.value;
-            }
-          }
-        });
-        
+        console.log('Saving config:', config);
         await chrome.storage.local.set(config);
         showStatus('설정이 저장되었습니다.', 'success');
+        updateDebugInfo('Config saved: ' + JSON.stringify(config, null, 2));
         
-        // 백그라운드 스크립트에 설정 업데이트 알림
+        // 백그라운드 스크립트에 알림
         try {
           await chrome.runtime.sendMessage({ type: 'UPDATE_CONFIG', config });
+          console.log('Notified background script');
         } catch (e) {
           console.warn('Failed to notify background script:', e);
         }
         
       } catch (error) {
+        console.error('Failed to save config:', error);
         showStatus('설정 저장 실패: ' + error.message, 'error');
+        updateDebugInfo('Config save failed: ' + error.message);
       }
     }
 
     // 기본값 복원
-    async function resetConfig() {
+    function resetConfig() {
       if (!confirm('모든 설정을 기본값으로 복원하시겠습니까?')) {
         return;
       }
       
+      console.log('Resetting config to defaults');
+      document.getElementById('enabled').checked = DEFAULT_CONFIG.enabled;
+      document.getElementById('fallbackOnError').checked = DEFAULT_CONFIG.fallbackOnError;
+      document.getElementById('debugMode').checked = DEFAULT_CONFIG.debugMode;
+      document.getElementById('serverUrl').value = DEFAULT_CONFIG.serverUrl;
+      document.getElementById('maxRetries').value = DEFAULT_CONFIG.maxRetries;
+      document.getElementById('timeout').value = Math.floor(DEFAULT_CONFIG.timeout / 1000);
+      
+      showStatus('기본값으로 복원되었습니다.', 'success');
+      updateDebugInfo('Config reset to defaults');
+    }
+
+    // 서버 연결 테스트
+    async function testConnection() {
+      console.log('Testing connection...');
+      const serverUrl = document.getElementById('serverUrl').value;
+      
       try {
-        Object.keys(DEFAULT_CONFIG).forEach(key => {
-          const element = elements[key];
-          const value = DEFAULT_CONFIG[key];
-          
-          if (element) {
-            if (element.type === 'checkbox') {
-              element.checked = Boolean(value);
-            } else {
-              element.value = value;
-            }
-          }
+        updateServerStatus(false, '연결 테스트 중...');
+        
+        const response = await fetch(serverUrl + '/health', {
+          method: 'GET',
+          signal: AbortSignal.timeout(5000)
         });
         
-        toggleCustomModelField();
-        showStatus('기본값으로 복원되었습니다.', 'success');
+        if (response.ok) {
+          const data = await response.json();
+          updateServerStatus(true, '연결 성공');
+          showStatus('서버 연결이 정상입니다.', 'success');
+          updateDebugInfo('Connection test successful: ' + JSON.stringify(data, null, 2));
+        } else {
+          throw new Error('HTTP ' + response.status);
+        }
       } catch (error) {
-        showStatus('복원 실패: ' + error.message, 'error');
+        console.error('Connection test failed:', error);
+        updateServerStatus(false, '연결 실패: ' + error.message);
+        showStatus('서버 연결 실패: ' + error.message, 'error');
+        updateDebugInfo('Connection test failed: ' + error.message);
       }
     }
 
-    // 설정 내보내기
-    function exportConfig() {
-      const config = {};
+    // 모델 테스트
+    async function testModel() {
+      console.log('Testing model...');
+      const serverUrl = document.getElementById('serverUrl').value;
       
-      Object.keys(DEFAULT_CONFIG).forEach(key => {
-        const element = elements[key];
-        if (element) {
-          if (element.type === 'checkbox') {
-            config[key] = element.checked;
-          } else if (element.type === 'number') {
-            config[key] = Number(element.value);
-          } else {
-            config[key] = element.value;
-          }
+      try {
+        const testText = '안녕하세요, 제 이름은 김철수이고 연락처는 010-1234-5678입니다.';
+        
+        const response = await fetch(serverUrl + '/pseudonymize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt: testText,
+            id: 'options_test_' + Date.now()
+          })
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          const detectedItems = data.detection?.items?.length || 0;
+          showStatus(`모델 테스트 성공! ${detectedItems}개 항목 탐지됨`, 'success');
+          updateDebugInfo('Model test successful. Detected items: ' + detectedItems + '\n' + JSON.stringify(data.detection, null, 2));
+        } else {
+          throw new Error(`HTTP ${response.status}`);
         }
-      });
-      
-      const dataStr = JSON.stringify(config, null, 2);
-      const dataBlob = new Blob([dataStr], { type: 'application/json' });
-      const url = URL.createObjectURL(dataBlob);
-      
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'pii-pseudonymizer-config.json';
-      link.click();
-      
-      URL.revokeObjectURL(url);
-      showStatus('설정이 내보내기되었습니다.', 'success');
+      } catch (error) {
+        console.error('Model test failed:', error);
+        showStatus('모델 테스트 실패: ' + error.message, 'error');
+        updateDebugInfo('Model test failed: ' + error.message);
+      }
     }
 
     // 로그 삭제
@@ -492,65 +420,33 @@
       }
       
       try {
-        const serverUrl = elements.serverUrl.value || DEFAULT_CONFIG.serverUrl;
+        const serverUrl = document.getElementById('serverUrl').value;
         const response = await fetch(serverUrl + '/prompt_logs', { 
           method: 'DELETE' 
         });
         
         if (response.ok) {
           showStatus('로그가 삭제되었습니다.', 'success');
+          updateDebugInfo('Logs cleared successfully');
         } else {
           throw new Error('서버 응답 오류: ' + response.status);
         }
       } catch (error) {
+        console.error('Failed to clear logs:', error);
         showStatus('로그 삭제 실패: ' + error.message, 'error');
-      }
-    }
-
-    // 서버 연결 테스트
-    async function testConnection() {
-      const serverUrl = elements.serverUrl.value || DEFAULT_CONFIG.serverUrl;
-      
-      try {
-        testConnectionBtn.disabled = true;
-        testConnectionBtn.textContent = '테스트 중...';
-        
-        const response = await fetch(serverUrl + '/health', {
-          method: 'GET',
-          signal: AbortSignal.timeout(5000)
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          updateServerStatus(true, `연결 성공 (모델: ${data.model_loaded ? '로드됨' : '실패'})`);
-          showStatus('서버 연결이 정상입니다.', 'success');
-        } else {
-          throw new Error('HTTP ' + response.status);
-        }
-      } catch (error) {
-        updateServerStatus(false, '연결 실패: ' + error.message);
-        showStatus('서버 연결 실패: ' + error.message, 'error');
-      } finally {
-        testConnectionBtn.disabled = false;
-        testConnectionBtn.textContent = '연결 테스트';
+        updateDebugInfo('Log clear failed: ' + error.message);
       }
     }
 
     // 서버 상태 업데이트
     function updateServerStatus(online, message) {
-      serverStatusIndicator.classList.toggle('online', online);
-      serverStatusText.textContent = message;
-    }
-
-    // 사용자 정의 모델 필드 토글
-    function toggleCustomModelField() {
-      const isCustom = modelSelect.value === 'custom';
-      customModelInput.style.display = isCustom ? 'block' : 'none';
-      customModelInput.required = isCustom;
+      document.getElementById('serverStatusIndicator').classList.toggle('online', online);
+      document.getElementById('serverStatusText').textContent = message;
     }
 
     // 상태 메시지 표시
     function showStatus(message, type) {
+      const statusDiv = document.getElementById('status');
       statusDiv.textContent = message;
       statusDiv.className = `status ${type}`;
       statusDiv.style.display = 'block';
@@ -560,21 +456,29 @@
       }, 3000);
     }
 
-    // 이벤트 리스너
-    saveBtn.addEventListener('click', saveConfig);
-    resetBtn.addEventListener('click', resetConfig);
-    exportBtn.addEventListener('click', exportConfig);
-    clearLogsBtn.addEventListener('click', clearLogs);
-    testConnectionBtn.addEventListener('click', testConnection);
-    modelSelect.addEventListener('change', toggleCustomModelField);
+    // 디버그 정보 업데이트
+    function updateDebugInfo(info) {
+      const debugDiv = document.getElementById('debugInfo');
+      const timestamp = new Date().toLocaleTimeString();
+      debugDiv.textContent += `[${timestamp}] ${info}\n`;
+      debugDiv.style.display = 'block';
+      debugDiv.scrollTop = debugDiv.scrollHeight;
+    }
 
-    // 초기화
-    document.addEventListener('DOMContentLoaded', () => {
+    // 페이지 로드 시 초기화
+    window.addEventListener('load', () => {
+      console.log('Window loaded, initializing...');
       loadConfig();
-      
-      // 페이지 로드 시 서버 상태 확인
       setTimeout(testConnection, 1000);
     });
+    
+    // DOM 로드 시에도 초기화 (이중 보장)
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('DOM loaded, initializing...');
+      loadConfig();
+    });
+    
+    console.log('Options page script finished loading');
   </script>
 </body>
 </html>

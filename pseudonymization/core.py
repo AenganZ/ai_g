@@ -1,15 +1,15 @@
-# pseudonymization/core.py - AenganZ PII 탐지 로직
+# pseudonymization/core.py - 개선된 PII 탐지 로직
 import os
 import re
 import random
 from typing import List, Dict, Any, Optional
 
-# ===== 정규식 패턴 (AenganZ 방식) =====
+# ===== 정규식 패턴 (개선된 버전) =====
 EMAIL_PATTERN = re.compile(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}')
 PHONE_PATTERN = re.compile(r'010[-\s]?\d{4}[-\s]?\d{4}')
 AGE_PATTERN = re.compile(r'\b(\d{1,2})\s*(?:세|살)\b')
 
-# 강화된 이름 패턴 (AenganZ 방식)
+# 강화된 이름 패턴
 NAME_PATTERNS = [
     re.compile(r'이름은\s*([가-힣]{2,4})'),
     re.compile(r'([가-힣]{2,4})\s*입니다'),
@@ -24,11 +24,27 @@ NAME_PATTERNS = [
     re.compile(r'([가-힣]{2,4})(?:님|씨)'),
 ]
 
-# 주소 패턴 (AenganZ 방식)
+# 개선된 주소 패턴 (더 정확하게)
 ADDRESS_PATTERNS = [
-    re.compile(r'[가-힣]+(?:시|도|구|군)\s+[가-힣\s\d,-]+(?:동|로|가|번지|층|호)'),
-    re.compile(r'[가-힣]+(?:시|도|구|군)'),
+    # 완전한 주소 형태 (시/도 + 구/군 + 동/로)
+    re.compile(r'([가-힣]+(?:시|도|특별시|광역시|특별자치시|특별자치도))\s*([가-힣]+(?:구|군))\s*([가-힣]+(?:동|로|가))'),
+    
+    # 시/도 + 구/군 형태
+    re.compile(r'([가-힣]+(?:시|도|특별시|광역시|특별자치시|특별자치도))\s*([가-힣]+(?:구|군))'),
+    
+    # 단독 시/도 (하지만 주소 맥락에서만)
+    re.compile(r'(?:거주|살고|위치|있는|지역)\s*[가-힣]*\s*([가-힣]+(?:시|도|특별시|광역시|특별자치시|특별자치도))'),
+    
+    # 구/군만 (시/도가 앞에 언급된 경우)
+    re.compile(r'(?<=시)\s*([가-힣]+(?:구|군))'),
+    re.compile(r'(?<=도)\s*([가-힣]+(?:구|군))'),
 ]
+
+# 주소가 아닌 단어들 제외 리스트
+ADDRESS_EXCLUDE_WORDS = {
+    '거주하시', '분이시', '하시는', '있는', '계시는', '살고', '위치한', 
+    '지역은', '동네는', '근처는', '일대는', '쪽은', '방면은'
+}
 
 # ===== 데이터풀 저장소 =====
 name_pool = []
@@ -40,7 +56,7 @@ address_pool = []
 company_pool = []
 
 def load_data_pools():
-    """모든 데이터풀 초기화 (AenganZ 방식)"""
+    """모든 데이터풀 초기화"""
     global name_pool, full_name_pool, fake_name_pool
     global email_pool, phone_pool, address_pool, company_pool
     
@@ -71,13 +87,13 @@ def load_data_pools():
         '한', '오', '서', '신', '권', '황', '안', '송', '류', '전'
     ]
     
-    # 성+이름 조합 생성 (AenganZ 방식)
+    # 성+이름 조합 생성
     full_name_pool = []
     for surname in surnames:
         for name in name_pool[:50]:  # 메모리 절약
             full_name_pool.append(surname + name)
     
-    # 가명 이름 풀 생성 (AenganZ 방식)
+    # 가명 이름 풀 생성
     fake_words = ['가명', '익명', '무명', '차명', '별명', '테스트', '샘플', '더미']
     fake_name_pool = [surname + fake_word for surname in surnames for fake_word in fake_words]
     
@@ -129,7 +145,7 @@ def load_data_pools():
     print(f"   🏠 주소: {len(address_pool)}개")
 
 def detect_pii_enhanced(text: str) -> List[Dict[str, Any]]:
-    """강화된 PII 탐지 (AenganZ 방식)"""
+    """강화된 PII 탐지 (개선된 주소 탐지)"""
     items = []
     
     print(f"🔍 PII 분석: {text[:50]}...")
@@ -141,11 +157,10 @@ def detect_pii_enhanced(text: str) -> List[Dict[str, Any]]:
         if is_ner_loaded():
             ner_items = extract_entities_with_ner(text)
             items.extend(ner_items)
-            print(f"🤖 NER 탐지: {len(ner_items)}개")
     except Exception as e:
         print(f"⚠️ NER 모델 사용 실패: {e}")
     
-    # 2. 정규식 기반 탐지 (AenganZ 방식)
+    # 2. 정규식 기반 탐지
     # 이메일
     for match in EMAIL_PATTERN.finditer(text):
         items.append({
@@ -184,30 +199,40 @@ def detect_pii_enhanced(text: str) -> List[Dict[str, Any]]:
         for match in pattern.finditer(text):
             name = match.group(1)
             if len(name) >= 2 and len(name) <= 4:
-                items.append({
-                    "type": "이름",
-                    "value": name,
-                    "start": match.start(1),
-                    "end": match.end(1),
-                    "confidence": 0.75,
-                    "source": "Pattern"
-                })
+                # 일반적인 단어는 제외
+                if name not in {'그분', '저희', '우리', '여기', '거기', '저기'}:
+                    items.append({
+                        "type": "이름",
+                        "value": name,
+                        "start": match.start(1),
+                        "end": match.end(1),
+                        "confidence": 0.75,
+                        "source": "Pattern"
+                    })
     
-    # 주소 패턴
+    # 개선된 주소 패턴
     for pattern in ADDRESS_PATTERNS:
         for match in pattern.finditer(text):
-            items.append({
-                "type": "주소",
-                "value": match.group(),
-                "start": match.start(),
-                "end": match.end(),
-                "confidence": 0.9,
-                "source": "Regex"
-            })
+            # 매치된 그룹들 확인
+            groups = match.groups()
+            if groups:
+                # 마지막 그룹이 실제 주소 부분
+                address_part = groups[-1] if groups[-1] else match.group()
+                
+                # 제외 단어 체크
+                if address_part not in ADDRESS_EXCLUDE_WORDS:
+                    items.append({
+                        "type": "주소",
+                        "value": address_part,
+                        "start": match.start(),
+                        "end": match.end(),
+                        "confidence": 0.9,
+                        "source": "Regex"
+                    })
     
     # 3. 데이터풀 기반 탐지 (성+이름 조합)
     if full_name_pool:
-        for full_name in full_name_pool[:500]:  # 성능을 위해 제한
+        for full_name in full_name_pool[:200]:  # 성능을 위해 제한
             if full_name in text:
                 start_idx = text.find(full_name)
                 items.append({
@@ -219,20 +244,43 @@ def detect_pii_enhanced(text: str) -> List[Dict[str, Any]]:
                     "source": "FullNamePool"
                 })
     
-    # 중복 제거 및 정렬
+    # 중복 제거 및 정렬 (더 정교한 중복 제거)
     unique_items = []
     seen = set()
-    for item in sorted(items, key=lambda x: x['start']):
-        key = (item['type'], item['value'], item['start'])
-        if key not in seen:
+    
+    # 정렬 (시작 위치 기준)
+    sorted_items = sorted(items, key=lambda x: x['start'])
+    
+    for item in sorted_items:
+        # 중복 제거 키: 타입, 값, 대략적인 위치
+        key = (item['type'], item['value'])
+        
+        # 이미 있는 항목과 겹치는지 확인
+        overlaps = False
+        for existing_item in unique_items:
+            if (existing_item['type'] == item['type'] and 
+                abs(existing_item['start'] - item['start']) < 10):  # 10자 이내면 중복으로 간주
+                overlaps = True
+                # 더 신뢰도가 높은 것을 선택
+                if item['confidence'] > existing_item['confidence']:
+                    unique_items.remove(existing_item)
+                    unique_items.append(item)
+                break
+        
+        if not overlaps and key not in seen:
             seen.add(key)
             unique_items.append(item)
     
     print(f"✅ 총 {len(unique_items)}개 PII 탐지됨")
+    
+    # 디버그 정보 출력
+    for item in unique_items:
+        print(f"   {item['type']}: '{item['value']}' (신뢰도: {item['confidence']:.2f}, 소스: {item['source']})")
+    
     return unique_items
 
 def assign_realistic_values(items: List[Dict[str, Any]]) -> Dict[str, str]:
-    """실제 데이터풀에서 대체값 할당 (AenganZ 방식)"""
+    """실제 데이터풀에서 대체값 할당"""
     substitution_map = {}
     
     for item in items:
@@ -240,8 +288,11 @@ def assign_realistic_values(items: List[Dict[str, Any]]) -> Dict[str, str]:
         original_value = item['value']
         
         if original_value in substitution_map:
+            # 이미 할당된 값이 있으면 기존 값 사용
+            item['replacement'] = substitution_map[original_value]
             continue
         
+        # 타입별 대체값 생성
         if pii_type == "이름":
             replacement = random.choice(fake_name_pool) if fake_name_pool else "김가명"
         elif pii_type == "이메일":
@@ -257,13 +308,17 @@ def assign_realistic_values(items: List[Dict[str, Any]]) -> Dict[str, str]:
         else:
             replacement = f"[{pii_type.upper()}_MASKED]"
         
+        # 매핑에 추가
         substitution_map[original_value] = replacement
+        # 아이템에도 직접 할당 (중요!)
         item['replacement'] = replacement
+        
+        print(f"   할당: {original_value} → {replacement}")
     
     return substitution_map
 
 def create_masked_text(original_text: str, items: List[Dict[str, Any]]) -> str:
-    """마스킹된 텍스트 생성 (AenganZ 방식)"""
+    """마스킹된 텍스트 생성"""
     replacements = [(item['value'], item.get('replacement', 'MASKED')) 
                    for item in items if item['value']]
     
@@ -277,7 +332,7 @@ def create_masked_text(original_text: str, items: List[Dict[str, Any]]) -> str:
     return masked_text
 
 def pseudonymize_text(original_prompt: str) -> Dict[str, Any]:
-    """메인 가명화 함수 (AenganZ 방식)"""
+    """메인 가명화 함수"""
     try:
         # PII 탐지
         items = detect_pii_enhanced(original_prompt)
@@ -294,7 +349,7 @@ def pseudonymize_text(original_prompt: str) -> Dict[str, Any]:
         detection = {
             "contains_pii": len(items) > 0,
             "items": items,
-            "model_used": "NER + Regex + NamePool + FullNamePool"
+            "model_used": "Enhanced NER + Improved Regex + NamePool + FullNamePool"
         }
         
         return {

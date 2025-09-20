@@ -1,10 +1,10 @@
-// background.js — CSP 우회를 위한 서버 통신 담당
+// background.js — CSP 우회를 위한 서버 통신 담당 (설정 반영 개선)
 
 console.log('[PII Background] Service worker started');
 
-// 설정
+// 설정 (기본값 enabled를 true로)
 const CONFIG = {
-  enabled: true,
+  enabled: true,        // 기본적으로 활성화
   serverUrl: 'http://127.0.0.1:5000',
   timeout: 15000,
   maxRetries: 2
@@ -13,11 +13,12 @@ const CONFIG = {
 // 설정 로드
 async function loadConfig() {
   try {
-    const stored = await chrome.storage.local.get(['enabled', 'serverUrl', 'timeout']);
+    const stored = await chrome.storage.local.get(['enabled', 'serverUrl', 'timeout', 'maxRetries']);
     Object.assign(CONFIG, {
-      enabled: stored.enabled ?? true,
+      enabled: stored.enabled ?? true,  // 기본값을 true로
       serverUrl: stored.serverUrl ?? 'http://127.0.0.1:5000',
-      timeout: stored.timeout ?? 15000
+      timeout: stored.timeout ?? 15000,
+      maxRetries: stored.maxRetries ?? 2
     });
     console.log('[PII Background] Config loaded:', CONFIG);
   } catch (e) {
@@ -29,9 +30,20 @@ async function loadConfig() {
 async function callPseudonymizationServer(prompt, requestId) {
   console.log('[PII Background] 📡 Calling pseudonymization server...');
   console.log('[PII Background] 📝 Prompt length:', prompt.length);
+  console.log('[PII Background] ⚙️ Enabled:', CONFIG.enabled);
   
+  // 설정에서 비활성화되어 있으면 원본 그대로 반환
   if (!CONFIG.enabled) {
-    throw new Error('Pseudonymizer is disabled');
+    console.log('[PII Background] ⚠️ Pseudonymizer is disabled in settings');
+    return {
+      ok: true,
+      original_prompt: prompt,
+      masked_prompt: prompt,  // 원본 그대로
+      detection: { contains_pii: false, items: [] },
+      substitution_map: {},
+      reverse_map: {},
+      mapping: []
+    };
   }
   
   for (let attempt = 0; attempt <= CONFIG.maxRetries; attempt++) {
@@ -67,7 +79,7 @@ async function callPseudonymizationServer(prompt, requestId) {
       if (result.mapping && result.mapping.length > 0) {
         console.log('[PII Background] 🎭 Detected items:');
         result.mapping.forEach(item => {
-          console.log(`[PII Background]    ${item.type}: "${item.value}" → "${item.token}"`);
+          console.log(`[PII Background]    ${item.type}: "${item.value}" → "${item.replacement || item.token}"`);
         });
       }
       
@@ -157,11 +169,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 chrome.runtime.onInstalled.addListener((details) => {
   console.log('[PII Background] Extension installed/updated:', details.reason);
   
-  // 기본 설정 저장
+  // 기본 설정 저장 (enabled를 true로)
   chrome.storage.local.set({
-    enabled: true,
+    enabled: true,      // 기본적으로 활성화
     serverUrl: 'http://127.0.0.1:5000',
-    timeout: 15000
+    timeout: 15000,
+    maxRetries: 2
   });
   
   loadConfig();
@@ -176,6 +189,13 @@ chrome.runtime.onStartup.addListener(() => {
 chrome.storage.onChanged.addListener((changes, areaName) => {
   if (areaName === 'local') {
     console.log('[PII Background] Storage changed:', changes);
+    
+    // enabled 설정이 변경되었을 때 특별히 로그 출력
+    if (changes.enabled) {
+      console.log('[PII Background] 🔄 Pseudonymizer enabled status changed:', 
+                  changes.enabled.oldValue, '→', changes.enabled.newValue);
+    }
+    
     loadConfig();
   }
 });

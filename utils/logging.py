@@ -1,61 +1,55 @@
-# utils/logging.py - TXT 형식 로깅 (원본 호환)
+# utils/logging.py - JSON 형식 로깅 (가독성 개선)
 import json
 import os
 from typing import Dict, Any, List
 
 def append_json_to_file(path: str, new_entry: Dict[str, Any]) -> None:
-    """JSON 엔트리를 TXT 파일에 한 줄씩 추가 (원본 시스템 호환)"""
+    """JSON 엔트리를 파일에 추가 (가독성 좋은 JSON 형식)"""
     try:
-        # JSON을 한 줄 문자열로 변환
-        log_line = json.dumps(new_entry, ensure_ascii=False, separators=(',', ':')) + "\n"
+        # 기존 파일 읽기
+        if os.path.exists(path):
+            with open(path, "r", encoding="utf-8") as f:
+                try:
+                    data = json.load(f)
+                except json.JSONDecodeError:
+                    data = {"logs": []}
+        else:
+            data = {"logs": []}
         
-        # 파일에 한 줄씩 추가
-        with open(path, "a", encoding="utf-8") as f:
-            f.write(log_line)
+        # logs 배열 확인
+        if "logs" not in data or not isinstance(data["logs"], list):
+            data["logs"] = []
         
-        # 로그 개수 제한 (선택적)
-        limit_log_lines(path, max_lines=1000)
+        # 새 엔트리 추가
+        data["logs"].append(new_entry)
+        
+        # 로그 개수 제한 (최대 100개)
+        if len(data["logs"]) > 100:
+            data["logs"] = data["logs"][-100:]
+        
+        # 가독성 좋은 JSON으로 저장
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        
+        print(f"📝 로그 저장됨: {path}")
         
     except Exception as e:
         print(f"❌ 로그 저장 실패: {e}")
 
-def limit_log_lines(path: str, max_lines: int = 1000) -> None:
-    """로그 라인 수 제한"""
-    try:
-        if not os.path.exists(path):
-            return
-        
-        with open(path, "r", encoding="utf-8") as f:
-            lines = f.readlines()
-        
-        if len(lines) > max_lines:
-            # 최신 로그만 유지
-            with open(path, "w", encoding="utf-8") as f:
-                f.writelines(lines[-max_lines:])
-            print(f"📝 로그 파일 정리: {len(lines)} → {max_lines} 라인")
-            
-    except Exception as e:
-        print(f"⚠️ 로그 정리 실패: {e}")
-
 def load_logs_from_file(path: str) -> Dict[str, List]:
-    """TXT 파일에서 로그 로드 (원본 호환)"""
+    """JSON 파일에서 로그 로드"""
     try:
         if not os.path.exists(path):
             return {"logs": []}
         
-        logs = []
         with open(path, "r", encoding="utf-8") as f:
-            for line_num, line in enumerate(f, 1):
-                line = line.strip()
-                if line:
-                    try:
-                        log_entry = json.loads(line)
-                        logs.append(log_entry)
-                    except json.JSONDecodeError as e:
-                        print(f"⚠️ 로그 파싱 오류 (라인 {line_num}): {e}")
-                        continue
+            data = json.load(f)
         
-        return {"logs": logs}
+        if "logs" not in data:
+            return {"logs": []}
+        
+        return data
+        
     except Exception as e:
         print(f"❌ 로그 로드 실패: {e}")
         return {"logs": []}
@@ -100,10 +94,10 @@ def get_log_stats(path: str) -> Dict[str, Any]:
         }
 
 def clear_logs(path: str) -> bool:
-    """로그 파일 삭제"""
+    """로그 파일 초기화"""
     try:
         with open(path, "w", encoding="utf-8") as f:
-            f.write("")  # 빈 파일로 초기화
+            json.dump({"logs": []}, f, ensure_ascii=False, indent=2)
         print(f"✅ 로그 파일 초기화: {path}")
         return True
     except Exception as e:
