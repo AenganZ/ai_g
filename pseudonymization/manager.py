@@ -1,79 +1,167 @@
-# Manager
-from typing import Dict, Any, Optional
-from .model import load_model
-from .core import pseudonymize_text
+# pseudonymization/manager.py - AenganZ 통합 매니저
+import threading
+import time
+from typing import Dict, Any
+
+from .core import pseudonymize_text, load_data_pools, get_data_pool_stats
+from .model import load_ner_model, is_ner_loaded
 
 class PseudonymizationManager:
-    """가명화 처리를 위한 중앙 관리 클래스"""
+    """가명화 매니저 클래스 (AenganZ 방식)"""
     
     def __init__(self):
-        self.model = None
-        self.tokenizer = None
-        self.device = None
-        self._initialized = False
-    
-    def initialize(self) -> None:
-        """모델을 초기화합니다"""
-        if self._initialized:
-            print("⚠️  모델이 이미 초기화되어 있습니다.")
-            return
-            
-        print("🤖 Qwen 모델 로딩 중...")
-        self.model, self.tokenizer, self.device = load_model()
-        self._initialized = True
-        print(f"✅ 모델 로딩 완료! Device: {self.device}")
-    
-    def is_initialized(self) -> bool:
-        """모델 초기화 상태를 확인합니다"""
-        return self._initialized
-    
-    def pseudonymize(self, text: str) -> Dict[str, Any]:
-        """텍스트를 가명화합니다
+        self.initialized = False
+        self.initialization_lock = threading.Lock()
+        self.data_pools_loaded = False
+        self.ner_model_loading = False
         
-        Args:
-            text: 가명화할 원본 텍스트
-            
-        Returns:
-            Dict containing:
-                - masked_prompt: 가명화된 텍스트
-                - detection: 탐지된 개인정보 정보
+    def initialize(self):
+        """매니저 초기화"""
+        with self.initialization_lock:
+            if self.initialized:
+                return
                 
-        Raises:
-            RuntimeError: 모델이 초기화되지 않은 경우
-        """
-        if not self._initialized:
-            raise RuntimeError("모델이 초기화되지 않았습니다. initialize()를 먼저 호출하세요.")
-        
-        return pseudonymize_text(text, self.model, self.tokenizer, self.device)
+            print("🔄 PseudonymizationManager 초기화 중...")
+            
+            try:
+                # 1. 데이터풀 로드 (동기적으로)
+                load_data_pools()
+                self.data_pools_loaded = True
+                print("✅ 데이터풀 로드 완료")
+                
+                # 2. NER 모델 백그라운드 로드 시작
+                self._start_ner_model_loading()
+                
+                self.initialized = True
+                print("✅ PseudonymizationManager 초기화 완료!")
+                
+            except Exception as e:
+                print(f"❌ 매니저 초기화 실패: {e}")
+                raise
     
-    def get_device_info(self) -> Dict[str, Any]:
-        """현재 사용 중인 디바이스 정보를 반환합니다"""
-        if not self._initialized:
-            return {"status": "not_initialized"}
+    def _start_ner_model_loading(self):
+        """NER 모델 백그라운드 로딩 시작"""
+        if not self.ner_model_loading:
+            self.ner_model_loading = True
+            threading.Thread(
+                target=self._load_ner_model_background, 
+                daemon=True,
+                name="NER-Model-Loader"
+            ).start()
+    
+    def _load_ner_model_background(self):
+        """백그라운드에서 NER 모델 로드"""
+        try:
+            print("🤖 백그라운드에서 NER 모델 로딩 시작...")
+            success = load_ner_model()
+            
+            if success:
+                print("✅ NER 모델 백그라운드 로딩 완료!")
+            else:
+                print("⚠️ NER 모델 로딩 실패 (기본 모드로 계속)")
+                
+        except Exception as e:
+            print(f"❌ NER 모델 백그라운드 로딩 오류: {e}")
+        finally:
+            self.ner_model_loading = False
+    
+    def pseudonymize(self, prompt: str) -> Dict[str, Any]:
+        """프롬프트 가명화"""
+        # 매니저가 초기화되지 않았으면 초기화
+        if not self.initialized:
+            self.initialize()
         
-        import torch
-        gpu_info = {}
+        # 데이터풀이 로드되지 않았으면 오류
+        if not self.data_pools_loaded:
+            raise RuntimeError("데이터풀이 로드되지 않았습니다. 초기화를 다시 시도하세요.")
         
-        if self.device == "cuda" and torch.cuda.is_available():
-            gpu_info = {
-                "gpu_name": torch.cuda.get_device_name(0),
-                "gpu_memory_total": f"{torch.cuda.get_device_properties(0).total_memory / 1e9:.1f}GB",
-                "gpu_memory_allocated": f"{torch.cuda.memory_allocated(0) / 1e9:.1f}GB",
-                "gpu_memory_cached": f"{torch.cuda.memory_reserved(0) / 1e9:.1f}GB"
-            }
-        
+        # 가명화 실행
+        return pseudonymize_text(prompt)
+    
+    def is_ready(self) -> bool:
+        """매니저 준비 상태 확인"""
+        return self.initialized and self.data_pools_loaded
+    
+    def get_status(self) -> Dict[str, Any]:
+        """매니저 상태 정보 반환"""
         return {
-            "status": "initialized",
-            "device": self.device,
-            "gpu_info": gpu_info
+            "initialized": self.initialized,
+            "data_pools_loaded": self.data_pools_loaded,
+            "ner_model_loaded": is_ner_loaded(),
+            "ner_model_loading": self.ner_model_loading,
+            "data_pool_stats": get_data_pool_stats() if self.data_pools_loaded else {}
         }
+    
+    def reload_data_pools(self):
+        """데이터풀 다시 로드"""
+        print("🔄 데이터풀 재로딩...")
+        
+        try:
+            load_data_pools()
+            self.data_pools_loaded = True
+            print("✅ 데이터풀 재로딩 완료")
+        except Exception as e:
+            print(f"❌ 데이터풀 재로딩 실패: {e}")
+            self.data_pools_loaded = False
+            raise
+    
+    def force_load_ner_model(self):
+        """NER 모델 강제 로드"""
+        if self.ner_model_loading:
+            print("⚠️ NER 모델이 이미 로딩 중입니다.")
+            return False
+        
+        print("🤖 NER 모델 강제 로딩...")
+        
+        try:
+            success = load_ner_model()
+            if success:
+                print("✅ NER 모델 강제 로딩 완료")
+            return success
+        except Exception as e:
+            print(f"❌ NER 모델 강제 로딩 실패: {e}")
+            return False
 
-# singleton instance
-_manager_instance: Optional[PseudonymizationManager] = None
+# 전역 매니저 인스턴스
+_manager_instance = None
+_manager_lock = threading.Lock()
 
 def get_manager() -> PseudonymizationManager:
-    """전역 PseudonymizationManager 인스턴스를 반환합니다"""
+    """매니저 싱글톤 인스턴스 반환"""
     global _manager_instance
+    
     if _manager_instance is None:
-        _manager_instance = PseudonymizationManager()
+        with _manager_lock:
+            if _manager_instance is None:
+                _manager_instance = PseudonymizationManager()
+                
+                # 백그라운드에서 초기화 시작
+                def background_init():
+                    try:
+                        _manager_instance.initialize()
+                    except Exception as e:
+                        print(f"❌ 백그라운드 초기화 실패: {e}")
+                
+                threading.Thread(
+                    target=background_init, 
+                    daemon=True,
+                    name="Manager-Initializer"
+                ).start()
+    
     return _manager_instance
+
+# 편의 함수들
+def is_manager_ready() -> bool:
+    """매니저 준비 상태 확인"""
+    manager = get_manager()
+    return manager.is_ready()
+
+def get_manager_status() -> Dict[str, Any]:
+    """매니저 상태 정보 반환"""
+    manager = get_manager()
+    return manager.get_status()
+
+def pseudonymize_with_manager(prompt: str) -> Dict[str, Any]:
+    """매니저를 통한 가명화"""
+    manager = get_manager()
+    return manager.pseudonymize(prompt)

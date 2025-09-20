@@ -1,72 +1,78 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS  # CORS 추가
+# app.py - 모듈화된 Flask 앱 (AenganZ 통합)
 import os
+import json
 from datetime import datetime
-from pseudonymization import get_manager
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+
+# 프로젝트 모듈들
+from pseudonymization.manager import get_manager
 from utils.logging import append_json_to_file
 
-app = Flask(__name__)
-app.config['JSON_AS_ASCII'] = False
-
-# CORS 설정 (Chrome 확장과의 통신을 위해)
-CORS(app, origins=["*"], methods=["GET", "POST", "OPTIONS"])
-
 # 설정
-LOG_PATH = os.getenv("PSEUDO_LOG_PATH", "./pseudo-log.txt")
-MAX_INPUT_LENGTH = 4000  # 더 긴 텍스트 처리
+LOG_PATH = "pseudo-log.txt"  # TXT 형식 로그
 
-# singleton instance
-manager = get_manager()
+# Flask 앱 생성
+app = Flask(__name__)
+CORS(app)
 
-# Request logging
-@app.before_request
-def log_request_info():
-    print(f"\n🌐 HTTP 요청 수신:")
-    print(f" 📍 URL: {request.url}")
-    print(f" 🔧 메서드: {request.method}")
-    print(f" 🏠 Origin: {request.headers.get('Origin', 'None')}")
-    print(f" 📦 Content-Type: {request.headers.get('Content-Type', 'None')}")
-    if request.method == "POST":
-        try:
-            if request.is_json:
-                data = request.get_json()
-                print(f" 📝 Body: {data}")
-            else:
-                print(f" 📝 Raw Body: {request.get_data()}")
-        except Exception as e:
-            print(f" ❌ Body 파싱 실패: {e}")
-    print("="*50)
+# 매니저 인스턴스 (lazy loading)
+manager = None
 
-@app.route("/", methods=["GET"])
+def get_initialized_manager():
+    """매니저 초기화 및 반환"""
+    global manager
+    if manager is None:
+        print("🚀 PseudonymizationManager 초기화 중...")
+        manager = get_manager()
+        print("✅ PseudonymizationManager 초기화 완료!")
+    return manager
+
+@app.route("/", methods=["GET", "OPTIONS"])
 def root():
-    return jsonify(
-        message="GenAI Pseudonymizer Server is running!",
-        endpoints={
-            "health": "/health",
-            "pseudonymize": "/pseudonymize (POST)",
-            "prompt_logs": "/prompt_logs",
-            "test": "/test (POST)"
-        }
-    )
-
-@app.route("/test", methods=["POST", "OPTIONS"])
-def test_endpoint():
-    """디버깅용 테스트 엔드포인트"""
+    """루트 엔드포인트"""
     if request.method == "OPTIONS":
-        # CORS preflight 요청 처리
         response = jsonify({"message": "CORS preflight OK"})
         response.headers.add('Access-Control-Allow-Origin', '*')
         response.headers.add('Access-Control-Allow-Headers', '*')
         response.headers.add('Access-Control-Allow-Methods', '*')
         return response
-    try:
-        data = request.get_json()
-        return jsonify(ok=True, received_data=data, message="테스트 성공!")
-    except Exception as e:
-        return jsonify(ok=False, error=str(e))
+    
+    # 매니저 초기화 (첫 요청 시)
+    mgr = get_initialized_manager()
+    
+    return jsonify({
+        "message": "GenAI Pseudonymizer (AenganZ Enhanced)", 
+        "version": "2.0.0",
+        "framework": "Flask (Modular)",
+        "detection_method": "NER + Regex + DataPools",
+        "ready": mgr.is_ready(),
+        "timestamp": datetime.now().isoformat()
+    })
+
+@app.route("/health", methods=["GET", "OPTIONS"])
+def health():
+    """헬스 체크 엔드포인트"""
+    if request.method == "OPTIONS":
+        response = jsonify({"message": "CORS preflight OK"})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', '*')
+        response.headers.add('Access-Control-Allow-Methods', '*')
+        return response
+    
+    # 매니저 초기화 (첫 요청 시)
+    mgr = get_initialized_manager()
+    
+    return jsonify({
+        "status": "ok",
+        "method": "enhanced_detection",
+        "ready": mgr.is_ready(),
+        "timestamp": datetime.now().isoformat()
+    })
 
 @app.route("/pseudonymize", methods=["POST", "OPTIONS"])
 def pseudonymize():
+    """가명화 처리 엔드포인트"""
     # CORS preflight 요청 처리
     if request.method == "OPTIONS":
         response = jsonify({"message": "CORS preflight OK"})
@@ -75,42 +81,103 @@ def pseudonymize():
         response.headers.add('Access-Control-Allow-Methods', '*')
         return response
 
-    # 확장에서 {"prompt":"","id":""} 전송
+    # JSON 파싱
     try:
         data = request.get_json(force=True, silent=False)
     except Exception as e:
-        return jsonify(ok=False, error=f"invalid_json: {e}"), 400
+        response = jsonify(ok=False, error=f"invalid_json: {e}")
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response, 400
 
     if not isinstance(data, dict):
-        return jsonify(ok=False, error="payload_must_be_object"), 400
+        response = jsonify(ok=False, error="payload_must_be_object")
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response, 400
 
     original_prompt = data.get("prompt", "")
     req_id = data.get("id", "")
 
-    # 가명화 처리
-    result = manager.pseudonymize(original_prompt)
-    masked_prompt = result["masked_prompt"]
-    detection = result["detection"]
+    if not original_prompt.strip():
+        response = jsonify(ok=False, error="empty_prompt")
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response, 400
 
-    out = {
-        "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "remote_addr": request.remote_addr,
-        "path": request.path,
-        "input": {
-            "id": req_id,
-            "prompt": original_prompt
-        },
-        "detection": detection
-    }
-    append_json_to_file(LOG_PATH, out)
+    print(f"\n" + "="*60)
+    print(f"🔍 가명화 요청: {datetime.now().strftime('%H:%M:%S')}")
+    print(f"🆔 ID: {req_id}")
+    print(f"📄 원문: {original_prompt}")
+    print(f"🌐 요청 IP: {request.remote_addr}")
 
-    # 확장으로 가명화 프롬프트 반환
-    response = jsonify(ok=True, masked_prompt=masked_prompt, detection=detection)
-    return response
+    try:
+        # 매니저 초기화 및 가명화 처리
+        mgr = get_initialized_manager()
+        result = mgr.pseudonymize(original_prompt)
+        
+        masked_prompt = result["masked_prompt"]
+        detection = result["detection"]
+        substitution_map = result.get("substitution_map", {})
+        reverse_map = result.get("reverse_map", {})
+
+        # 로그 저장
+        log_entry = {
+            "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "remote_addr": request.remote_addr,
+            "path": request.path,
+            "input": {
+                "id": req_id,
+                "prompt": original_prompt
+            },
+            "detection": detection,
+            "substitution_map": substitution_map,
+            "reverse_map": reverse_map,
+            "performance": {
+                "items_detected": len(detection.get("items", []))
+            }
+        }
+        append_json_to_file(LOG_PATH, log_entry)
+
+        print(f"✅ 가명화 완료 ({len(detection.get('items', []))}개 탐지)")
+        print(f"🔄 대체 맵: {substitution_map}")
+        print("="*60)
+
+        # 응답 생성 (AenganZ 포맷 + 확장 호환성)
+        response_data = {
+            "ok": True,
+            "original_prompt": original_prompt,        # 사용자가 보는 원본
+            "masked_prompt": masked_prompt,            # LLM이 받는 마스킹된 버전
+            "detection": detection,
+            "substitution_map": substitution_map,      # 원본 → 가명 매핑
+            "reverse_map": reverse_map,                # 가명 → 원본 매핑 (복원용)
+            "mapping": detection.get("items", [])      # 기존 확장 호환성
+        }
+        
+        response = jsonify(response_data)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+
+    except Exception as e:
+        print(f"❌ 가명화 오류: {e}")
+        import traceback
+        traceback.print_exc()
+        
+        error_response = {
+            "ok": False,
+            "error": str(e),
+            "original_prompt": original_prompt,
+            "masked_prompt": original_prompt,  # 오류 시 원본 반환
+            "detection": {"contains_pii": False, "items": []},
+            "substitution_map": {},
+            "reverse_map": {},
+            "mapping": []
+        }
+        
+        response = jsonify(error_response)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response, 500
 
 @app.route("/prompt_logs", methods=["GET", "OPTIONS"])
 def prompt_logs():
-    # CORS preflight 요청 처리
+    """로그 조회 엔드포인트"""
     if request.method == "OPTIONS":
         response = jsonify({"message": "CORS preflight OK"})
         response.headers.add('Access-Control-Allow-Origin', '*')
@@ -118,63 +185,68 @@ def prompt_logs():
         response.headers.add('Access-Control-Allow-Methods', '*')
         return response
 
-    # 파일 그대로 반환 (유효 JSON 보장)
     try:
-        with open(LOG_PATH, "r", encoding="utf-8") as f:
-            raw = f.read()
-        import json
-        json.loads(raw)  # JSON 유효성 검사
-        response = app.response_class(
-            response=raw,
-            status=200,
-            mimetype="application/json; charset=utf-8"
-        )
+        # TXT 파일에서 로그 로드
+        from utils.logging import load_logs_from_file
+        logs_data = load_logs_from_file(LOG_PATH)
+        
+        response = jsonify(logs_data)
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
-    except FileNotFoundError:
-        import json
-        empty = {"logs": []}
-        response = app.response_class(
-            response=json.dumps(empty, ensure_ascii=False),
-            status=200,
-            mimetype="application/json; charset=utf-8"
-        )
+        
+    except Exception as e:
+        response = jsonify({"error": f"log_read_error: {e}", "logs": []})
         response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
-    except Exception:
-        import json
-        safe = {"logs": []}
-        response = app.response_class(
-            response=json.dumps(safe, ensure_ascii=False),
-            status=200,
-            mimetype="application/json; charset=utf-8"
-        )
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
+        return response, 500
 
-@app.route("/health", methods=["GET"])
-def health():
-    device_info = manager.get_device_info()
-    return jsonify(
-        status="ok",
-        model=os.getenv("MODEL_ID", "Qwen/Qwen2.5-0.5B-Instruct"),
-        device_info=device_info,
-        log_path=os.path.abspath(LOG_PATH)
-    )
+@app.route("/prompt_logs", methods=["DELETE"])
+def clear_logs():
+    """로그 삭제 엔드포인트"""
+    try:
+        # 로그 파일 초기화
+        with open(LOG_PATH, "w", encoding="utf-8") as f:
+            f.write("")  # 빈 파일로 초기화
+        
+        response = jsonify({"success": True, "message": "Logs cleared"})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    except Exception as e:
+        response = jsonify({"success": False, "error": str(e)})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response, 500
 
-# 에러 핸들러 추가
+# 에러 핸들러
 @app.errorhandler(404)
 def not_found(error):
-    response = jsonify(error="Not Found", message=f"Endpoint {request.path} not found")
+    response = jsonify({"error": "Not found"})
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response, 404
 
 @app.errorhandler(500)
 def internal_error(error):
-    response = jsonify(error="Internal Server Error", message=str(error))
+    response = jsonify({"error": "Internal server error"})
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response, 500
 
 if __name__ == "__main__":
-    manager.initialize()
-    app.run(host="127.0.0.1", port=5000, debug=False)
+    print("🎭 GenAI Pseudonymizer (AenganZ Enhanced - Modular)")
+    print("🔧 프레임워크: Flask (모듈화)")
+    print("🧠 탐지 방식: NER + 정규식 + 데이터풀")
+    print("📛 가명화: 실제 데이터 대체")
+    print("🔄 복원: 양방향 매핑")
+    print("📝 로깅: TXT 형식")
+    print("🌐 서버 시작 중...")
+    
+    try:
+        app.run(
+            host="127.0.0.1",
+            port=5000,
+            debug=True,
+            threaded=True
+        )
+    except KeyboardInterrupt:
+        print("\n👋 서버 종료")
+    except Exception as e:
+        print(f"❌ 서버 시작 실패: {e}")
+        import traceback
+        traceback.print_exc()

@@ -1,154 +1,208 @@
-# Qwen model
+# pseudonymization/model.py - AenganZ NER 모델 (모듈화 버전)
 import os
-import json
-import re
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM
 from typing import List, Dict, Any, Optional
-from .normalizers import normalize_entities
-from ..utils.parsers import extract_first_json
+from concurrent.futures import ThreadPoolExecutor
 
-# 설정
-MODEL_ID = os.getenv("MODEL_ID", "Qwen/Qwen2.5-0.5B-Instruct")
+# NER 모델 관련 import
+try:
+    from transformers import AutoTokenizer, AutoModelForTokenClassification, pipeline
+    NER_AVAILABLE = True
+except ImportError:
+    NER_AVAILABLE = False
+    print("⚠️ Transformers 라이브러리가 없습니다. pip install transformers torch를 실행하세요.")
 
-# 시스템 프롬프트
-SYSTEM_PROMPT = """한국어 개인정보 추출기입니다. JSON으로만 응답하세요.
-추출 대상: 이름, 나이, 전화번호, 이메일, 주소
-출력 형식: {"entities": [{"name": "홍길동", "age": "25", "phone": "010-1234-5678", "email": "user@example.com", "address": "서울시"}]}
-규칙:
-- 이름: 한글 2-4자만
-- 나이: 숫자만 ("25세" → "25")
-- 전화번호: 010/011/016/017/018/019 시작
-- 이메일: @포함된 주소
-- 주소: 첫 번째 "시"까지만
-- 없으면 null
-- 추측 금지, 명확한 정보만"""
+# AenganZ에서 사용하는 NER 모델 설정
+AENGANZ_NER_MODEL = "monologg/koelectra-base-v3-naver-ner"
+
+class AenganZNERModel:
+    """AenganZ 방식의 NER 모델 클래스"""
+    
+    def __init__(self):
+        self.model = None
+        self.tokenizer = None
+        self.pipeline = None
+        self.device = self._get_device()
+        self.loaded = False
+    
+    def _get_device(self):
+        """최적의 디바이스 선택"""
+        if torch.cuda.is_available():
+            return 0  # GPU
+        elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
+            return "mps"  # Apple Silicon
+        else:
+            return -1  # CPU
+    
+    def load_model(self) -> bool:
+        """AenganZ 방식의 NER 모델 로드"""
+        if not NER_AVAILABLE:
+            print("❌ NER 모델을 로드할 수 없습니다 - transformers 라이브러리가 필요합니다")
+            return False
+        
+        try:
+            print(f"🔄 NER 모델 로딩 중... ({AENGANZ_NER_MODEL})")
+            
+            # 토크나이저와 모델 로드
+            self.tokenizer = AutoTokenizer.from_pretrained(AENGANZ_NER_MODEL)
+            self.model = AutoModelForTokenClassification.from_pretrained(AENGANZ_NER_MODEL)
+            
+            # 파이프라인 생성
+            self.pipeline = pipeline(
+                "ner", 
+                model=self.model, 
+                tokenizer=self.tokenizer,
+                aggregation_strategy="simple",
+                device=self.device
+            )
+            
+            self.loaded = True
+            print("✅ AenganZ NER 모델 로드 완료!")
+            print(f"   📱 디바이스: {self.device}")
+            print(f"   🤖 모델: {AENGANZ_NER_MODEL}")
+            return True
+            
+        except Exception as e:
+            print(f"❌ NER 모델 로드 실패: {e}")
+            print("💡 해결 방법:")
+            print("   1. 인터넷 연결 확인")
+            print("   2. pip install transformers torch")
+            print("   3. Hugging Face 모델 다운로드 재시도")
+            self.loaded = False
+            return False
+    
+    def is_loaded(self) -> bool:
+        """모델 로드 상태 확인"""
+        return self.loaded
+    
+    def extract_entities(self, text: str) -> List[Dict[str, Any]]:
+        """텍스트에서 개체명 추출 (AenganZ 방식)"""
+        if not self.loaded or not self.pipeline:
+            return []
+        
+        try:
+            # NER 파이프라인 실행
+            ner_results = self.pipeline(text)
+            
+            entities = []
+            for entity in ner_results:
+                entity_type = entity['entity_group']
+                entity_text = entity['word']
+                confidence = entity['score']
+                start = entity['start']
+                end = entity['end']
+                
+                # 신뢰도 임계값 (AenganZ 기준)
+                if confidence > 0.7:
+                    pii_type = self._map_ner_label_to_pii_type(entity_type)
+                    if pii_type:
+                        entities.append({
+                            "type": pii_type,
+                            "value": entity_text,
+                            "start": start,
+                            "end": end,
+                            "confidence": confidence,
+                            "source": "NER"
+                        })
+            
+            return entities
+            
+        except Exception as e:
+            print(f"❌ NER 개체명 추출 실패: {e}")
+            return []
+    
+    def _map_ner_label_to_pii_type(self, label: str) -> Optional[str]:
+        """NER 라벨을 PII 타입으로 매핑 (AenganZ 방식)"""
+        mapping = {
+            'PER': '이름',
+            'PERSON': '이름',
+            'LOC': '주소',
+            'LOCATION': '주소',
+            'ORG': '회사',
+            'ORGANIZATION': '회사'
+        }
+        return mapping.get(label)
+
+# 전역 모델 인스턴스
+_ner_model_instance = None
+
+def get_ner_model() -> AenganZNERModel:
+    """NER 모델 싱글톤 인스턴스 반환"""
+    global _ner_model_instance
+    
+    if _ner_model_instance is None:
+        _ner_model_instance = AenganZNERModel()
+    
+    return _ner_model_instance
+
+def load_ner_model() -> bool:
+    """NER 모델 로드 (백그라운드 실행 가능)"""
+    model = get_ner_model()
+    return model.load_model()
+
+def extract_entities_with_ner(text: str) -> List[Dict[str, Any]]:
+    """NER 모델을 사용한 개체명 추출"""
+    model = get_ner_model()
+    
+    if not model.is_loaded():
+        print("⚠️ NER 모델이 로드되지 않았습니다. 먼저 load_ner_model()을 호출하세요.")
+        return []
+    
+    return model.extract_entities(text)
+
+def is_ner_available() -> bool:
+    """NER 기능 사용 가능 여부 확인"""
+    return NER_AVAILABLE
+
+def is_ner_loaded() -> bool:
+    """NER 모델 로드 상태 확인"""
+    model = get_ner_model()
+    return model.is_loaded()
+
+# 호환성을 위한 기존 함수들
+def call_qwen_detect_pii(original_prompt: str, model=None, tokenizer=None, device=None) -> Dict[str, Any]:
+    """기존 Qwen 방식 호환을 위한 함수 (AenganZ NER로 변경)"""
+    print("⚠️ call_qwen_detect_pii는 deprecated입니다. extract_entities_with_ner를 사용하세요.")
+    
+    # AenganZ NER 모델 사용
+    entities = extract_entities_with_ner(original_prompt)
+    
+    return {
+        "items": entities,
+        "contains_pii": len(entities) > 0
+    }
 
 def pick_device_and_dtype():
-    """최적의 디바이스와 데이터 타입을 선택"""
-    if torch.cuda.is_available():
+    """디바이스 및 데이터 타입 선택 (호환성)"""
+    model = get_ner_model()
+    device = model.device
+    
+    if device == 0:  # GPU
         return "cuda", torch.bfloat16
-    if torch.backends.mps.is_available():  # Apple Silicon
+    elif device == "mps":  # Apple Silicon
         return "mps", torch.float16
-    return "cpu", torch.float32
+    else:  # CPU
+        return "cpu", torch.float32
 
 def load_model():
-    """Qwen 모델과 토크나이저를 로드"""
-    device, torch_dtype = pick_device_and_dtype()
+    """모델 로드 (호환성)"""
+    return load_ner_model()
+
+# 모듈 초기화 시 정보 출력
+if __name__ == "__main__":
+    print("🎭 AenganZ NER 모델 모듈")
+    print(f"📱 Transformers 사용 가능: {NER_AVAILABLE}")
+    print(f"🤖 모델: {AENGANZ_NER_MODEL}")
     
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, trust_remote_code=True)
-    # 패딩 토큰 설정 (attention mask 경고 해결)
-    if tokenizer.pad_token is None:
-        tokenizer.pad_token = tokenizer.unk_token if tokenizer.unk_token else "<|endoftext|>"
-    # 패딩 토큰 ID 설정
-    if tokenizer.pad_token_id is None:
-        tokenizer.pad_token_id = tokenizer.unk_token_id if tokenizer.unk_token_id else tokenizer.eos_token_id
-
-    # GPU 최적화된 모델 로딩
-    if device == "cuda":
-        torch.cuda.empty_cache()
-        model = AutoModelForCausalLM.from_pretrained(
-            MODEL_ID,
-            dtype=torch_dtype,
-            device_map="auto",
-            trust_remote_code=True,
-            low_cpu_mem_usage=True,
-        )
-    elif device == "mps":  # Apple Silicon
-        model = AutoModelForCausalLM.from_pretrained(
-            MODEL_ID,
-            dtype=torch_dtype,
-            trust_remote_code=True,
-            low_cpu_mem_usage=True
-        ).to(device)
-    else:  # CPU
-        model = AutoModelForCausalLM.from_pretrained(
-            MODEL_ID,
-            dtype=torch_dtype,
-            trust_remote_code=True,
-            low_cpu_mem_usage=True,
-        ).to(device)
-        torch.set_num_threads(4)
-
-    model.eval()
-    # GPU에서 추가 최적화 (torch.compile은 모델 로딩 후 적용)
-    if device == "cuda" and hasattr(torch, 'compile'):
-        try:
-            model = torch.compile(model, mode="reduce-overhead")
-        except Exception:
-            pass
-    
-    return model, tokenizer, device
-
-def generate_qwen_response(original_prompt: str, model, tokenizer, device) -> str:
-    """Qwen 모델로 PII 추출 응답 생성 (순수 모델 추론)"""
-    messages = [
-        {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": f"[입력]\n{original_prompt}"}
-    ]
-    input_ids = tokenizer.apply_chat_template(
-        messages, tokenize=True, add_generation_prompt=True, return_tensors="pt"
-    ).to(device)
-
-    # Attention mask 생성 (경고 해결)
-    attention_mask = torch.ones_like(input_ids).to(device)
-
-    with torch.no_grad():
-        generation_kwargs = {
-            "input_ids": input_ids,
-            "attention_mask": attention_mask,
-            "max_new_tokens": 400,
-            "temperature": 0.1,
-            "top_p": 0.8,
-            "do_sample": True,
-            "eos_token_id": tokenizer.eos_token_id,
-            "pad_token_id": tokenizer.pad_token_id,
-            "use_cache": True,
-        }
-        if device == "cuda":
-            generation_kwargs.update({
-                "num_beams": 1,
-                "repetition_penalty": 1.1,
-                "length_penalty": 1.0,
-            })
-        out = model.generate(**generation_kwargs)
-        return tokenizer.decode(out[0][input_ids.shape[-1]:], skip_special_tokens=True)
-
-def call_qwen_detect_pii(original_prompt: str, model, tokenizer, device):
-    """Qwen 모델을 사용하여 PII 탐지 (메인 인터페이스)"""
-    try:
-        # 1. 모델 추론
-        decoded = generate_qwen_response(original_prompt, model, tokenizer, device)
-        
-        # 2. JSON 파싱
-        parsed = extract_first_json(decoded.strip())
-        if not parsed:
-            return {"contains_pii": False, "items": [], "_error": "no_json_found"}
-
-        entities_raw = parsed.get("entities", [])
-        if not isinstance(entities_raw, list):
-            entities_raw = []
-
-        # 3. 정규화
-        entities_norm = normalize_entities(entities_raw)
-
-        # 4. 기존 형식으로 변환
-        items = []
-        for ent in entities_norm:
-            for field_name, field_type in [("name", "이름"), ("age", "나이"),
-                                           ("phone", "전화번호"), ("email", "이메일"),
-                                           ("address", "주소")]:
-                val = ent.get(field_name)
-                if val:
-                    items.append({
-                        "type": field_type,
-                        "value": val,
-                        "start": 0,
-                        "end": 0
-                    })
-        return {
-            "contains_pii": bool(items),
-            "items": items
-        }
-    except Exception as e:
-        return {"contains_pii": False, "items": [], "_error": f"exception: {e}"}
+    if NER_AVAILABLE:
+        model = get_ner_model()
+        success = model.load_model()
+        if success:
+            # 테스트
+            test_text = "안녕하세요, 저는 김테스트입니다."
+            entities = model.extract_entities(test_text)
+            print(f"🧪 테스트 결과: {len(entities)}개 개체 탐지")
+            for entity in entities:
+                print(f"   {entity['type']}: {entity['value']} (신뢰도: {entity['confidence']:.2f})")
+        else:
+            print("❌ 모델 로드 실패")

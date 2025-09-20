@@ -1,0 +1,70 @@
+{
+  "logs": [
+    {
+      "time": "2025-09-21 00:21:46",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "debug_test_1758381706494",
+        "prompt": "안녕하세요, 제 이름은 홍길동이고 연락처는 010-1234-5678입니다. 서울 강남구에 살고 있습니다."
+      },
+      "detection": {
+        "contains_pii": true,
+        "items": [
+          {
+            "type": "이름",
+            "value": "홍길동이",
+            "start": 13,
+            "end": 17,
+            "confidence": 0.75,
+            "source": "Pattern",
+            "replacement": "박테스트"
+          },
+          {
+            "type": "이름",
+            "value": "홍길동",
+            "start": 13,
+            "end": 16,
+            "confidence": 0.75,
+            "source": "Pattern",
+            "replacement": "조무명"
+          },
+          {
+            "type": "전화번호",
+            "value": "010-1234-5678",
+            "start": 24,
+            "end": 37,
+            "confidence": 1.0,
+            "source": "Regex",
+            "replacement": "010-0001-0063"
+          },
+          {
+            "type": "주소",
+            "value": "강남구",
+            "start": 45,
+            "end": 48,
+            "confidence": 0.9,
+            "source": "Regex",
+            "replacement": "인천시 남동구"
+          }
+        ],
+        "model_used": "NER + Regex + NamePool + FullNamePool"
+      },
+      "substitution_map": {
+        "홍길동이": "박테스트",
+        "홍길동": "조무명",
+        "010-1234-5678": "010-0001-0063",
+        "강남구": "인천시 남동구"
+      },
+      "reverse_map": {
+        "박테스트": "홍길동이",
+        "조무명": "홍길동",
+        "010-0001-0063": "010-1234-5678",
+        "인천시 남동구": "강남구"
+      },
+      "performance": {
+        "items_detected": 4
+      }
+    }
+  ]
+}

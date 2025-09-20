@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>GenAI Pseudonymizer 옵션</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+      color: #333;
+    }
+    
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 30px;
+      border-bottom: 2px solid #3498db;
+      padding-bottom: 10px;
+    }
+    
+    .section {
+      margin-bottom: 30px;
+      padding: 20px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+    
+    .section h3 {
+      margin-top: 0;
+      color: #34495e;
+      font-size: 18px;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      color: #555;
+    }
+    
+    input[type="text"], input[type="number"], select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    
+    input[type="checkbox"] {
+      transform: scale(1.2);
+      margin-right: 8px;
+    }
+    
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .help-text {
+      font-size: 12px;
+      color: #777;
+      margin-top: 5px;
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 30px;
+    }
+    
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .btn-primary {
+      background: #3498db;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #2980b9;
+    }
+    
+    .btn-secondary {
+      background: #95a5a6;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background: #7f8c8d;
+    }
+    
+    .btn-danger {
+      background: #e74c3c;
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background: #c0392b;
+    }
+    
+    .status {
+      margin-top: 20px;
+      padding: 10px;
+      border-radius: 6px;
+      display: none;
+    }
+    
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    .server-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    
+    .status-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #dc3545;
+    }
+    
+    .status-indicator.online {
+      background: #28a745;
+    }
+    
+    .advanced {
+      border-left: 4px solid #f39c12;
+      background: #fef9e7;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>GenAI Pseudonymizer 설정</h1>
+    
+    <!-- 기본 설정 -->
+    <div class="section">
+      <h3>기본 설정</h3>
+      
+      <div class="form-group">
+        <div class="checkbox-group">
+          <input type="checkbox" id="enabled">
+          <label for="enabled">가명화 기능 활성화</label>
+        </div>
+        <div class="help-text">체크 해제 시 모든 요청이 가명화 없이 통과됩니다.</div>
+      </div>
+      
+      <div class="form-group">
+        <div class="checkbox-group">
+          <input type="checkbox" id="fallbackOnError">
+          <label for="fallbackOnError">오류 시 원본 요청 실행</label>
+        </div>
+        <div class="help-text">가명화 실패 시 원본 요청을 그대로 전송합니다.</div>
+      </div>
+      
+      <div class="form-group">
+        <div class="checkbox-group">
+          <input type="checkbox" id="debugMode">
+          <label for="debugMode">디버그 모드</label>
+        </div>
+        <div class="help-text">콘솔에 상세한 로그를 출력합니다.</div>
+      </div>
+    </div>
+    
+    <!-- 서버 설정 -->
+    <div class="section">
+      <h3>로컬 서버 설정</h3>
+      
+      <div class="form-group">
+        <label for="serverUrl">서버 URL</label>
+        <input type="text" id="serverUrl" placeholder="http://127.0.0.1:5000">
+        <div class="help-text">로컬 가명화 서버 주소</div>
+      </div>
+      
+      <div class="form-group">
+        <label for="model">NER 모델</label>
+        <select id="model">
+          <option value="monologg/koelectra-base-v3-naver-ner">KoELECTRA (기본)</option>
+          <option value="klue/roberta-base-ner">KLUE RoBERTa</option>
+          <option value="custom">사용자 정의</option>
+        </select>
+        <input type="text" id="customModel" placeholder="사용자 정의 모델 ID" style="margin-top: 10px; display: none;">
+        <div class="help-text">사용할 NER 모델을 선택하세요.</div>
+      </div>
+      
+      <div class="server-status">
+        <div class="status-indicator" id="serverStatusIndicator"></div>
+        <span id="serverStatusText">서버 상태 확인 중...</span>
+        <button type="button" id="testConnection" class="btn-secondary" style="padding: 5px 10px; font-size: 12px;">연결 테스트</button>
+      </div>
+    </div>
+    
+    <!-- 고급 설정 -->
+    <div class="section advanced">
+      <h3>고급 설정</h3>
+      
+      <div class="form-group">
+        <label for="maxRetries">최대 재시도 횟수</label>
+        <input type="number" id="maxRetries" min="0" max="5" value="2">
+        <div class="help-text">가명화 실패 시 재시도할 횟수</div>
+      </div>
+      
+      <div class="form-group">
+        <label for="requestTimeout">요청 타임아웃 (초)</label>
+        <input type="number" id="requestTimeout" min="5" max="120" value="30">
+        <div class="help-text">가명화 서버 응답 대기 시간</div>
+      </div>
+      
+      <div class="form-group">
+        <label for="nerThreshold">NER 신뢰도 임계값</label>
+        <input type="number" id="nerThreshold" min="0.1" max="1.0" step="0.05" value="0.70">
+        <div class="help-text">개인정보 탐지를 위한 최소 신뢰도 (0.1-1.0)</div>
+      </div>
+      
+      <div class="form-group">
+        <label for="maxInputLength">최대 입력 길이</label>
+        <input type="number" id="maxInputLength" min="1000" max="10000" value="4000">
+        <div class="help-text">처리할 프롬프트의 최대 문자 수</div>
+      </div>
+      
+      <div class="form-group">
+        <div class="checkbox-group">
+          <input type="checkbox" id="enableCache">
+          <label for="enableCache">결과 캐싱 활성화</label>
+        </div>
+        <div class="help-text">동일한 텍스트에 대한 분석 결과를 캐시합니다.</div>
+      </div>
+    </div>
+    
+    <!-- 개인정보 유형 설정 -->
+    <div class="section">
+      <h3>탐지할 개인정보 유형</h3>
+      
+      <div class="form-group">
+        <div class="checkbox-group">
+          <input type="checkbox" id="detectNames" checked>
+          <label for="detectNames">이름</label>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <div class="checkbox-group">
+          <input type="checkbox" id="detectPhones" checked>
+          <label for="detectPhones">전화번호</label>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <div class="checkbox-group">
+          <input type="checkbox" id="detectEmails" checked>
+          <label for="detectEmails">이메일 주소</label>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <div class="checkbox-group">
+          <input type="checkbox" id="detectAddresses" checked>
+          <label for="detectAddresses">주소</label>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <div class="checkbox-group">
+          <input type="checkbox" id="detectAges" checked>
+          <label for="detectAges">나이</label>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <div class="checkbox-group">
+          <input type="checkbox" id="detectSSN">
+          <label for="detectSSN">주민등록번호</label>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <div class="checkbox-group">
+          <input type="checkbox" id="detectAccounts">
+          <label for="detectAccounts">계좌번호</label>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 버튼 그룹 -->
+    <div class="button-group">
+      <button id="save" class="btn-primary">설정 저장</button>
+      <button id="reset" class="btn-secondary">기본값 복원</button>
+      <button id="export" class="btn-secondary">설정 내보내기</button>
+      <button id="clearLogs" class="btn-danger">로그 삭제</button>
+    </div>
+    
+    <!-- 상태 메시지 -->
+    <div id="status" class="status"></div>
+  </div>
+
+  <script>
+    // 기본값 정의
+    const DEFAULT_CONFIG = {
+      enabled: true,
+      fallbackOnError: true,
+      debugMode: false,
+      serverUrl: 'http://127.0.0.1:5000',
+      model: 'monologg/koelectra-base-v3-naver-ner',
+      customModel: '',
+      maxRetries: 2,
+      requestTimeout: 30,
+      nerThreshold: 0.70,
+      maxInputLength: 4000,
+      enableCache: true,
+      detectNames: true,
+      detectPhones: true,
+      detectEmails: true,
+      detectAddresses: true,
+      detectAges: true,
+      detectSSN: false,
+      detectAccounts: false
+    };
+
+    // DOM 요소들
+    const elements = {};
+    Object.keys(DEFAULT_CONFIG).forEach(key => {
+      elements[key] = document.getElementById(key);
+    });
+    
+    const saveBtn = document.getElementById('save');
+    const resetBtn = document.getElementById('reset');
+    const exportBtn = document.getElementById('export');
+    const clearLogsBtn = document.getElementById('clearLogs');
+    const testConnectionBtn = document.getElementById('testConnection');
+    const statusDiv = document.getElementById('status');
+    const modelSelect = document.getElementById('model');
+    const customModelInput = document.getElementById('customModel');
+    const serverStatusIndicator = document.getElementById('serverStatusIndicator');
+    const serverStatusText = document.getElementById('serverStatusText');
+
+    // 설정 로드
+    async function loadConfig() {
+      try {
+        const stored = await chrome.storage.local.get(Object.keys(DEFAULT_CONFIG));
+        
+        Object.keys(DEFAULT_CONFIG).forEach(key => {
+          const value = stored[key] ?? DEFAULT_CONFIG[key];
+          const element = elements[key];
+          
+          if (element) {
+            if (element.type === 'checkbox') {
+              element.checked = Boolean(value);
+            } else {
+              element.value = value;
+            }
+          }
+        });
+        
+        // 사용자 정의 모델 필드 표시/숨김
+        toggleCustomModelField();
+        
+        showStatus('설정이 로드되었습니다.', 'success');
+      } catch (error) {
+        showStatus('설정 로드 실패: ' + error.message, 'error');
+      }
+    }
+
+    // 설정 저장
+    async function saveConfig() {
+      try {
+        const config = {};
+        
+        Object.keys(DEFAULT_CONFIG).forEach(key => {
+          const element = elements[key];
+          if (element) {
+            if (element.type === 'checkbox') {
+              config[key] = element.checked;
+            } else if (element.type === 'number') {
+              config[key] = Number(element.value);
+            } else {
+              config[key] = element.value;
+            }
+          }
+        });
+        
+        await chrome.storage.local.set(config);
+        showStatus('설정이 저장되었습니다.', 'success');
+        
+        // 백그라운드 스크립트에 설정 업데이트 알림
+        try {
+          await chrome.runtime.sendMessage({ type: 'UPDATE_CONFIG', config });
+        } catch (e) {
+          console.warn('Failed to notify background script:', e);
+        }
+        
+      } catch (error) {
+        showStatus('설정 저장 실패: ' + error.message, 'error');
+      }
+    }
+
+    // 기본값 복원
+    async function resetConfig() {
+      if (!confirm('모든 설정을 기본값으로 복원하시겠습니까?')) {
+        return;
+      }
+      
+      try {
+        Object.keys(DEFAULT_CONFIG).forEach(key => {
+          const element = elements[key];
+          const value = DEFAULT_CONFIG[key];
+          
+          if (element) {
+            if (element.type === 'checkbox') {
+              element.checked = Boolean(value);
+            } else {
+              element.value = value;
+            }
+          }
+        });
+        
+        toggleCustomModelField();
+        showStatus('기본값으로 복원되었습니다.', 'success');
+      } catch (error) {
+        showStatus('복원 실패: ' + error.message, 'error');
+      }
+    }
+
+    // 설정 내보내기
+    function exportConfig() {
+      const config = {};
+      
+      Object.keys(DEFAULT_CONFIG).forEach(key => {
+        const element = elements[key];
+        if (element) {
+          if (element.type === 'checkbox') {
+            config[key] = element.checked;
+          } else if (element.type === 'number') {
+            config[key] = Number(element.value);
+          } else {
+            config[key] = element.value;
+          }
+        }
+      });
+      
+      const dataStr = JSON.stringify(config, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'pii-pseudonymizer-config.json';
+      link.click();
+      
+      URL.revokeObjectURL(url);
+      showStatus('설정이 내보내기되었습니다.', 'success');
+    }
+
+    // 로그 삭제
+    async function clearLogs() {
+      if (!confirm('모든 로그를 삭제하시겠습니까?')) {
+        return;
+      }
+      
+      try {
+        const serverUrl = elements.serverUrl.value || DEFAULT_CONFIG.serverUrl;
+        const response = await fetch(serverUrl + '/prompt_logs', { 
+          method: 'DELETE' 
+        });
+        
+        if (response.ok) {
+          showStatus('로그가 삭제되었습니다.', 'success');
+        } else {
+          throw new Error('서버 응답 오류: ' + response.status);
+        }
+      } catch (error) {
+        showStatus('로그 삭제 실패: ' + error.message, 'error');
+      }
+    }
+
+    // 서버 연결 테스트
+    async function testConnection() {
+      const serverUrl = elements.serverUrl.value || DEFAULT_CONFIG.serverUrl;
+      
+      try {
+        testConnectionBtn.disabled = true;
+        testConnectionBtn.textContent = '테스트 중...';
+        
+        const response = await fetch(serverUrl + '/health', {
+          method: 'GET',
+          signal: AbortSignal.timeout(5000)
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          updateServerStatus(true, `연결 성공 (모델: ${data.model_loaded ? '로드됨' : '실패'})`);
+          showStatus('서버 연결이 정상입니다.', 'success');
+        } else {
+          throw new Error('HTTP ' + response.status);
+        }
+      } catch (error) {
+        updateServerStatus(false, '연결 실패: ' + error.message);
+        showStatus('서버 연결 실패: ' + error.message, 'error');
+      } finally {
+        testConnectionBtn.disabled = false;
+        testConnectionBtn.textContent = '연결 테스트';
+      }
+    }
+
+    // 서버 상태 업데이트
+    function updateServerStatus(online, message) {
+      serverStatusIndicator.classList.toggle('online', online);
+      serverStatusText.textContent = message;
+    }
+
+    // 사용자 정의 모델 필드 토글
+    function toggleCustomModelField() {
+      const isCustom = modelSelect.value === 'custom';
+      customModelInput.style.display = isCustom ? 'block' : 'none';
+      customModelInput.required = isCustom;
+    }
+
+    // 상태 메시지 표시
+    function showStatus(message, type) {
+      statusDiv.textContent = message;
+      statusDiv.className = `status ${type}`;
+      statusDiv.style.display = 'block';
+      
+      setTimeout(() => {
+        statusDiv.style.display = 'none';
+      }, 3000);
+    }
+
+    // 이벤트 리스너
+    saveBtn.addEventListener('click', saveConfig);
+    resetBtn.addEventListener('click', resetConfig);
+    exportBtn.addEventListener('click', exportConfig);
+    clearLogsBtn.addEventListener('click', clearLogs);
+    testConnectionBtn.addEventListener('click', testConnection);
+    modelSelect.addEventListener('change', toggleCustomModelField);
+
+    // 초기화
+    document.addEventListener('DOMContentLoaded', () => {
+      loadConfig();
+      
+      // 페이지 로드 시 서버 상태 확인
+      setTimeout(testConnection, 1000);
+    });
+  </script>
+</body>
+</html>

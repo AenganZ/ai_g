@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>GenAI Pseudonymizer</title>
+  <style>
+    body {
+      width: 450px;
+      max-height: 600px;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 14px;
+      background: #f5f5f5;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .status {
+      padding: 12px 16px;
+      text-align: center;
+      font-weight: 500;
+      font-size: 13px;
+    }
+
+    .status.checking {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .status.online {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status.offline {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      background: white;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .btn {
+      padding: 8px 12px;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      background: white;
+      color: #495057;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      background: #e9ecef;
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .btn.primary {
+      background: #007bff;
+      color: white;
+      border-color: #007bff;
+    }
+
+    .btn.primary:hover {
+      background: #0056b3;
+    }
+
+    .btn.danger {
+      background: #dc3545;
+      color: white;
+      border-color: #dc3545;
+    }
+
+    .btn.danger:hover {
+      background: #c82333;
+    }
+
+    .content {
+      background: white;
+      max-height: 400px;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    .loading, .empty, .error {
+      text-align: center;
+      padding: 40px 20px;
+      color: #6c757d;
+    }
+
+    .error {
+      color: #dc3545;
+    }
+
+    .error code {
+      background: #f8f9fa;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-family: monospace;
+    }
+
+    .test-example {
+      background: #e7f3ff;
+      border: 1px solid #b6d7ff;
+      border-radius: 4px;
+      padding: 12px;
+      margin-top: 12px;
+      font-size: 12px;
+    }
+
+    .log-entry {
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      background: white;
+    }
+
+    .log-entry.has-pii {
+      border-color: #ffc107;
+      background: #fff8e1;
+    }
+
+    .log-entry.no-pii {
+      border-color: #28a745;
+      background: #f8fff9;
+    }
+
+    .log-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .badge {
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .badge.pii {
+      background: #ffc107;
+      color: #856404;
+    }
+
+    .badge.clean {
+      background: #28a745;
+      color: white;
+    }
+
+    .time, .performance {
+      font-size: 11px;
+      color: #6c757d;
+    }
+
+    .prompt {
+      font-family: monospace;
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 4px;
+      padding: 8px;
+      margin: 8px 0;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .detection-details {
+      margin-top: 8px;
+    }
+
+    .detection-details ul {
+      margin: 8px 0;
+      padding-left: 20px;
+    }
+
+    .detection-details li {
+      margin: 4px 0;
+      font-size: 12px;
+    }
+
+    .type {
+      font-weight: 600;
+      color: #495057;
+    }
+
+    .value {
+      color: #dc3545;
+      font-family: monospace;
+    }
+
+    .token {
+      color: #28a745;
+      font-family: monospace;
+    }
+
+    .no-detection {
+      color: #6c757d;
+      font-style: italic;
+      font-size: 12px;
+    }
+
+    /* 스크롤바 */
+    .content::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .content::-webkit-scrollbar-track {
+      background: #f8f9fa;
+    }
+
+    .content::-webkit-scrollbar-thumb {
+      background: #ced4da;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🔒 GenAI Pseudonymizer</h1>
+  </div>
+
+  <div id="status" class="status checking">
+    서버 상태 확인 중...
+  </div>
+
+  <div class="toolbar">
+    <button id="refreshBtn" class="btn primary">새로고침</button>
+    <button id="testBtn" class="btn">연결 테스트</button>
+    <button id="clearBtn" class="btn danger">로그 삭제</button>
+    <button id="optionsBtn" class="btn">설정</button>
+  </div>
+
+  <div class="content">
+    <div id="logs" class="loading">
+      로딩 중...
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
