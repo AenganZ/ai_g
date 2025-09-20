@@ -1,7 +1,4 @@
-"""
-로깅 유틸리티 모듈
-JSON 형태의 로그를 파일에 저장하고 관리합니다.
-"""
+# Logging json to file
 import json
 import os
 from typing import Dict, Any
