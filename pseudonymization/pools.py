@@ -1,7 +1,4 @@
-"""
-토큰 풀 관리 모듈
-개인정보 유형별 가명화 토큰을 관리하고 제공합니다.
-"""
+# Pools module
 import secrets
 from typing import List, Tuple
 from dataclasses import dataclass
