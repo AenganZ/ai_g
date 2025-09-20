@@ -1,0 +1,144 @@
+{
+  "logs": [
+    {
+      "time": "2025-09-20 01:19:02",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "2217deace21c0d9c3e11",
+        "prompt": "나 현순데 지금 빨리 01038824927로 전화줘 이따 밥 먹기로 했잖아. 서울시 동작구 63빌딩 앞에서 봐. 혹시 전화 안 받으면 kinghwan@gmail.com으로 이메일 줘"
+      },
+      "detection": {
+        "contains_pii": true,
+        "items": [
+          {
+            "type": "이름",
+            "value": "현순데",
+            "start": 0,
+            "end": 0,
+            "token": "이영희"
+          },
+          {
+            "type": "전화번호",
+            "value": "010-3882-4927",
+            "start": 0,
+            "end": 0,
+            "token": "010-3333-4444"
+          },
+          {
+            "type": "이메일",
+            "value": "kinghwan@gmail.com",
+            "start": 0,
+            "end": 0,
+            "token": "name2@example.com"
+          },
+          {
+            "type": "주소",
+            "value": "서울시",
+            "start": 0,
+            "end": 0,
+            "token": "대구광역시"
+          }
+        ]
+      }
+    },
+    {
+      "time": "2025-09-20 01:25:02",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "44e27c01a09fdbfd9bab",
+        "prompt": "나 현순데 지금 빨리 01038824927로 전화줘 이따 밥 먹기로 했잖아. 서울시 동작구 63빌딩 앞에서 봐. 혹시 전화 안 받으면 kinghwan@gmail.com으로 이메일 줘"
+      },
+      "detection": {
+        "contains_pii": true,
+        "items": [
+          {
+            "type": "이름",
+            "value": "현순",
+            "start": 0,
+            "end": 0,
+            "token": "홍길동"
+          },
+          {
+            "type": "나이",
+            "value": "25",
+            "start": 0,
+            "end": 0,
+            "token": "21"
+          },
+          {
+            "type": "전화번호",
+            "value": "010-3882-4927",
+            "start": 0,
+            "end": 0,
+            "token": "010-1111-2222"
+          },
+          {
+            "type": "이메일",
+            "value": "kinghwan@gmail.com",
+            "start": 0,
+            "end": 0,
+            "token": "name1@example.com"
+          },
+          {
+            "type": "주소",
+            "value": "서울시",
+            "start": 0,
+            "end": 0,
+            "token": "서울특별시"
+          }
+        ]
+      }
+    },
+    {
+      "time": "2025-09-20 01:26:46",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "edb1f65ea74473f2dc7f",
+        "prompt": "나 현순데 지금 빨리 01038824927로 전화줘 이따 밥 먹기로 했잖아. 서울시 동작구 63빌딩 앞에서 봐. 혹시 전화 안 받으면 kinghwan@gmail.com으로 이메일 줘"
+      },
+      "detection": {
+        "contains_pii": true,
+        "items": [
+          {
+            "type": "이름",
+            "value": "현순",
+            "start": 0,
+            "end": 0,
+            "token": "김철수"
+          },
+          {
+            "type": "나이",
+            "value": "25",
+            "start": 0,
+            "end": 0,
+            "token": "47"
+          },
+          {
+            "type": "전화번호",
+            "value": "010-3882-4927",
+            "start": 0,
+            "end": 0,
+            "token": "010-2222-3333"
+          },
+          {
+            "type": "이메일",
+            "value": "kinghwan@gmail.com",
+            "start": 0,
+            "end": 0,
+            "token": "name2@example.com"
+          },
+          {
+            "type": "주소",
+            "value": "서울시",
+            "start": 0,
+            "end": 0,
+            "token": "부산광역시"
+          }
+        ]
+      }
+    }
+  ]
+}
