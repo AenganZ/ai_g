@@ -1,11 +1,26 @@
 # Normalizers module
 import re
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 
 # 정규식 패턴들
 EMAIL_RX = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b")
 AGE_RX = re.compile(r"\b(\d{1,3})\s*(?:세|살)?\b")
 PHONE_NUM_ONLY = re.compile(r"\D+")
+
+def normalize_entities(raw_entities: List[Dict[str, Optional[str]]]) -> List[Dict[str, Optional[str]]]:
+    """엔터티 정규화"""
+    out = []
+    for e in raw_entities:
+        ent = {
+            "name": norm_name(e.get("name")) if isinstance(e.get("name"), str) else None,
+            "age": norm_age(str(e.get("age"))) if e.get("age") is not None else None,
+            "phone": norm_phone(e.get("phone")) if isinstance(e.get("phone"), str) else None,
+            "email": norm_email(e.get("email")) if isinstance(e.get("email"), str) else None,
+            "address": norm_address(e.get("address")) if isinstance(e.get("address"), str) else None
+        }
+        ent = cross_check(ent)
+        out.append(ent)
+    return out
 
 def norm_age(val: Optional[str]) -> Optional[str]:
     """나이 값을 숫자만 추출하여 정규화"""
