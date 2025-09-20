@@ -1,49 +1,63 @@
-# pseudonymization/core.py - 개선된 PII 탐지 로직
+# pseudonymization/core.py - 수정된 주소 패턴 (문법 오류 수정)
 import os
 import re
 import random
 from typing import List, Dict, Any, Optional
 
-# ===== 정규식 패턴 (개선된 버전) =====
+# ===== 개선된 정규식 패턴 =====
 EMAIL_PATTERN = re.compile(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}')
 PHONE_PATTERN = re.compile(r'010[-\s]?\d{4}[-\s]?\d{4}')
 AGE_PATTERN = re.compile(r'\b(\d{1,2})\s*(?:세|살)\b')
 
-# 강화된 이름 패턴
+# 🔧 **안전한 이름 패턴** - 위험한 패턴 제거, 확실한 것만 사용
 NAME_PATTERNS = [
+    # 안전하고 확실한 패턴들만 사용
     re.compile(r'이름은\s*([가-힣]{2,4})'),
-    re.compile(r'([가-힣]{2,4})\s*입니다'),
     re.compile(r'저는\s*([가-힣]{2,4})'),
-    re.compile(r'([가-힣]{2,4})(?:이에요|예요|이야|야)'),
-    re.compile(r'([가-힣]{2,4})(?:입니다|이다)'),
     re.compile(r'안녕하세요,?\s*(?:저는\s*)?([가-힣]{2,4})'),
-    re.compile(r'([가-힣]{2,4})이고'),
-    re.compile(r'([가-힣]{2,4})이며'),
+    re.compile(r'([가-힣]{2,4})\s*입니다'),
     re.compile(r'([가-힣]{2,4})라고\s*합니다'),
     re.compile(r'([가-힣]{2,4})라고\s*해요'),
     re.compile(r'([가-힣]{2,4})(?:님|씨)'),
+    
+    # 🚫 위험한 패턴들 제거: "이고", "이며" 등은 오탐 가능성 높음
+    # 대신 정규식보다는 NER 모델에 의존하거나 더 명확한 패턴만 사용
 ]
 
-# 개선된 주소 패턴 (더 정확하게)
+# 🔧 **수정된 주소 패턴** - 정확한 주소만 탐지
 ADDRESS_PATTERNS = [
-    # 완전한 주소 형태 (시/도 + 구/군 + 동/로)
-    re.compile(r'([가-힣]+(?:시|도|특별시|광역시|특별자치시|특별자치도))\s*([가-힣]+(?:구|군))\s*([가-힣]+(?:동|로|가))'),
+    # 1. 완전한 주소 형태: "서울시 강남구", "부산 해운대구"
+    re.compile(r'([가-힣]+(?:특별시|광역시|특별자치시|특별자치도|시|도))\s+([가-힣]+(?:구|군))'),
     
-    # 시/도 + 구/군 형태
-    re.compile(r'([가-힣]+(?:시|도|특별시|광역시|특별자치시|특별자치도))\s*([가-힣]+(?:구|군))'),
+    # 2. 구/군 + 동/로: "강남구 테헤란로", "중구 명동"  
+    re.compile(r'([가-힣]+(?:구|군))\s+([가-힣]+(?:동|로|가))'),
     
-    # 단독 시/도 (하지만 주소 맥락에서만)
-    re.compile(r'(?:거주|살고|위치|있는|지역)\s*[가-힣]*\s*([가-힣]+(?:시|도|특별시|광역시|특별자치시|특별자치도))'),
+    # 3. 시/도만 (명확한 지역명): "서울", "부산", "대구", "대전", "광주", "울산", "인천"
+    re.compile(r'\b(서울|부산|대구|대전|광주|울산|인천|세종|제주)(?=\s|$|에|에서|의|으로|로)'),
     
-    # 구/군만 (시/도가 앞에 언급된 경우)
-    re.compile(r'(?<=시)\s*([가-힣]+(?:구|군))'),
-    re.compile(r'(?<=도)\s*([가-힣]+(?:구|군))'),
+    # 4. 구/군만 (명확한 지역명): "강남구", "해운대구", "중구" 
+    re.compile(r'\b([가-힣]{2,4}(?:구|군))(?=\s|$|에|에서|의|으로|로)'),
+    
+    # 5. 도로명 주소: "테헤란로", "명동길"
+    re.compile(r'([가-힣]{2,10}(?:로|길|대로|로길))'),
 ]
 
-# 주소가 아닌 단어들 제외 리스트
+# 🚫 **주소가 아닌 단어들 제외** (정확한 제외 리스트)
 ADDRESS_EXCLUDE_WORDS = {
-    '거주하시', '분이시', '하시는', '있는', '계시는', '살고', '위치한', 
-    '지역은', '동네는', '근처는', '일대는', '쪽은', '방면은'
+    # 동사/형용사
+    '거주하시', '거주하는', '살고있는', '살고', '있는', '계시는', '위치한', '자리한',
+    '분이시', '하시는', '되시는', '이시는', '으시는', '하신', '이신', '으신',
+    
+    # 지시어/수식어  
+    '그분의', '이분의', '저분의', '우리의', '제가', '내가', '당신의',
+    '어디에', '여기에', '저기에', '그곳에', '이곳에',
+    
+    # 일반 명사 (지역명과 유사한 것들)
+    '중요', '중심', '중앙', '동쪽', '서쪽', '남쪽', '북쪽', '근처', '주변', '일대',
+    '지역은', '동네는', '근처는', '쪽은', '방면은', '곳은', '데는',
+    
+    # 기타 오탐 가능 단어들
+    '문구', '상구', '하구', '입구', '출구', '통로', '도로', '길로', '경로'
 }
 
 # ===== 데이터풀 저장소 =====
@@ -62,21 +76,15 @@ def load_data_pools():
     
     print("📂 데이터풀 로딩 중...")
     
-    # 이름풀 로드 (name.csv가 있으면 사용)
+    # 이름풀 로드
     try:
         if os.path.exists('name.csv'):
             import pandas as pd
             df = pd.read_csv('name.csv', encoding='utf-8')
-            name_pool = df['이름'].tolist()[:1000]  # 최대 1000개
+            name_pool = df['이름'].tolist()[:1000]
             print(f"✅ name.csv에서 {len(name_pool)}개 이름 로드")
         else:
-            # 기본 이름풀
-            name_pool = [
-                '민준', '서준', '도윤', '예준', '시우', '주원', '하준', '지호',
-                '지후', '준우', '현우', '준서', '도현', '지훈', '건우', '우진',
-                '서윤', '지우', '서현', '하은', '예은', '윤서', '지민', '채원'
-            ]
-            print(f"✅ 기본 이름풀 사용: {len(name_pool)}개")
+            name_pool = ['민준', '서준', '지우', '서현']
     except Exception as e:
         print(f"❌ 이름풀 로드 실패: {e}")
         name_pool = ['민준', '서준', '지우', '서현']
@@ -122,11 +130,11 @@ def load_data_pools():
         if os.path.exists('address_road.csv'):
             import pandas as pd
             df = pd.read_csv('address_road.csv', encoding='utf-8')
-            road_names = df['도로명'].dropna().unique().tolist()[:100]  # 상위 100개
+            road_names = df['도로명'].dropna().unique().tolist()[:100]
             
             # 기존 주소에 도로명 추가
-            for base in address_pool[:5]:  # 상위 5개 지역만
-                for road in road_names[:10]:  # 상위 10개 도로명
+            for base in address_pool[:5]:
+                for road in road_names[:10]:
                     address_pool.append(f"{base} {road}")
             print(f"✅ address_road.csv에서 {len(road_names)}개 도로명 로드")
     except Exception as e:
@@ -155,12 +163,16 @@ def detect_pii_enhanced(text: str) -> List[Dict[str, Any]]:
         from .model import extract_entities_with_ner, is_ner_loaded
         
         if is_ner_loaded():
+            print("🤖 NER 모델로 개체명 추출 중...")
             ner_items = extract_entities_with_ner(text)
             items.extend(ner_items)
+            print(f"   NER 결과: {len(ner_items)}개 탐지")
     except Exception as e:
         print(f"⚠️ NER 모델 사용 실패: {e}")
     
     # 2. 정규식 기반 탐지
+    print("🔎 정규식 패턴으로 추가 탐지 중...")
+    
     # 이메일
     for match in EMAIL_PATTERN.finditer(text):
         items.append({
@@ -195,44 +207,68 @@ def detect_pii_enhanced(text: str) -> List[Dict[str, Any]]:
         })
     
     # 이름 패턴
+    print("👤 이름 패턴 분석 중...")
     for pattern in NAME_PATTERNS:
         for match in pattern.finditer(text):
             name = match.group(1)
             if len(name) >= 2 and len(name) <= 4:
-                # 일반적인 단어는 제외
-                if name not in {'그분', '저희', '우리', '여기', '거기', '저기'}:
+                # 🔧 후처리: 조사 제거 ("홍길동이" → "홍길동")
+                clean_name = re.sub(r'[이가을를에서]$', '', name)
+                if len(clean_name) >= 2:  # 조사 제거 후에도 2글자 이상이어야 함
                     items.append({
                         "type": "이름",
-                        "value": name,
+                        "value": clean_name,  # 정리된 이름 사용
                         "start": match.start(1),
-                        "end": match.end(1),
+                        "end": match.start(1) + len(clean_name),  # 정리된 길이로 조정
                         "confidence": 0.75,
                         "source": "Pattern"
                     })
+                    print(f"   ✅ 이름 탐지: '{name}' → '{clean_name}' (조사 제거)")
+                else:
+                    print(f"   ❌ 제외: '{name}' (조사 제거 후 너무 짧음)")
+            else:
+                print(f"   ❌ 제외: '{name}' (길이 부적절: {len(name)})")
     
-    # 개선된 주소 패턴
-    for pattern in ADDRESS_PATTERNS:
+    # 🔧 **개선된 주소 패턴 탐지**
+    print("🏠 주소 패턴 분석 중...")
+    for i, pattern in enumerate(ADDRESS_PATTERNS):
         for match in pattern.finditer(text):
-            # 매치된 그룹들 확인
-            groups = match.groups()
-            if groups:
-                # 마지막 그룹이 실제 주소 부분
-                address_part = groups[-1] if groups[-1] else match.group()
-                
-                # 제외 단어 체크
-                if address_part not in ADDRESS_EXCLUDE_WORDS:
-                    items.append({
-                        "type": "주소",
-                        "value": address_part,
-                        "start": match.start(),
-                        "end": match.end(),
-                        "confidence": 0.9,
-                        "source": "Regex"
-                    })
+            address_text = match.group().strip()
+            
+            # 제외 단어 필터링
+            if address_text in ADDRESS_EXCLUDE_WORDS:
+                print(f"   ❌ 제외됨: '{address_text}' (제외 목록에 포함)")
+                continue
+            
+            # 길이 검증 (너무 짧거나 긴 것 제외)
+            if len(address_text) < 2 or len(address_text) > 20:
+                print(f"   ❌ 제외됨: '{address_text}' (길이 부적절: {len(address_text)})")
+                continue
+            
+            # 숫자만 있는 것 제외
+            if address_text.isdigit():
+                print(f"   ❌ 제외됨: '{address_text}' (숫자만 포함)")
+                continue
+            
+            # 한글이 포함되어 있는지 확인
+            if not re.search(r'[가-힣]', address_text):
+                print(f"   ❌ 제외됨: '{address_text}' (한글 미포함)")
+                continue
+            
+            print(f"   ✅ 주소 탐지: '{address_text}' (패턴 {i+1})")
+            items.append({
+                "type": "주소",
+                "value": address_text,
+                "start": match.start(),
+                "end": match.end(),
+                "confidence": 0.85,  # 정규식 주소는 높은 신뢰도
+                "source": f"Regex-Pattern{i+1}"
+            })
     
-    # 3. 데이터풀 기반 탐지 (성+이름 조합)
+    # 3. 데이터풀 기반 탐지 (전체 이름 풀 확인)
+    print("📋 데이터풀 기반 탐지 중...")
     if full_name_pool:
-        for full_name in full_name_pool[:200]:  # 성능을 위해 제한
+        for full_name in full_name_pool[:500]:  # 성능을 위해 제한
             if full_name in text:
                 start_idx = text.find(full_name)
                 items.append({
@@ -244,63 +280,78 @@ def detect_pii_enhanced(text: str) -> List[Dict[str, Any]]:
                     "source": "FullNamePool"
                 })
     
-    # 중복 제거 및 정렬 (더 정교한 중복 제거)
+    # 4. 중복 제거 및 우선순위 정렬
+    print("🧹 중복 제거 및 정렬 중...")
     unique_items = []
     seen = set()
     
-    # 정렬 (시작 위치 기준)
-    sorted_items = sorted(items, key=lambda x: x['start'])
+    # NER 결과를 우선순위로 정렬 (NER > Regex > Pattern)
+    priority_order = {'NER': 0, 'Regex': 1, 'Pattern': 2, 'FullNamePool': 3}
+    items.sort(key=lambda x: (x['start'], priority_order.get(x['source'].split('-')[0], 4)))
     
-    for item in sorted_items:
-        # 중복 제거 키: 타입, 값, 대략적인 위치
-        key = (item['type'], item['value'])
+    for item in items:
+        # 위치 기반 중복 체크 (겹치는 범위 제거)
+        overlap = False
+        for existing in unique_items:
+            if (item['start'] < existing['end'] and item['end'] > existing['start']):
+                # 겹치는 경우 더 긴 것 또는 신뢰도 높은 것 선택
+                if (item['end'] - item['start']) > (existing['end'] - existing['start']):
+                    unique_items.remove(existing)
+                    break
+                else:
+                    overlap = True
+                    break
         
-        # 이미 있는 항목과 겹치는지 확인
-        overlaps = False
-        for existing_item in unique_items:
-            if (existing_item['type'] == item['type'] and 
-                abs(existing_item['start'] - item['start']) < 10):  # 10자 이내면 중복으로 간주
-                overlaps = True
-                # 더 신뢰도가 높은 것을 선택
-                if item['confidence'] > existing_item['confidence']:
-                    unique_items.remove(existing_item)
-                    unique_items.append(item)
-                break
-        
-        if not overlaps and key not in seen:
-            seen.add(key)
+        if not overlap:
             unique_items.append(item)
     
-    print(f"✅ 총 {len(unique_items)}개 PII 탐지됨")
+    # 최종 결과 정렬 (위치 순)
+    unique_items.sort(key=lambda x: x['start'])
     
-    # 디버그 정보 출력
+    print(f"🎯 최종 탐지 결과: {len(unique_items)}개")
     for item in unique_items:
-        print(f"   {item['type']}: '{item['value']}' (신뢰도: {item['confidence']:.2f}, 소스: {item['source']})")
+        print(f"   - {item['type']}: '{item['value']}' (신뢰도: {item['confidence']:.2f}, 출처: {item['source']})")
     
     return unique_items
 
 def assign_realistic_values(items: List[Dict[str, Any]]) -> Dict[str, str]:
-    """실제 데이터풀에서 대체값 할당"""
+    """실제 데이터풀에서 대체값 할당 (주소 간소화)"""
     substitution_map = {}
     
-    for item in items:
+    # 🔧 주소 아이템들을 먼저 그룹화
+    address_items = [item for item in items if item['type'] == '주소']
+    non_address_items = [item for item in items if item['type'] != '주소']
+    
+    # 🏠 **주소 간소화**: 여러 주소를 하나의 간단한 지역명으로 통합
+    if address_items:
+        print(f"🏠 주소 간소화: {len(address_items)}개 → 1개 지역명")
+        
+        # 간단한 지역명 풀 (시/도 단위)
+        simple_regions = ['서울', '부산', '대구', '인천', '광주', '대전', '울산', '경기', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주']
+        chosen_region = random.choice(simple_regions)
+        
+        print(f"   선택된 지역: {chosen_region}")
+        
+        # 모든 주소를 같은 지역명으로 대체
+        for item in address_items:
+            substitution_map[item['value']] = chosen_region
+            item['replacement'] = chosen_region
+            print(f"   주소 간소화: '{item['value']}' → '{chosen_region}'")
+    
+    # 주소가 아닌 다른 아이템들 처리
+    for item in non_address_items:
         pii_type = item['type']
         original_value = item['value']
         
         if original_value in substitution_map:
-            # 이미 할당된 값이 있으면 기존 값 사용
-            item['replacement'] = substitution_map[original_value]
             continue
         
-        # 타입별 대체값 생성
         if pii_type == "이름":
             replacement = random.choice(fake_name_pool) if fake_name_pool else "김가명"
         elif pii_type == "이메일":
             replacement = random.choice(email_pool) if email_pool else "test@example.com"
         elif pii_type == "전화번호":
             replacement = random.choice(phone_pool) if phone_pool else "010-0000-0000"
-        elif pii_type == "주소":
-            replacement = random.choice(address_pool) if address_pool else "서울시 강남구"
         elif pii_type == "회사":
             replacement = random.choice(company_pool) if company_pool else "테스트회사"
         elif pii_type == "나이":
@@ -308,9 +359,7 @@ def assign_realistic_values(items: List[Dict[str, Any]]) -> Dict[str, str]:
         else:
             replacement = f"[{pii_type.upper()}_MASKED]"
         
-        # 매핑에 추가
         substitution_map[original_value] = replacement
-        # 아이템에도 직접 할당 (중요!)
         item['replacement'] = replacement
         
         print(f"   할당: {original_value} → {replacement}")
@@ -318,7 +367,7 @@ def assign_realistic_values(items: List[Dict[str, Any]]) -> Dict[str, str]:
     return substitution_map
 
 def create_masked_text(original_text: str, items: List[Dict[str, Any]]) -> str:
-    """마스킹된 텍스트 생성"""
+    """마스킹된 텍스트 생성 (개선된 중복 제거)"""
     replacements = [(item['value'], item.get('replacement', 'MASKED')) 
                    for item in items if item['value']]
     
@@ -329,15 +378,48 @@ def create_masked_text(original_text: str, items: List[Dict[str, Any]]) -> str:
     for original, replacement in replacements:
         masked_text = masked_text.replace(original, replacement)
     
+    # 🔧 **개선된 중복 제거**: 연속된 같은 대체값들 제거
+    print(f"🔧 치환 후: {masked_text}")
+    
+    # 모든 대체값들 수집
+    replacement_values = set(item.get('replacement', '') for item in items if item.get('replacement'))
+    
+    # 각 대체값에 대해 중복 제거
+    for replacement_value in replacement_values:
+        if len(replacement_value) < 2:  # 너무 짧은 것 제외
+            continue
+            
+        # 연속된 같은 대체값 패턴 찾기
+        pattern = re.escape(replacement_value)
+        
+        # "인천 인천", "인천  인천", "인천, 인천" 등 처리
+        duplicate_pattern = f'({pattern})(\\s*,?\\s*{pattern})+'
+        
+        def replace_duplicates(match):
+            return match.group(1)  # 첫 번째 것만 남기기
+        
+        before = masked_text
+        masked_text = re.sub(duplicate_pattern, replace_duplicates, masked_text)
+        
+        if before != masked_text:
+            print(f"   🔧 중복 제거: '{replacement_value}' 연속 발생 → 1개로 통합")
+    
+    # 추가 정리: 연속된 공백, 쉼표 정리
+    masked_text = re.sub(r'\s*,\s*,', ',', masked_text)  # 연속 쉼표 제거
+    masked_text = re.sub(r'\s+', ' ', masked_text)       # 연속 공백 제거
+    masked_text = masked_text.strip()
+    
+    print(f"🔧 최종 정리: {masked_text}")
+    
     return masked_text
 
 def pseudonymize_text(original_prompt: str) -> Dict[str, Any]:
-    """메인 가명화 함수"""
+    """메인 가명화 함수 (undefined 오류 해결)"""
     try:
         # PII 탐지
         items = detect_pii_enhanced(original_prompt)
         
-        # 실제 데이터풀에서 대체값 할당
+        # 실제 데이터풀에서 대체값 할당 (주소 합치기 포함)
         substitution_map = assign_realistic_values(items)
         
         # 복구용 맵 생성 (가명 → 원본)
@@ -346,17 +428,33 @@ def pseudonymize_text(original_prompt: str) -> Dict[str, Any]:
         # 마스킹된 텍스트 생성
         masked_prompt = create_masked_text(original_prompt, items)
         
+        # 🔧 detection에 replacement 정보 포함 (undefined 해결)
+        for item in items:
+            if 'replacement' not in item:
+                # 혹시 누락된 경우를 위한 fallback
+                item['replacement'] = substitution_map.get(item['value'], 'MASKED')
+        
         detection = {
             "contains_pii": len(items) > 0,
-            "items": items,
+            "items": items,  # 이제 각 item에 replacement 정보 포함
             "model_used": "Enhanced NER + Improved Regex + NamePool + FullNamePool"
         }
+        
+        print(f"🎯 최종 결과:")
+        print(f"   원본: {original_prompt}")
+        print(f"   가명: {masked_prompt}")
+        print(f"   탐지: {len(items)}개 항목")
+        for i, item in enumerate(items, 1):
+            print(f"   #{i} {item['type']}: '{item['value']}' → '{item.get('replacement', 'MASKED')}'")
         
         return {
             "masked_prompt": masked_prompt,
             "detection": detection,
             "substitution_map": substitution_map,
-            "reverse_map": reverse_map
+            "reverse_map": reverse_map,
+            "performance": {
+                "items_detected": len(items)
+            }
         }
     
     except Exception as e:
@@ -368,7 +466,8 @@ def pseudonymize_text(original_prompt: str) -> Dict[str, Any]:
             "masked_prompt": original_prompt,
             "detection": {"contains_pii": False, "items": []},
             "substitution_map": {},
-            "reverse_map": {}
+            "reverse_map": {},
+            "performance": {"items_detected": 0}
         }
 
 def get_data_pool_stats() -> Dict[str, int]:

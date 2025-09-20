@@ -810,6 +810,1121 @@
       "performance": {
         "items_detected": 2
       }
+    },
+    {
+      "time": "2025-09-21 04:53:32",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "debug_test_1758398012030",
+        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다."
+      },
+      "detection": {
+        "contains_pii": true,
+        "items": [
+          {
+            "type": "이름",
+            "value": "이영희",
+            "start": 0,
+            "end": 3,
+            "confidence": 0.75,
+            "source": "Pattern",
+            "replacement": "이차명"
+          },
+          {
+            "type": "나이",
+            "value": "25",
+            "start": 5,
+            "end": 8,
+            "confidence": 0.9,
+            "source": "Regex",
+            "replacement": "20"
+          },
+          {
+            "type": "이메일",
+            "value": "contact@example.com",
+            "start": 28,
+            "end": 47,
+            "confidence": 1.0,
+            "source": "Regex",
+            "replacement": "office1061@gmail.com"
+          }
+        ],
+        "model_used": "Enhanced NER + Improved Regex + NamePool + FullNamePool"
+      },
+      "substitution_map": {
+        "이영희": "이차명",
+        "25": "20",
+        "contact@example.com": "office1061@gmail.com"
+      },
+      "reverse_map": {
+        "이차명": "이영희",
+        "20": "25",
+        "office1061@gmail.com": "contact@example.com"
+      },
+      "performance": {
+        "items_detected": 3
+      }
+    },
+    {
+      "time": "2025-09-21 04:53:46",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "debug_test_1758398026016",
+        "prompt": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요."
+      },
+      "detection": {
+        "contains_pii": true,
+        "items": [
+          {
+            "type": "이름",
+            "value": "고객",
+            "start": 4,
+            "end": 6,
+            "confidence": 0.75,
+            "source": "Pattern",
+            "replacement": "임차명"
+          },
+          {
+            "type": "전화번호",
+            "value": "010-9876-5432",
+            "start": 36,
+            "end": 49,
+            "confidence": 1.0,
+            "source": "Regex",
+            "replacement": "010-0016-0092"
+          }
+        ],
+        "model_used": "Enhanced NER + Improved Regex + NamePool + FullNamePool"
+      },
+      "substitution_map": {
+        "고객": "임차명",
+        "010-9876-5432": "010-0016-0092"
+      },
+      "reverse_map": {
+        "임차명": "고객",
+        "010-0016-0092": "010-9876-5432"
+      },
+      "performance": {
+        "items_detected": 2
+      }
+    },
+    {
+      "time": "2025-09-21 04:54:46",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "debug_test_1758398086664",
+        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다."
+      },
+      "detection": {
+        "contains_pii": true,
+        "items": [
+          {
+            "type": "이름",
+            "value": "이영희",
+            "start": 0,
+            "end": 3,
+            "confidence": 0.75,
+            "source": "Pattern",
+            "replacement": "서무명"
+          },
+          {
+            "type": "나이",
+            "value": "25",
+            "start": 5,
+            "end": 8,
+            "confidence": 0.9,
+            "source": "Regex",
+            "replacement": "34"
+          },
+          {
+            "type": "이메일",
+            "value": "contact@example.com",
+            "start": 28,
+            "end": 47,
+            "confidence": 1.0,
+            "source": "Regex",
+            "replacement": "office1063@naver.com"
+          }
+        ],
+        "model_used": "Enhanced NER + Improved Regex + NamePool + FullNamePool"
+      },
+      "substitution_map": {
+        "이영희": "서무명",
+        "25": "34",
+        "contact@example.com": "office1063@naver.com"
+      },
+      "reverse_map": {
+        "서무명": "이영희",
+        "34": "25",
+        "office1063@naver.com": "contact@example.com"
+      },
+      "performance": {
+        "items_detected": 3
+      }
+    },
+    {
+      "time": "2025-09-21 04:59:57",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "debug_test_1758398397451",
+        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다."
+      },
+      "detection": {
+        "contains_pii": true,
+        "items": [
+          {
+            "type": "이름",
+            "value": "이영희",
+            "start": 0,
+            "end": 3,
+            "confidence": 0.75,
+            "source": "Pattern",
+            "replacement": "임가명"
+          },
+          {
+            "type": "나이",
+            "value": "25",
+            "start": 5,
+            "end": 8,
+            "confidence": 0.9,
+            "source": "Regex",
+            "replacement": "24"
+          },
+          {
+            "type": "주소",
+            "value": "대구",
+            "start": 10,
+            "end": 12,
+            "confidence": 0.85,
+            "source": "Regex-Pattern3",
+            "replacement": "서울시 송파구 가작로"
+          },
+          {
+            "type": "이메일",
+            "value": "contact@example.com",
+            "start": 28,
+            "end": 47,
+            "confidence": 1.0,
+            "source": "Regex",
+            "replacement": "work1041@gmail.com"
+          }
+        ],
+        "model_used": "Enhanced NER + Improved Regex + NamePool + FullNamePool"
+      },
+      "substitution_map": {
+        "이영희": "임가명",
+        "25": "24",
+        "대구": "서울시 송파구 가작로",
+        "contact@example.com": "work1041@gmail.com"
+      },
+      "reverse_map": {
+        "임가명": "이영희",
+        "24": "25",
+        "서울시 송파구 가작로": "대구",
+        "work1041@gmail.com": "contact@example.com"
+      },
+      "performance": {
+        "items_detected": 4
+      }
+    },
+    {
+      "time": "2025-09-21 05:00:19",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "debug_test_1758398419794",
+        "prompt": "안녕하세요, 제 이름은 홍길동이고 연락처는 010-1234-5678입니다. 서울 강남구에 살고 있습니다."
+      },
+      "detection": {
+        "contains_pii": true,
+        "items": [
+          {
+            "type": "이름",
+            "value": "홍길동이",
+            "start": 13,
+            "end": 17,
+            "confidence": 0.75,
+            "source": "Pattern",
+            "replacement": "김무명"
+          },
+          {
+            "type": "전화번호",
+            "value": "010-1234-5678",
+            "start": 24,
+            "end": 37,
+            "confidence": 1.0,
+            "source": "Regex",
+            "replacement": "010-0011-0043"
+          },
+          {
+            "type": "주소",
+            "value": "서울",
+            "start": 42,
+            "end": 44,
+            "confidence": 0.85,
+            "source": "Regex-Pattern3",
+            "replacement": "서울시 송파구 강중길"
+          },
+          {
+            "type": "주소",
+            "value": "강남구",
+            "start": 45,
+            "end": 48,
+            "confidence": 0.85,
+            "source": "Regex-Pattern4",
+            "replacement": "서울시 강남구 간현로"
+          }
+        ],
+        "model_used": "Enhanced NER + Improved Regex + NamePool + FullNamePool"
+      },
+      "substitution_map": {
+        "홍길동이": "김무명",
+        "010-1234-5678": "010-0011-0043",
+        "서울": "서울시 송파구 강중길",
+        "강남구": "서울시 강남구 간현로"
+      },
+      "reverse_map": {
+        "김무명": "홍길동이",
+        "010-0011-0043": "010-1234-5678",
+        "서울시 송파구 강중길": "서울",
+        "서울시 강남구 간현로": "강남구"
+      },
+      "performance": {
+        "items_detected": 4
+      }
+    },
+    {
+      "time": "2025-09-21 05:00:36",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "debug_test_1758398436332",
+        "prompt": "안녕하세요, 제 이름은 홍길동이고 연락처는 010-1234-5678입니다. 서울 강남구에 살고 있습니다."
+      },
+      "detection": {
+        "contains_pii": true,
+        "items": [
+          {
+            "type": "이름",
+            "value": "홍길동이",
+            "start": 13,
+            "end": 17,
+            "confidence": 0.75,
+            "source": "Pattern",
+            "replacement": "권테스트"
+          },
+          {
+            "type": "전화번호",
+            "value": "010-1234-5678",
+            "start": 24,
+            "end": 37,
+            "confidence": 1.0,
+            "source": "Regex",
+            "replacement": "010-0013-0019"
+          },
+          {
+            "type": "주소",
+            "value": "서울",
+            "start": 42,
+            "end": 44,
+            "confidence": 0.85,
+            "source": "Regex-Pattern3",
+            "replacement": "서울시 강동구 가일길"
+          },
+          {
+            "type": "주소",
+            "value": "강남구",
+            "start": 45,
+            "end": 48,
+            "confidence": 0.85,
+            "source": "Regex-Pattern4",
+            "replacement": "서울시 송파구 간성북로"
+          }
+        ],
+        "model_used": "Enhanced NER + Improved Regex + NamePool + FullNamePool"
+      },
+      "substitution_map": {
+        "홍길동이": "권테스트",
+        "010-1234-5678": "010-0013-0019",
+        "서울": "서울시 강동구 가일길",
+        "강남구": "서울시 송파구 간성북로"
+      },
+      "reverse_map": {
+        "권테스트": "홍길동이",
+        "010-0013-0019": "010-1234-5678",
+        "서울시 강동구 가일길": "서울",
+        "서울시 송파구 간성북로": "강남구"
+      },
+      "performance": {
+        "items_detected": 4
+      }
+    },
+    {
+      "time": "2025-09-21 05:00:41",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "debug_test_1758398441487",
+        "prompt": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요."
+      },
+      "detection": {
+        "contains_pii": true,
+        "items": [
+          {
+            "type": "이름",
+            "value": "고객",
+            "start": 4,
+            "end": 6,
+            "confidence": 0.75,
+            "source": "Pattern",
+            "replacement": "한가명"
+          },
+          {
+            "type": "주소",
+            "value": "부산",
+            "start": 9,
+            "end": 11,
+            "confidence": 0.85,
+            "source": "Regex-Pattern3",
+            "replacement": "인천시 남동구"
+          },
+          {
+            "type": "주소",
+            "value": "해운대구",
+            "start": 12,
+            "end": 16,
+            "confidence": 0.85,
+            "source": "Regex-Pattern4",
+            "replacement": "서울시 강남구 강변로"
+          },
+          {
+            "type": "전화번호",
+            "value": "010-9876-5432",
+            "start": 36,
+            "end": 49,
+            "confidence": 1.0,
+            "source": "Regex",
+            "replacement": "010-0015-0056"
+          }
+        ],
+        "model_used": "Enhanced NER + Improved Regex + NamePool + FullNamePool"
+      },
+      "substitution_map": {
+        "고객": "한가명",
+        "부산": "인천시 남동구",
+        "해운대구": "서울시 강남구 강변로",
+        "010-9876-5432": "010-0015-0056"
+      },
+      "reverse_map": {
+        "한가명": "고객",
+        "인천시 남동구": "부산",
+        "서울시 강남구 강변로": "해운대구",
+        "010-0015-0056": "010-9876-5432"
+      },
+      "performance": {
+        "items_detected": 4
+      }
+    },
+    {
+      "time": "2025-09-21 05:04:06",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "debug_test_1758398646041",
+        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다."
+      },
+      "detection": {
+        "contains_pii": true,
+        "items": [
+          {
+            "type": "이름",
+            "value": "이영희",
+            "start": 0,
+            "end": 3,
+            "confidence": 0.75,
+            "source": "Pattern",
+            "replacement": "박별명"
+          },
+          {
+            "type": "나이",
+            "value": "25",
+            "start": 5,
+            "end": 8,
+            "confidence": 0.9,
+            "source": "Regex",
+            "replacement": "33"
+          },
+          {
+            "type": "주소",
+            "value": "대구",
+            "start": 10,
+            "end": 12,
+            "confidence": 0.85,
+            "source": "Regex-Pattern3",
+            "replacement": "부산시 부산진구"
+          },
+          {
+            "type": "이메일",
+            "value": "contact@example.com",
+            "start": 28,
+            "end": 47,
+            "confidence": 1.0,
+            "source": "Regex",
+            "replacement": "info1048@daum.net"
+          }
+        ],
+        "model_used": "Enhanced NER + Improved Regex + NamePool + FullNamePool"
+      },
+      "substitution_map": {
+        "대구": "부산시 부산진구",
+        "이영희": "박별명",
+        "25": "33",
+        "contact@example.com": "info1048@daum.net"
+      },
+      "reverse_map": {
+        "부산시 부산진구": "대구",
+        "박별명": "이영희",
+        "33": "25",
+        "info1048@daum.net": "contact@example.com"
+      },
+      "performance": {
+        "items_detected": 4
+      }
+    },
+    {
+      "time": "2025-09-21 05:04:30",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "debug_test_1758398670300",
+        "prompt": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요."
+      },
+      "detection": {
+        "contains_pii": true,
+        "items": [
+          {
+            "type": "이름",
+            "value": "고객",
+            "start": 4,
+            "end": 6,
+            "confidence": 0.75,
+            "source": "Pattern",
+            "replacement": "조테스트"
+          },
+          {
+            "type": "주소",
+            "value": "부산",
+            "start": 9,
+            "end": 11,
+            "confidence": 0.85,
+            "source": "Regex-Pattern3",
+            "replacement": "서울시 마포구 강중길"
+          },
+          {
+            "type": "주소",
+            "value": "해운대구",
+            "start": 12,
+            "end": 16,
+            "confidence": 0.85,
+            "source": "Regex-Pattern4",
+            "replacement": "서울시 마포구 강중길"
+          },
+          {
+            "type": "전화번호",
+            "value": "010-9876-5432",
+            "start": 36,
+            "end": 49,
+            "confidence": 1.0,
+            "source": "Regex",
+            "replacement": "010-0016-0048"
+          }
+        ],
+        "model_used": "Enhanced NER + Improved Regex + NamePool + FullNamePool"
+      },
+      "substitution_map": {
+        "부산": "서울시 마포구 강중길",
+        "해운대구": "서울시 마포구 강중길",
+        "고객": "조테스트",
+        "010-9876-5432": "010-0016-0048"
+      },
+      "reverse_map": {
+        "서울시 마포구 강중길": "해운대구",
+        "조테스트": "고객",
+        "010-0016-0048": "010-9876-5432"
+      },
+      "performance": {
+        "items_detected": 4
+      }
+    },
+    {
+      "time": "2025-09-21 05:09:10",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "debug_test_1758398950428",
+        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다."
+      },
+      "detection": {
+        "contains_pii": true,
+        "items": [
+          {
+            "type": "이름",
+            "value": "이영희",
+            "start": 0,
+            "end": 3,
+            "confidence": 0.75,
+            "source": "Pattern",
+            "replacement": "송별명"
+          },
+          {
+            "type": "나이",
+            "value": "25",
+            "start": 5,
+            "end": 8,
+            "confidence": 0.9,
+            "source": "Regex",
+            "replacement": "38"
+          },
+          {
+            "type": "주소",
+            "value": "대구",
+            "start": 10,
+            "end": 12,
+            "confidence": 0.85,
+            "source": "Regex-Pattern3",
+            "replacement": "강원"
+          },
+          {
+            "type": "이메일",
+            "value": "contact@example.com",
+            "start": 28,
+            "end": 47,
+            "confidence": 1.0,
+            "source": "Regex",
+            "replacement": "hello1082@naver.com"
+          }
+        ],
+        "model_used": "Enhanced NER + Improved Regex + NamePool + FullNamePool"
+      },
+      "substitution_map": {
+        "대구": "강원",
+        "이영희": "송별명",
+        "25": "38",
+        "contact@example.com": "hello1082@naver.com"
+      },
+      "reverse_map": {
+        "강원": "대구",
+        "송별명": "이영희",
+        "38": "25",
+        "hello1082@naver.com": "contact@example.com"
+      },
+      "performance": {
+        "items_detected": 4
+      }
+    },
+    {
+      "time": "2025-09-21 05:09:19",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "debug_test_1758398959907",
+        "prompt": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요."
+      },
+      "detection": {
+        "contains_pii": true,
+        "items": [
+          {
+            "type": "이름",
+            "value": "고객",
+            "start": 4,
+            "end": 6,
+            "confidence": 0.75,
+            "source": "Pattern",
+            "replacement": "박가명"
+          },
+          {
+            "type": "주소",
+            "value": "부산",
+            "start": 9,
+            "end": 11,
+            "confidence": 0.85,
+            "source": "Regex-Pattern3",
+            "replacement": "충남"
+          },
+          {
+            "type": "주소",
+            "value": "해운대구",
+            "start": 12,
+            "end": 16,
+            "confidence": 0.85,
+            "source": "Regex-Pattern4",
+            "replacement": "충남"
+          },
+          {
+            "type": "전화번호",
+            "value": "010-9876-5432",
+            "start": 36,
+            "end": 49,
+            "confidence": 1.0,
+            "source": "Regex",
+            "replacement": "010-0012-0019"
+          }
+        ],
+        "model_used": "Enhanced NER + Improved Regex + NamePool + FullNamePool"
+      },
+      "substitution_map": {
+        "부산": "충남",
+        "해운대구": "충남",
+        "고객": "박가명",
+        "010-9876-5432": "010-0012-0019"
+      },
+      "reverse_map": {
+        "충남": "해운대구",
+        "박가명": "고객",
+        "010-0012-0019": "010-9876-5432"
+      },
+      "performance": {
+        "items_detected": 4
+      }
+    },
+    {
+      "time": "2025-09-21 05:09:39",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "debug_test_1758398979726",
+        "prompt": "안녕하세요, 제 이름은 홍길동이고 연락처는 010-1234-5678입니다. 서울 강남구에 살고 있습니다."
+      },
+      "detection": {
+        "contains_pii": true,
+        "items": [
+          {
+            "type": "이름",
+            "value": "홍길동이",
+            "start": 13,
+            "end": 17,
+            "confidence": 0.75,
+            "source": "Pattern",
+            "replacement": "권차명"
+          },
+          {
+            "type": "전화번호",
+            "value": "010-1234-5678",
+            "start": 24,
+            "end": 37,
+            "confidence": 1.0,
+            "source": "Regex",
+            "replacement": "010-0019-0020"
+          },
+          {
+            "type": "주소",
+            "value": "서울",
+            "start": 42,
+            "end": 44,
+            "confidence": 0.85,
+            "source": "Regex-Pattern3",
+            "replacement": "인천"
+          },
+          {
+            "type": "주소",
+            "value": "강남구",
+            "start": 45,
+            "end": 48,
+            "confidence": 0.85,
+            "source": "Regex-Pattern4",
+            "replacement": "인천"
+          }
+        ],
+        "model_used": "Enhanced NER + Improved Regex + NamePool + FullNamePool"
+      },
+      "substitution_map": {
+        "서울": "인천",
+        "강남구": "인천",
+        "홍길동이": "권차명",
+        "010-1234-5678": "010-0019-0020"
+      },
+      "reverse_map": {
+        "인천": "강남구",
+        "권차명": "홍길동이",
+        "010-0019-0020": "010-1234-5678"
+      },
+      "performance": {
+        "items_detected": 4
+      }
+    },
+    {
+      "time": "2025-09-21 05:16:32",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "debug_test_1758399392111",
+        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다."
+      },
+      "detection": {
+        "contains_pii": true,
+        "items": [
+          {
+            "type": "이름",
+            "value": "이영희",
+            "start": 0,
+            "end": 3,
+            "confidence": 0.75,
+            "source": "Pattern",
+            "replacement": "강가명"
+          },
+          {
+            "type": "나이",
+            "value": "25",
+            "start": 5,
+            "end": 8,
+            "confidence": 0.9,
+            "source": "Regex",
+            "replacement": "38"
+          },
+          {
+            "type": "주소",
+            "value": "대구",
+            "start": 10,
+            "end": 12,
+            "confidence": 0.85,
+            "source": "Regex-Pattern3",
+            "replacement": "서울"
+          },
+          {
+            "type": "이메일",
+            "value": "contact@example.com",
+            "start": 28,
+            "end": 47,
+            "confidence": 1.0,
+            "source": "Regex",
+            "replacement": "work1075@daum.net"
+          }
+        ],
+        "model_used": "Enhanced NER + Improved Regex + NamePool + FullNamePool"
+      },
+      "substitution_map": {
+        "대구": "서울",
+        "이영희": "강가명",
+        "25": "38",
+        "contact@example.com": "work1075@daum.net"
+      },
+      "reverse_map": {
+        "서울": "대구",
+        "강가명": "이영희",
+        "38": "25",
+        "work1075@daum.net": "contact@example.com"
+      },
+      "performance": {
+        "items_detected": 4
+      }
+    },
+    {
+      "time": "2025-09-21 05:16:38",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "debug_test_1758399398395",
+        "prompt": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요."
+      },
+      "detection": {
+        "contains_pii": true,
+        "items": [
+          {
+            "type": "이름",
+            "value": "고객",
+            "start": 4,
+            "end": 6,
+            "confidence": 0.75,
+            "source": "Pattern",
+            "replacement": "최샘플"
+          },
+          {
+            "type": "주소",
+            "value": "부산",
+            "start": 9,
+            "end": 11,
+            "confidence": 0.85,
+            "source": "Regex-Pattern3",
+            "replacement": "부산"
+          },
+          {
+            "type": "주소",
+            "value": "해운대구",
+            "start": 12,
+            "end": 16,
+            "confidence": 0.85,
+            "source": "Regex-Pattern4",
+            "replacement": "부산"
+          },
+          {
+            "type": "전화번호",
+            "value": "010-9876-5432",
+            "start": 36,
+            "end": 49,
+            "confidence": 1.0,
+            "source": "Regex",
+            "replacement": "010-0017-0096"
+          }
+        ],
+        "model_used": "Enhanced NER + Improved Regex + NamePool + FullNamePool"
+      },
+      "substitution_map": {
+        "부산": "부산",
+        "해운대구": "부산",
+        "고객": "최샘플",
+        "010-9876-5432": "010-0017-0096"
+      },
+      "reverse_map": {
+        "부산": "해운대구",
+        "최샘플": "고객",
+        "010-0017-0096": "010-9876-5432"
+      },
+      "performance": {
+        "items_detected": 4
+      }
+    },
+    {
+      "time": "2025-09-21 05:18:28",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "debug_test_1758399507953",
+        "prompt": "안녕하세요, 제 이름은 홍길동이고 연락처는 010-1234-5678입니다. 서울 강남구에 살고 있습니다."
+      },
+      "detection": {
+        "contains_pii": true,
+        "items": [
+          {
+            "type": "이름",
+            "value": "홍길동",
+            "start": 13,
+            "end": 16,
+            "confidence": 0.75,
+            "source": "Pattern",
+            "replacement": "윤가명"
+          },
+          {
+            "type": "전화번호",
+            "value": "010-1234-5678",
+            "start": 24,
+            "end": 37,
+            "confidence": 1.0,
+            "source": "Regex",
+            "replacement": "010-0017-0001"
+          },
+          {
+            "type": "주소",
+            "value": "서울",
+            "start": 42,
+            "end": 44,
+            "confidence": 0.85,
+            "source": "Regex-Pattern3",
+            "replacement": "경남"
+          },
+          {
+            "type": "주소",
+            "value": "강남구",
+            "start": 45,
+            "end": 48,
+            "confidence": 0.85,
+            "source": "Regex-Pattern4",
+            "replacement": "경남"
+          }
+        ],
+        "model_used": "Enhanced NER + Improved Regex + NamePool + FullNamePool"
+      },
+      "substitution_map": {
+        "서울": "경남",
+        "강남구": "경남",
+        "홍길동": "윤가명",
+        "010-1234-5678": "010-0017-0001"
+      },
+      "reverse_map": {
+        "경남": "강남구",
+        "윤가명": "홍길동",
+        "010-0017-0001": "010-1234-5678"
+      },
+      "performance": {
+        "items_detected": 4
+      }
+    },
+    {
+      "time": "2025-09-21 05:21:23",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "debug_test_1758399683740",
+        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다."
+      },
+      "detection": {
+        "contains_pii": true,
+        "items": [
+          {
+            "type": "나이",
+            "value": "25",
+            "start": 5,
+            "end": 8,
+            "confidence": 0.9,
+            "source": "Regex",
+            "replacement": "39"
+          },
+          {
+            "type": "주소",
+            "value": "대구",
+            "start": 10,
+            "end": 12,
+            "confidence": 0.85,
+            "source": "Regex-Pattern3",
+            "replacement": "울산"
+          },
+          {
+            "type": "이메일",
+            "value": "contact@example.com",
+            "start": 28,
+            "end": 47,
+            "confidence": 1.0,
+            "source": "Regex",
+            "replacement": "hello1017@kakao.com"
+          }
+        ],
+        "model_used": "Enhanced NER + Improved Regex + NamePool + FullNamePool"
+      },
+      "substitution_map": {
+        "대구": "울산",
+        "25": "39",
+        "contact@example.com": "hello1017@kakao.com"
+      },
+      "reverse_map": {
+        "울산": "대구",
+        "39": "25",
+        "hello1017@kakao.com": "contact@example.com"
+      },
+      "performance": {
+        "items_detected": 3
+      }
+    },
+    {
+      "time": "2025-09-21 05:21:34",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "debug_test_1758399694235",
+        "prompt": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요."
+      },
+      "detection": {
+        "contains_pii": true,
+        "items": [
+          {
+            "type": "주소",
+            "value": "부산",
+            "start": 9,
+            "end": 11,
+            "confidence": 0.85,
+            "source": "Regex-Pattern3",
+            "replacement": "경기"
+          },
+          {
+            "type": "주소",
+            "value": "해운대구",
+            "start": 12,
+            "end": 16,
+            "confidence": 0.85,
+            "source": "Regex-Pattern4",
+            "replacement": "경기"
+          },
+          {
+            "type": "전화번호",
+            "value": "010-9876-5432",
+            "start": 36,
+            "end": 49,
+            "confidence": 1.0,
+            "source": "Regex",
+            "replacement": "010-0014-0008"
+          }
+        ],
+        "model_used": "Enhanced NER + Improved Regex + NamePool + FullNamePool"
+      },
+      "substitution_map": {
+        "부산": "경기",
+        "해운대구": "경기",
+        "010-9876-5432": "010-0014-0008"
+      },
+      "reverse_map": {
+        "경기": "해운대구",
+        "010-0014-0008": "010-9876-5432"
+      },
+      "performance": {
+        "items_detected": 3
+      }
+    },
+    {
+      "time": "2025-09-21 05:21:41",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "debug_test_1758399701635",
+        "prompt": "안녕하세요, 제 이름은 홍길동이고 연락처는 010-1234-5678입니다. 서울 강남구에 살고 있습니다."
+      },
+      "detection": {
+        "contains_pii": true,
+        "items": [
+          {
+            "type": "이름",
+            "value": "홍길동",
+            "start": 13,
+            "end": 16,
+            "confidence": 0.75,
+            "source": "Pattern",
+            "replacement": "오샘플"
+          },
+          {
+            "type": "전화번호",
+            "value": "010-1234-5678",
+            "start": 24,
+            "end": 37,
+            "confidence": 1.0,
+            "source": "Regex",
+            "replacement": "010-0011-0023"
+          },
+          {
+            "type": "주소",
+            "value": "서울",
+            "start": 42,
+            "end": 44,
+            "confidence": 0.85,
+            "source": "Regex-Pattern3",
+            "replacement": "광주"
+          },
+          {
+            "type": "주소",
+            "value": "강남구",
+            "start": 45,
+            "end": 48,
+            "confidence": 0.85,
+            "source": "Regex-Pattern4",
+            "replacement": "광주"
+          }
+        ],
+        "model_used": "Enhanced NER + Improved Regex + NamePool + FullNamePool"
+      },
+      "substitution_map": {
+        "서울": "광주",
+        "강남구": "광주",
+        "홍길동": "오샘플",
+        "010-1234-5678": "010-0011-0023"
+      },
+      "reverse_map": {
+        "광주": "강남구",
+        "오샘플": "홍길동",
+        "010-0011-0023": "010-1234-5678"
+      },
+      "performance": {
+        "items_detected": 4
+      }
     }
   ]
 }
