@@ -45,8 +45,13 @@ from .detection import (
 # 가명화 치환 (replacement.py)
 from .replacement import (
     ReplacementManager,
+    WorkflowReplacementManager,  # 추가
+    get_workflow_manager,  # 추가
     apply_replacements,
+    apply_tokenization,  # 추가
     restore_text,
+    restore_from_tokens,  # 추가
+    create_detailed_mapping_report,  # 추가
     remove_duplicates
 )
 
@@ -98,8 +103,13 @@ __all__ = [
     
     # 가명화 치환
     'ReplacementManager',
+    'WorkflowReplacementManager',  # 추가
+    'get_workflow_manager',  # 추가
     'apply_replacements',
+    'apply_tokenization',  # 추가
     'restore_text',
+    'restore_from_tokens',  # 추가
+    'create_detailed_mapping_report',  # 추가
     
     # NER 모델
     'load_ner_model',

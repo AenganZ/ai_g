@@ -53,7 +53,7 @@ NAME_EXCLUDE_WORDS = {
 }
 
 class DataPools:
-    """데이터풀 클래스 - CSV 로드 기능 제거"""
+    """데이터풀 클래스 - 전국 시/구 데이터 포함"""
     
     def __init__(self):
         self._initialized = False
@@ -62,18 +62,71 @@ class DataPools:
         self.road_names = set()
         self.companies = set()
         
-        # 지역 데이터
-        self.provinces = {'서울', '부산', '대구', '인천', '광주', '대전', '울산', '세종'}
-        self.cities = {
-            '서울시', '부산시', '대구시', '인천시', '광주시', '대전시', '울산시', '세종시',
-            '수원시', '성남시', '안양시', '부천시', '안산시', '용인시', '평택시', '시흥시'
+        # 전국 지역 데이터 (완전판)
+        self.provinces = {
+            '서울특별시', '부산광역시', '대구광역시', '인천광역시', '광주광역시', '대전광역시', '울산광역시', '세종특별자치시',
+            '경기도', '강원도', '충청북도', '충청남도', '전라북도', '전라남도', '경상북도', '경상남도', '제주특별자치도',
+            '서울', '부산', '대구', '인천', '광주', '대전', '울산', '세종'
         }
+        
+        self.cities = {
+            # 특별시/광역시
+            '서울시', '부산시', '대구시', '인천시', '광주시', '대전시', '울산시', '세종시',
+            
+            # 경기도
+            '수원시', '성남시', '의정부시', '안양시', '부천시', '광명시', '평택시', '동두천시', '안산시', '고양시',
+            '과천시', '구리시', '남양주시', '오산시', '시흥시', '군포시', '의왕시', '하남시', '용인시', '파주시',
+            '이천시', '안성시', '김포시', '화성시', '광주시', '양주시', '포천시', '여주시',
+            
+            # 강원도
+            '춘천시', '원주시', '강릉시', '동해시', '태백시', '속초시', '삼척시',
+            
+            # 충북
+            '청주시', '충주시', '제천시',
+            
+            # 충남
+            '천안시', '공주시', '보령시', '아산시', '서산시', '논산시', '계룡시', '당진시',
+            
+            # 전북
+            '전주시', '군산시', '익산시', '정읍시', '남원시', '김제시',
+            
+            # 전남
+            '목포시', '여수시', '순천시', '나주시', '광양시',
+            
+            # 경북
+            '포항시', '경주시', '김천시', '안동시', '구미시', '영주시', '영천시', '상주시', '문경시', '경산시',
+            
+            # 경남
+            '창원시', '진주시', '통영시', '사천시', '김해시', '밀양시', '거제시', '양산시',
+            
+            # 제주
+            '제주시', '서귀포시'
+        }
+        
         self.districts = {
-            '강남구', '강북구', '강서구', '강동구', '서초구', '송파구', '마포구', '용산구',
-            '종로구', '중구', '동구', '서구', '남구', '북구', '영등포구', '관악구',
-            '성북구', '동대문구', '노원구', '은평구', '서대문구', '금천구', '구로구',
-            '도봉구', '동작구', '성동구', '중랑구', '양천구', '해운대구', '부산진구',
-            '동래구', '남구', '중구', '수성구', '달서구', '달성군'
+            # 서울특별시 25개 구
+            '종로구', '중구', '용산구', '성동구', '광진구', '동대문구', '중랑구', '성북구', '강북구', '도봉구',
+            '노원구', '은평구', '서대문구', '마포구', '양천구', '강서구', '구로구', '금천구', '영등포구', '동작구',
+            '관악구', '서초구', '강남구', '송파구', '강동구',
+            
+            # 부산광역시 16개 구·군
+            '중구', '서구', '동구', '영도구', '부산진구', '동래구', '남구', '북구', '해운대구', '사하구',
+            '금정구', '강서구', '연제구', '수영구', '사상구', '기장군',
+            
+            # 대구광역시 8개 구·군
+            '중구', '동구', '서구', '남구', '북구', '수성구', '달서구', '달성군',
+            
+            # 인천광역시 10개 구·군
+            '중구', '동구', '미추홀구', '연수구', '남동구', '부평구', '계양구', '서구', '강화군', '옹진군',
+            
+            # 광주광역시 5개 구
+            '동구', '서구', '남구', '북구', '광산구',
+            
+            # 대전광역시 5개 구
+            '동구', '중구', '서구', '유성구', '대덕구',
+            
+            # 울산광역시 5개 구·군
+            '중구', '남구', '동구', '북구', '울주군'
         }
         
         # 성씨 데이터
@@ -85,6 +138,12 @@ class DataPools:
         
         # 기본 실명 목록 (확실한 이름들만)
         self._load_basic_names()
+        
+        # 가명 풀 (치환용)
+        self.fake_names = self._generate_fake_names()
+        self.fake_phones = self._generate_fake_phones()
+        self.fake_addresses = self._generate_fake_addresses()
+        self.fake_emails = self._generate_fake_emails()
     
     def _load_basic_names(self):
         """기본 실명 목록 로드 (확실한 이름들만)"""
@@ -105,14 +164,45 @@ class DataPools:
         
         self.real_names = filtered_names
     
+    def _generate_fake_names(self) -> list:
+        """가명 이름 생성 (김가명, 이가명 형태)"""
+        surnames = ['김', '이', '박', '최', '정', '강', '조', '윤', '장', '임']
+        fake_words = ['가명', '익명', '무명', '차명', '별명', '테스트', '샘플', '더미', '임시', '대체']
+        
+        fake_names = []
+        for surname in surnames:
+            for fake_word in fake_words:
+                fake_names.append(surname + fake_word)
+        
+        return fake_names
+    
+    def _generate_fake_phones(self) -> list:
+        """가짜 전화번호 생성 (010-0000-0000부터 1씩 증가)"""
+        fake_phones = []
+        for i in range(10000):
+            fake_phones.append(f"010-{i:04d}-0000")
+        return fake_phones
+    
+    def _generate_fake_addresses(self) -> list:
+        """가짜 주소 생성 (시/도만 표시)"""
+        return ['서울시', '부산시', '대구시', '인천시', '광주시', '대전시', '울산시', '경기도', '강원도', '충북도']
+    
+    def _generate_fake_emails(self) -> list:
+        """가짜 이메일 생성"""
+        fake_emails = []
+        domains = ['example.com', 'test.co.kr', 'sample.net', 'demo.org']
+        for i in range(1000):
+            fake_emails.append(f"user{i:03d}@{domains[i % len(domains)]}")
+        return fake_emails
+    
     def initialize(self, custom_data: Dict = None):
-        """데이터풀 초기화 (CSV 로드 제거)"""
+        """데이터풀 초기화"""
         if self._initialized:
             return
         
         print("데이터풀 초기화 중...")
         
-        # 커스텀 데이터만 추가 (CSV는 사용하지 않음)
+        # 커스텀 데이터만 추가
         if custom_data:
             if 'names' in custom_data:
                 filtered_custom_names = set()
@@ -126,9 +216,10 @@ class DataPools:
         
         print(f"데이터풀 초기화 완료:")
         print(f"  - 실명: {len(self.real_names)}개")
-        print(f"  - 주소: {len(self.real_addresses)}개")
+        print(f"  - 시/도: {len(self.provinces)}개")
+        print(f"  - 시: {len(self.cities)}개") 
+        print(f"  - 구/군: {len(self.districts)}개")
         print(f"  - 제외단어: {len(self.name_exclude_words)}개")
-        print(f"  - 성씨: 단일 {len(self.single_surnames)}개, 복합 {len(self.compound_surnames)}개")
 
 # 전역 인스턴스
 _pools_instance = None
@@ -152,7 +243,7 @@ def reload_pools():
     initialize_pools()
 
 def get_data_pool_stats() -> Dict[str, int]:
-    """데이터풀 통계 정보 - core.py에서 이 함수는 제거됨"""
+    """데이터풀 통계 정보"""
     pools = get_pools()
     return {
         "탐지_이름수": len(pools.real_names),
@@ -160,5 +251,6 @@ def get_data_pool_stats() -> Dict[str, int]:
         "탐지_도로수": len(pools.road_names),
         "탐지_시군구수": len(pools.districts),
         "탐지_시도수": len(pools.provinces),
+        "탐지_시수": len(pools.cities),
         "회사수": len(pools.companies)
     }

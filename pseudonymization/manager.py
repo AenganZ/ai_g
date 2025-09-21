@@ -65,18 +65,16 @@ class PseudonymizationManager:
             # 통계 업데이트
             if use_fake:
                 self.stats['fake_mode_requests'] += 1
+                print("가명화 모드로 처리 중...")
             else:
                 self.stats['token_mode_requests'] += 1
+                print("토큰화 모드로 처리 중...")
             
             # 가명화 처리
             start_time = time.time()
             
-            if use_fake:
-                print("가명화 모드로 처리 중...")
-                result = pseudonymize_text_with_fake(text, detailed_report)
-            else:
-                print("토큰화 모드로 처리 중...")
-                result = core_pseudonymize_text(text, detailed_report, use_fake=False)
+            # 통합된 함수 사용
+            result = core_pseudonymize_text(text, detailed_report, use_fake=use_fake)
             
             processing_time = time.time() - start_time
             

@@ -22,17 +22,17 @@ __all__ = [
     'create_masked_text'
 ]
 
-def pseudonymize_text(text: str, detailed_report: bool = True, use_fake: bool = False) -> Dict[str, Any]:
+def pseudonymize_text(text: str, detailed_report: bool = True, use_fake: bool = True) -> Dict[str, Any]:
     """
     워크플로우 기반 통합 가명화 함수
     
     Args:
         text: 원본 텍스트
         detailed_report: 상세 리포트 생성 여부
-        use_fake: 가명화 모드 사용 여부
+        use_fake: 가명화 모드 사용 여부 (True: 김가명, False: [PER_0])
         
     Returns:
-        dict: 가명화 결과 (토큰화된 텍스트 포함)
+        dict: 가명화 결과
     """
     start_time = time.time()
     print(f"가명화 시작: {text[:50]}...")
@@ -73,7 +73,7 @@ def pseudonymize_text(text: str, detailed_report: bool = True, use_fake: bool = 
             }
         }
     
-    # 토큰 기반 치환 처리
+    # 치환 처리
     detection_time = time.time() - start_time
     replacement_start = time.time()
     
@@ -81,8 +81,15 @@ def pseudonymize_text(text: str, detailed_report: bool = True, use_fake: bool = 
     token_map = detection['stats']['token_map']
     substitution_map, reverse_map = manager.create_substitution_map(detection['items'], token_map)
     
-    # 텍스트 토큰화
-    tokenized_text = apply_tokenization(text, substitution_map)
+    # 텍스트 치환 (실제 가명으로)
+    if use_fake:
+        pseudonymized_text = apply_tokenization(text, substitution_map)
+        print(f"가명화 결과: {pseudonymized_text}")
+    else:
+        # 토큰화 모드 (기존 방식)
+        token_substitution_map = {original: token_map.get(original, original) for original in substitution_map.keys()}
+        pseudonymized_text = apply_tokenization(text, token_substitution_map)
+        print(f"토큰화 결과: {pseudonymized_text}")
     
     replacement_time = time.time() - replacement_start
     total_time = time.time() - start_time
@@ -93,22 +100,23 @@ def pseudonymize_text(text: str, detailed_report: bool = True, use_fake: bool = 
         mapping_report = create_detailed_mapping_report(substitution_map, reverse_map)
     
     print(f"이전: {text}")
-    print(f"토큰화: {tokenized_text}")
-    print(f"처리 시간: 탐지 {detection_time:.3f}초, 토큰화 {replacement_time:.3f}초, 전체 {total_time:.3f}초")
+    print(f"{'가명화' if use_fake else '토큰화'}: {pseudonymized_text}")
+    print(f"처리 시간: 탐지 {detection_time:.3f}초, 치환 {replacement_time:.3f}초, 전체 {total_time:.3f}초")
     
     # 결과 반환
     result = {
         "original": text,
-        "pseudonymized": tokenized_text,
-        "pseudonymized_text": tokenized_text,
-        "tokenized_text": tokenized_text,
-        "masked_prompt": tokenized_text,
+        "pseudonymized": pseudonymized_text,
+        "pseudonymized_text": pseudonymized_text,
+        "tokenized_text": pseudonymized_text,
+        "masked_prompt": pseudonymized_text,
         "detection": detection,
         "substitution_map": substitution_map,
         "reverse_map": reverse_map,
         "token_map": token_map,
         "mapping_report": mapping_report,
         "processing_time": total_time,
+        "use_fake_mode": use_fake,
         "stats": {
             "detected_items": len(detection['items']),
             "replaced_items": len(substitution_map),
@@ -123,7 +131,7 @@ def pseudonymize_text(text: str, detailed_report: bool = True, use_fake: bool = 
     return result
 
 def pseudonymize_text_with_fake(text: str, detailed_report: bool = True) -> Dict[str, Any]:
-    """가명화 모드로 텍스트 처리 (import 오류 해결용)"""
+    """가명화 모드로 텍스트 처리"""
     return pseudonymize_text(text, detailed_report, use_fake=True)
 
 def restore_original(tokenized_text: str, reverse_map: Dict[str, str]) -> str:

@@ -1,57 +1,88 @@
-# app.py - 모듈화된 완전 버전 (AenganZ Enhanced) - 가명화 모드 기본
+# app.py - FastAPI 기반 (브라우저 익스텐션 호환)
 import os
 import json
 import time
-import threading
+import asyncio
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import List, Optional, Dict, Any
+from concurrent.futures import ThreadPoolExecutor
 
-from flask import Flask, request, jsonify
-from flask_cors import CORS
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 # 가명화 모듈 import
 from pseudonymization.manager import get_manager, is_manager_ready, get_manager_status
-from pseudonymization.core import get_data_pool_stats  # 수정: pools.py → core.py
-from pseudonymization.core import workflow_process_ai_response
+from pseudonymization.core import get_data_pool_stats, workflow_process_ai_response
 from pseudonymization import __version__, __title__, __description__
 
 # 설정
 LOG_FILE = "pseudo-log.json"
 MAX_LOGS = 100
 
-# Flask 설정
-app = Flask(__name__)
-CORS(app)
+# FastAPI 설정
+app = FastAPI(title="GenAI Pseudonymizer", version=__version__, description=__description__)
+app.add_middleware(
+    CORSMiddleware, 
+    allow_origins=["*"], 
+    allow_credentials=True, 
+    allow_methods=["*"], 
+    allow_headers=["*"]
+)
 
 # 전역 변수
 manager = None
 manager_initialized = False
 
-# 로깅 유틸리티
-def append_json_to_file(path: str, new_entry: Dict[str, Any]) -> None:
-    """JSON 엔트리를 로그 파일에 추가"""
-    try:
-        if os.path.exists(path):
-            with open(path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-        else:
-            data = {"logs": []}
-    except:
-        data = {"logs": []}
-    
-    if "logs" not in data or not isinstance(data["logs"], list):
-        data["logs"] = []
-    
-    data["logs"].append(new_entry)
-    
-    # 로그 개수 제한
-    if len(data["logs"]) > MAX_LOGS:
-        data["logs"] = data["logs"][-MAX_LOGS:]
-    
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+# Pydantic 모델들
+class PseudoRequest(BaseModel):
+    prompt: str
+    id: Optional[str] = ""
 
-def initialize_manager():
+class PseudoItem(BaseModel):
+    type: str
+    value: str
+    start: int
+    end: int
+    replacement: str
+    confidence: float
+    source: str
+
+class PseudoResponse(BaseModel):
+    ok: bool
+    original_prompt: str  # 사용자가 보는 원본
+    masked_prompt: str    # LLM이 받는 가명화된 버전
+    mapping: List[PseudoItem]
+    substitution_map: Dict[str, str]
+    reverse_map: Dict[str, str]  # 복구용 맵 (가명 → 원본)
+    detection: Dict[str, Any]
+
+# 로그 관리 함수들
+def load_logs():
+    try:
+        if os.path.exists(LOG_FILE):
+            with open(LOG_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        return {"logs": []}
+    except:
+        return {"logs": []}
+
+def save_logs(logs_data):
+    try:
+        with open(LOG_FILE, 'w', encoding='utf-8') as f:
+            json.dump(logs_data, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"로그 저장 실패: {e}")
+
+def add_log(entry):
+    logs_data = load_logs()
+    logs_data["logs"].append(entry)
+    if len(logs_data["logs"]) > MAX_LOGS:
+        logs_data["logs"] = logs_data["logs"][-MAX_LOGS:]
+    save_logs(logs_data)
+
+# 매니저 초기화
+async def initialize_manager():
     """매니저 초기화"""
     global manager, manager_initialized
     
@@ -60,6 +91,7 @@ def initialize_manager():
         print("가명화: 김가명, 이가명 형태 (기본모드)")
         print("전화번호: 010-0000-0000부터 1씩 증가")
         print("주소: 시/도만 표시")
+        print("이메일: user001@example.com 형태")
         print("서버 시작 중...")
         
         print("가명화매니저 초기화 중...")
@@ -74,9 +106,9 @@ def initialize_manager():
             stats = get_data_pool_stats()
             print("데이터풀 로딩 성공")
             print(f"실명: {stats.get('탐지_이름수', 0):,}개")
-            print(f"주소: {stats.get('탐지_주소수', 0):,}개") 
-            print(f"시군구: {stats.get('탐지_시군구수', 0):,}개")
-            print(f"시도: {stats.get('탐지_시도수', 0):,}개")
+            print(f"시/도: {stats.get('탐지_시도수', 0):,}개")
+            print(f"시: {stats.get('탐지_시수', 0):,}개") 
+            print(f"구/군: {stats.get('탐지_시군구수', 0):,}개")
         except Exception as e:
             print(f"데이터풀 통계 출력 실패: {e}")
         
@@ -88,289 +120,230 @@ def initialize_manager():
         print(f"매니저 초기화 실패: {e}")
         manager_initialized = False
 
-# 백그라운드에서 매니저 초기화
-def start_background_initialization():
-    """백그라운드에서 매니저 초기화"""
-    def init_worker():
-        initialize_manager()
-    
-    init_thread = threading.Thread(target=init_worker, daemon=True)
-    init_thread.start()
+# 서버 시작시 초기화
+@app.on_event("startup")
+async def startup_event():
+    # 백그라운드에서 매니저 초기화
+    executor = ThreadPoolExecutor(max_workers=1)
+    loop = asyncio.get_event_loop()
+    await loop.run_in_executor(executor, lambda: asyncio.run(initialize_manager()))
 
-# API 엔드포인트
+# API 엔드포인트들
+@app.get("/")
+def root():
+    return {
+        "message": "GenAI Pseudonymizer (FastAPI - 브라우저 익스텐션 호환)", 
+        "version": __version__,
+        "framework": "FastAPI",
+        "manager_loaded": manager_initialized,
+        "data_pools": {
+            "전국_시도수": len(get_manager().pools.provinces) if manager_initialized else 0,
+            "전국_시수": len(get_manager().pools.cities) if manager_initialized else 0,
+            "전국_구군수": len(get_manager().pools.districts) if manager_initialized else 0,
+        } if manager_initialized else {}
+    }
 
-@app.route('/health', methods=['GET', 'OPTIONS'])
-def health_check():
-    """서버 상태 확인"""
-    if request.method == "OPTIONS":
-        response = jsonify({"message": "CORS preflight OK"})
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Headers', '*')
-        response.headers.add('Access-Control-Allow-Methods', '*')
-        return response
-        
-    global manager_initialized
-    
-    return jsonify({
-        "status": "ready" if manager_initialized else "initializing",
+@app.get("/health")
+def health():
+    return {
+        "status": "ready" if manager_initialized else "initializing", 
+        "method": "enhanced_address_detection", 
         "manager_ready": manager_initialized,
-        "timestamp": datetime.now().isoformat(),
-        "version": __version__
-    })
+        "timestamp": datetime.now().isoformat()
+    }
 
-@app.route('/stats', methods=['GET', 'OPTIONS'])
+@app.get("/stats")
 def get_stats():
     """데이터풀 통계"""
-    if request.method == "OPTIONS":
-        response = jsonify({"message": "CORS preflight OK"})
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Headers', '*')
-        response.headers.add('Access-Control-Allow-Methods', '*')
-        return response
-        
     try:
         stats = get_data_pool_stats()
-        return jsonify({
+        return {
             "stats": stats,
             "timestamp": datetime.now().isoformat()
-        })
+        }
     except Exception as e:
-        return jsonify({
+        return {
             "error": f"통계 조회 실패: {str(e)}",
             "timestamp": datetime.now().isoformat()
-        }), 500
+        }
 
-@app.route('/pseudonymize', methods=['POST', 'OPTIONS'])
-def pseudonymize():
-    """기존 호환성을 위한 가명화 엔드포인트"""
-    # CORS preflight 요청 처리
-    if request.method == "OPTIONS":
-        response = jsonify({"message": "CORS preflight OK"})
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Headers', '*')
-        response.headers.add('Access-Control-Allow-Methods', '*')
-        return response
-    
+@app.post("/pseudonymize")
+async def pseudonymize(request: PseudoRequest):
+    """가명화 처리 (브라우저 익스텐션 호환)"""
     global manager, manager_initialized
     
     if not manager_initialized or not manager:
-        return jsonify({
+        return {
+            "ok": False,
             "error": "Manager not ready",
-            "message": "가명화 매니저가 초기화되지 않았습니다."
-        }), 503
+            "original_prompt": request.prompt,
+            "masked_prompt": request.prompt,
+            "mapping": [],
+            "substitution_map": {},
+            "reverse_map": {},
+            "detection": {"contains_pii": False, "items": []}
+        }
+    
+    start_time = time.time()
+    
+    print(f"\n" + "="*60)
+    print(f"가명화 요청: {datetime.now().strftime('%H:%M:%S')}")
+    print(f"ID: {request.id}")
+    print(f"원문: {request.prompt}")
     
     try:
-        data = request.get_json()
-        if not data or 'prompt' not in data:
-            return jsonify({"error": "요청에 'prompt' 필드가 필요합니다"}), 400
-        
-        text = data['prompt']
-        detailed_report = data.get('detailed_report', False)
-        request_id = data.get("id", f"pseudo_{int(time.time() * 1000)}_{hash(text) % 100000}")
-        
-        print("============================================================")
-        print(f"가명화 요청: {time.strftime('%H:%M:%S')}")
-        print(f"ID: {request_id}")
-        print(f"원본 텍스트: {text}")
-        
-        start_time = time.time()
-        
         # 가명화 실행
-        result = manager.pseudonymize(text, detailed_report=detailed_report)
+        result = manager.pseudonymize(request.prompt, detailed_report=True)
         
-        processing_time = time.time() - start_time
+        processing_time = int((time.time() - start_time) * 1000)
         
-        print(f"가명화 완료 ({result.get('stats', {}).get('detected_items', 0)}개 항목 탐지)")
-        print("============================================================")
-        
-        # 로그 엔트리 준비
+        # 로그 엔트리 생성 (기존 FastAPI 형식 유지)
         log_entry = {
-            "timestamp": datetime.now().isoformat(),
-            "type": "pseudonymize",
-            "request_id": request_id,
-            "original_text": text,
-            "pseudonymized_text": result.get("pseudonymized", ""),
-            "processing_time": processing_time,
-            "detected_items": result.get("stats", {}).get("detected_items", 0),
-            "success": True
+            "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "remote_addr": "127.0.0.1",  # FastAPI에서는 실제 IP 얻기 복잡함
+            "path": "/pseudonymize",
+            "input": {"id": request.id, "prompt": request.prompt},
+            "detection": {
+                "contains_pii": len(result.get('detection', {}).get('items', [])) > 0, 
+                "items": [
+                    {
+                        "type": item.get('type', ''),
+                        "value": item.get('value', ''),
+                        "start": item.get('start', 0),
+                        "end": item.get('end', 0),
+                        "confidence": item.get('confidence', 0.0),
+                        "source": item.get('source', ''),
+                        "replacement": result.get('substitution_map', {}).get(item.get('value', ''), '')
+                    } for item in result.get('detection', {}).get('items', [])
+                ],
+                "model_used": "NER + Regex + NamePool + AddressPool"
+            },
+            "substitution_map": result.get('substitution_map', {}),
+            "reverse_map": result.get('reverse_map', {}),
+            "performance": {"total_time_ms": processing_time, "items_detected": len(result.get('detection', {}).get('items', []))}
         }
         
-        # 로그 저장
-        append_json_to_file(LOG_FILE, log_entry)
+        add_log(log_entry)
         
-        # 원래 형식의 응답 반환
-        return jsonify({
-            "pseudonymized_text": result.get("pseudonymized", ""),
-            "original_text": text,
-            "detection": result.get("detection", {}),
-            "substitution_map": result.get("substitution_map", {}),
-            "reverse_map": result.get("reverse_map", {}),
-            "processing_time": processing_time,
-            "stats": result.get("stats", {}),
-            "request_id": request_id,
-            "timestamp": datetime.now().isoformat()
-        })
+        print(f"완료 ({processing_time}ms, {len(result.get('detection', {}).get('items', []))}개 탐지)")
+        print(f"복구 맵: {result.get('reverse_map', {})}")
+        print("="*60)
+        
+        # FastAPI 응답 형식으로 변환
+        detection_items = result.get('detection', {}).get('items', [])
+        mapping = []
+        for item in detection_items:
+            if item.get('value') in result.get('substitution_map', {}):
+                mapping.append(PseudoItem(
+                    type=item.get('type', ''),
+                    value=item.get('value', ''),
+                    start=item.get('start', 0),
+                    end=item.get('end', 0),
+                    replacement=result.get('substitution_map', {}).get(item.get('value', ''), ''),
+                    confidence=item.get('confidence', 0.0),
+                    source=item.get('source', '')
+                ))
+        
+        return PseudoResponse(
+            ok=True,
+            original_prompt=request.prompt,    # 사용자가 보는 원본
+            masked_prompt=result.get('pseudonymized_text', request.prompt),  # LLM이 받는 가명화된 버전
+            mapping=mapping,
+            substitution_map=result.get('substitution_map', {}),
+            reverse_map=result.get('reverse_map', {}),   # 복구용 맵
+            detection={
+                "contains_pii": len(detection_items) > 0, 
+                "items": detection_items,
+                "model_used": "NER + Regex + NamePool + AddressPool"
+            }
+        )
         
     except Exception as e:
-        error_msg = str(e)
-        print(f"가명화 처리 오류: {error_msg}")
-        
-        # 오류 로그
-        log_entry = {
-            "timestamp": datetime.now().isoformat(),
-            "type": "pseudonymize_error",
-            "request_id": data.get('id', '') if 'data' in locals() else '',
-            "original_text": data.get('prompt', '') if 'data' in locals() else '',
-            "error": error_msg,
-            "success": False
+        print(f"오류: {e}")
+        return {
+            "ok": False, 
+            "error": str(e), 
+            "original_prompt": request.prompt,
+            "masked_prompt": request.prompt, 
+            "mapping": [], 
+            "substitution_map": {},
+            "reverse_map": {},
+            "detection": {"contains_pii": False, "items": []}
         }
-        append_json_to_file(LOG_FILE, log_entry)
-        
-        return jsonify({
-            "error": f"가명화 처리 중 오류 발생: {error_msg}",
-            "timestamp": datetime.now().isoformat()
-        }), 500
 
-@app.route('/restore', methods=['POST', 'OPTIONS'])
-def restore():
-    """복원 엔드포인트"""
-    # CORS preflight 요청 처리
-    if request.method == "OPTIONS":
-        response = jsonify({"message": "CORS preflight OK"})
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Headers', '*')
-        response.headers.add('Access-Control-Allow-Methods', '*')
-        return response
-        
+@app.post("/restore")
+async def restore(request: dict):
+    """가명화 복원"""
     try:
-        data = request.get_json()
-        if not data or 'pseudonymized_text' not in data or 'reverse_map' not in data:
-            return jsonify({"error": "pseudonymized_text와 reverse_map 필드가 필요합니다"}), 400
+        pseudonymized_text = request.get('pseudonymized_text', '')
+        reverse_map = request.get('reverse_map', {})
         
-        pseudonymized_text = data['pseudonymized_text']
-        reverse_map = data['reverse_map']
+        if not pseudonymized_text or not reverse_map:
+            return {
+                "error": "pseudonymized_text와 reverse_map 필드가 필요합니다"
+            }
         
         start_time = time.time()
         
         # 복원 실행
-        from pseudonymization.core import restore_original
-        restored_text = restore_original(pseudonymized_text, reverse_map)
+        restored_text = workflow_process_ai_response(pseudonymized_text, reverse_map)
         
         processing_time = time.time() - start_time
         
-        return jsonify({
+        return {
             "restored_text": restored_text,
             "processing_time": processing_time,
             "timestamp": datetime.now().isoformat()
-        })
+        }
         
     except Exception as e:
-        return jsonify({
+        return {
             "error": f"복원 처리 중 오류 발생: {str(e)}",
             "timestamp": datetime.now().isoformat()
-        }), 500
+        }
 
-@app.route('/logs', methods=['GET', 'OPTIONS'])
+@app.get("/prompt_logs")
 def get_logs():
-    """로그 조회"""
-    if request.method == "OPTIONS":
-        response = jsonify({"message": "CORS preflight OK"})
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Headers', '*')
-        response.headers.add('Access-Control-Allow-Methods', '*')
-        return response
-        
+    """로그 조회 (브라우저 익스텐션 호환)"""
+    return load_logs()
+
+@app.delete("/prompt_logs")
+def clear_logs():
+    """로그 삭제 (브라우저 익스텐션 호환)"""
     try:
-        limit = request.args.get('limit', 50, type=int)
-        if not os.path.exists(LOG_FILE):
-            return jsonify({
-                "logs": [],
-                "total": 0
-            })
+        save_logs({"logs": []})
+        return {"success": True}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.get("/logs")
+def get_logs_alternative():
+    """로그 조회 (대안 엔드포인트)"""
+    try:
+        logs_data = load_logs()
+        logs = logs_data.get("logs", [])
         
-        with open(LOG_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        
-        logs = data.get("logs", [])
-        total = len(logs)
-        
-        # 최신순으로 정렬하고 제한
-        logs = logs[-limit:] if limit > 0 else logs
+        # 최신순으로 정렬
         logs.reverse()
         
-        return jsonify({
+        return {
             "logs": logs,
-            "total": total,
+            "total": len(logs),
             "returned": len(logs)
-        })
+        }
         
     except Exception as e:
-        return jsonify({
+        return {
             "error": f"로그 조회 중 오류: {str(e)}"
-        }), 500
+        }
 
-@app.route('/', methods=['GET'])
-def index():
-    """기본 페이지"""
-    status = "ready" if manager_initialized else "initializing"
+if __name__ == "__main__":
+    import uvicorn
+    print("GenAI 가명화기 (FastAPI - 브라우저 익스텐션 호환)")
+    print("전국 시/구 데이터 완전 지원")
+    print("이메일 탐지 강화")
+    print("주소 중복 처리 (첫 번째만 치환)")
+    print("가명화: 김가명, 이가명 등 명백한 가명 사용")
+    print("브라우저 익스텐션과 호환됩니다")
     
-    html = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>GenAI 가명화기</title>
-        <meta charset="utf-8">
-        <style>
-            body {{ font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }}
-            .container {{ max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; }}
-            .status {{ padding: 10px 20px; border-radius: 5px; margin: 20px 0; text-align: center; font-weight: bold; }}
-            .ready {{ background: #d4edda; color: #155724; }}
-            .initializing {{ background: #fff3cd; color: #856404; }}
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <h1>GenAI 가명화기 (AenganZ Enhanced)</h1>
-            <p>버전: {__version__}</p>
-            
-            <div class="status {'ready' if status == 'ready' else 'initializing'}">
-                {'서버 준비 완료' if status == 'ready' else '초기화 중...'}
-            </div>
-            
-            <h2>API 엔드포인트</h2>
-            <ul>
-                <li><strong>POST /pseudonymize</strong> - 가명화 (prompt 필드 사용)</li>
-                <li><strong>POST /restore</strong> - 복원</li>
-                <li><strong>GET /health</strong> - 상태 확인</li>
-                <li><strong>GET /stats</strong> - 통계</li>
-                <li><strong>GET /logs</strong> - 로그</li>
-            </ul>
-        </div>
-    </body>
-    </html>
-    """
-    
-    return html
-
-# 서버 시작
-if __name__ == '__main__':
-    print("GenAI 가명화기 (AenganZ Enhanced) 시작")
-    print("=" * 50)
-    
-    # 백그라운드에서 매니저 초기화 시작
-    start_background_initialization()
-    
-    print("Flask 서버 시작 (http://localhost:5000)")
-    
-    # Flask 서버 시작
-    try:
-        app.run(
-            host='0.0.0.0',
-            port=5000,
-            debug=False,
-            threaded=True
-        )
-    except KeyboardInterrupt:
-        print("\n서버 종료")
-    except Exception as e:
-        print(f"서버 시작 실패: {e}")
+    uvicorn.run(app, host="127.0.0.1", port=5000, log_level="info")
