@@ -123,6 +123,36 @@
       },
       "mapping_report": "워크플로우 기반 토큰 매핑 리포트\n==================================================\n\n이름 (4개 항목):\n   • 이영 ↔ [PER_0]\n   • 이영희 ↔ [PER_1]\n   • 이영희님 ↔ [PER_2]\n   • 이시 ↔ [PER_3]\n\n주소 (1개 항목):\n   • 대구 ↔ [LOC_0]\n\n전체: 5개 PII 토큰화됨\n워크플로우 기반 양방향 매핑 완료\n",
       "workflow_ready": true
+    },
+    {
+      "timestamp": "2025-09-22T01:39:12.347978",
+      "type": "pseudonymize",
+      "request_id": "debug_test_1758472752236",
+      "original_text": "안녕하세요, 제 이름은 홍길동이고 연락처는 010-1234-5678입니다. 서울 강남구에 살고 있습니다.",
+      "pseudonymized_text": "안녕하세요, 제 이름은 [PER_0]이고 연락처는 [PHONE_0]입니다. [LOC_0] 강남구에 살고 있습니다.",
+      "processing_time": 0.10604691505432129,
+      "detected_items": 3,
+      "success": true
+    },
+    {
+      "timestamp": "2025-09-22T01:39:40.946295",
+      "type": "pseudonymize",
+      "request_id": "debug_test_1758472780868",
+      "original_text": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요.",
+      "pseudonymized_text": "[PER_0] 고객님, [LOC_0] 해운대구 예약이 확인되었습니다. 문의사항은 [PHONE_0]로 연락 [PER_1].",
+      "processing_time": 0.07178640365600586,
+      "detected_items": 4,
+      "success": true
+    },
+    {
+      "timestamp": "2025-09-22T01:39:47.961857",
+      "type": "pseudonymize",
+      "request_id": "debug_test_1758472787898",
+      "original_text": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
+      "pseudonymized_text": "[PER_1] 25세, [LOC_0] 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
+      "processing_time": 0.059322357177734375,
+      "detected_items": 3,
+      "success": true
     }
   ]
 }

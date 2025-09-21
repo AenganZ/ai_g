@@ -13,7 +13,7 @@ from .pools import get_pools
 def detect_with_regex_fast(text: str) -> List[Dict[str, Any]]:
     """1차: 규칙/정규식 고속 패스 (핵심 패턴만)"""
     
-    print("🚀 1차: 규칙/정규식 고속 패스")
+    print("1차: 규칙/정규식 고속 패스")
     
     items = []
     
@@ -28,7 +28,7 @@ def detect_with_regex_fast(text: str) -> List[Dict[str, Any]]:
             "confidence": 0.95,
             "source": "정규식-이메일"
         })
-        print(f"📧 이메일 탐지: '{match.group()}'")
+        print(f"이메일 탐지: '{match.group()}'")
     
     # 전화번호 (한국식)
     phone_patterns = [
@@ -47,7 +47,7 @@ def detect_with_regex_fast(text: str) -> List[Dict[str, Any]]:
                 "confidence": 0.9,
                 "source": "정규식-전화번호"
             })
-            print(f"📞 전화번호 탐지: '{match.group()}'")
+            print(f"전화번호 탐지: '{match.group()}'")
     
     # 주민등록번호 (부분 마스킹 포함)
     rrn_patterns = [
@@ -65,7 +65,7 @@ def detect_with_regex_fast(text: str) -> List[Dict[str, Any]]:
                 "confidence": 0.98,
                 "source": "정규식-주민등록번호"
             })
-            print(f"🆔 주민등록번호 탐지: '{match.group()}'")
+            print(f"주민등록번호 탐지: '{match.group()}'")
     
     # 신용카드 번호
     card_pattern = r'\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}'
@@ -81,16 +81,16 @@ def detect_with_regex_fast(text: str) -> List[Dict[str, Any]]:
                 "confidence": 0.85,
                 "source": "정규식-신용카드"
             })
-            print(f"💳 신용카드 탐지: '{match.group()}'")
+            print(f"신용카드 탐지: '{match.group()}'")
     
-    print(f"🚀 규칙/정규식 탐지 완료: {len(items)}개")
+    print(f"규칙/정규식 탐지 완료: {len(items)}개")
     
     return items
 
 def detect_names_with_realname_list(text: str) -> List[Dict[str, Any]]:
     """실명 목록 기반 이름 탐지 (제외 단어 체크 추가)"""
     
-    print("👤 실명 목록 기반 이름 탐지")
+    print("실명 목록 기반 이름 탐지")
     
     items = []
     pools = get_pools()
@@ -100,12 +100,12 @@ def detect_names_with_realname_list(text: str) -> List[Dict[str, Any]]:
         if len(name) >= 2:  # 2글자 이상
             # 제외 단어 확인 (추가됨)
             if name in pools.name_exclude_words:
-                print(f"🚫 실명 목록 제외 단어 무시: '{name}'")
+                print(f"실명 목록 제외 단어 무시: '{name}'")
                 continue
             
             # 이름으로 보기 어려운 단어들 필터링 (추가됨)
             if _is_invalid_name(name):
-                print(f"🚫 유효하지 않은 이름 무시: '{name}'")
+                print(f"유효하지 않은 이름 무시: '{name}'")
                 continue
             
             for match in re.finditer(re.escape(name), text):
@@ -117,9 +117,9 @@ def detect_names_with_realname_list(text: str) -> List[Dict[str, Any]]:
                     "confidence": 0.95,
                     "source": "실명목록"
                 })
-                print(f"👤 실명 탐지: '{name}'")
+                print(f"실명 탐지: '{name}'")
     
-    print(f"👤 실명 목록 탐지 완료: {len(items)}개")
+    print(f"실명 목록 탐지 완료: {len(items)}개")
     
     return items
 
@@ -169,7 +169,7 @@ def _is_invalid_name(name: str) -> bool:
 def detect_names_with_patterns(text: str, exclude_names: set = None) -> List[Dict[str, Any]]:
     """패턴 기반 이름 탐지 (중복 방지, 엄격한 필터링)"""
     
-    print("🔍 패턴 기반 이름 탐지")
+    print("패턴 기반 이름 탐지")
     
     items = []
     exclude_names = exclude_names or set()
@@ -187,12 +187,12 @@ def detect_names_with_patterns(text: str, exclude_names: set = None) -> List[Dic
         
         # 제외 단어 확인
         if name in pools.name_exclude_words:
-            print(f"🚫 제외 단어 무시: '{name}'")
+            print(f"제외 단어 무시: '{name}'")
             continue
         
         # 이름으로 보기 어려운 단어들 필터링 (추가됨)
         if _is_invalid_name(name):
-            print(f"🚫 유효하지 않은 패턴 무시: '{name}'")
+            print(f"유효하지 않은 패턴 무시: '{name}'")
             continue
         
         # 성씨 패턴 확인 (더 엄격하게)
@@ -207,16 +207,16 @@ def detect_names_with_patterns(text: str, exclude_names: set = None) -> List[Dic
                     "confidence": 0.8,
                     "source": "패턴-이름"
                 })
-                print(f"🔍 패턴 이름 탐지: '{name}'")
+                print(f"패턴 이름 탐지: '{name}'")
             else:
-                print(f"🚫 실제 이름이 아닌 패턴 무시: '{name}'")
+                print(f"실제 이름이 아닌 패턴 무시: '{name}'")
     
-    print(f"🔍 패턴 이름 탐지 완료: {len(items)}개")
+    print(f"패턴 이름 탐지 완료: {len(items)}개")
     
     return items
 
 def _looks_like_real_name(name: str) -> bool:
-    """실제 이름처럼 보이는지 확인"""
+    """실제 이름처럼 보이는지 확인 (더 엄격한 검사)"""
     
     # 너무 짧거나 긴 경우
     if len(name) < 2 or len(name) > 4:
@@ -226,24 +226,52 @@ def _looks_like_real_name(name: str) -> bool:
     if len(set(name)) == 1:
         return False
     
+    # 지역명으로 끝나는 경우
+    location_endings = ['시', '도', '구', '군', '동', '로', '가', '읍', '면', '리', '에', '에서', '으로', '로']
+    for ending in location_endings:
+        if name.endswith(ending):
+            return False
+    
     # 명사로 끝나는 경우들
-    noun_endings = ['시장', '의원', '사장', '부장', '과장', '팀장', '회장', '사무소', '병원', '학교']
+    noun_endings = ['시장', '의원', '사장', '부장', '과장', '팀장', '회장', '사무소', '병원', '학교', '회사', '고객님', '선생님']
     for ending in noun_endings:
         if name.endswith(ending):
             return False
     
     # 동사/형용사 어미들
-    verb_endings = ['하다', '되다', '있다', '없다', '좋다', '나쁘다', '크다', '작다']
+    verb_endings = ['하다', '되다', '있다', '없다', '좋다', '나쁘다', '크다', '작다', '하고', '하며', '하는', '되는']
     for ending in verb_endings:
         if name.endswith(ending[:2]):  # 어미의 처음 2글자로 체크
             return False
+    
+    # 문법 조사들
+    particle_endings = ['은', '는', '이', '가', '을', '를', '의', '에', '로', '와', '과', '도', '만', '부터', '까지']
+    for particle in particle_endings:
+        if name.endswith(particle):
+            return False
+    
+    # 지역 관련 단어들
+    location_words = {
+        '서울', '부산', '대구', '인천', '광주', '대전', '울산', '경기', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주',
+        '강남구에', '강북구에', '서초구에', '송파구에', '마포구에', '중구에', '동구에', '서구에', '남구에', '북구에'
+    }
+    if name in location_words:
+        return False
+    
+    # 숫자가 포함된 경우
+    if any(char.isdigit() for char in name):
+        return False
+    
+    # 특수문자가 포함된 경우
+    if not name.replace(' ', '').isalpha():
+        return False
     
     return True
 
 def detect_addresses_smart(text: str) -> List[Dict[str, Any]]:
     """스마트 주소 탐지 (첫 번째 주소만 선택)"""
     
-    print("🏠 스마트 주소 탐지")
+    print("스마트 주소 탐지")
     
     items = []
     pools = get_pools()
@@ -262,7 +290,7 @@ def detect_addresses_smart(text: str) -> List[Dict[str, Any]]:
                     "confidence": 0.9,
                     "source": "패턴-주소"
                 })
-                print(f"🗺️ 시/도 탐지: '{province}'")
+                print(f"시/도 탐지: '{province}'")
     
     # 구/군 탐지
     districts = pools.districts
@@ -277,7 +305,7 @@ def detect_addresses_smart(text: str) -> List[Dict[str, Any]]:
                     "confidence": 0.85,
                     "source": "패턴-주소"
                 })
-                print(f"🏘️ 구 탐지: '{district}'")
+                print(f"구 탐지: '{district}'")
     
     # 도시 탐지
     cities = pools.cities
@@ -292,7 +320,7 @@ def detect_addresses_smart(text: str) -> List[Dict[str, Any]]:
                     "confidence": 0.85,
                     "source": "패턴-주소"
                 })
-                print(f"🏙️ 도시 탐지: '{city}'")
+                print(f"도시 탐지: '{city}'")
     
     # 중복 제거 및 정렬
     detected_locations.sort(key=lambda x: x["start"])
@@ -307,13 +335,13 @@ def detect_addresses_smart(text: str) -> List[Dict[str, Any]]:
             unique_locations.append(location)
             used_positions.add(position_key)
     
-    print(f"🏠 주소 중복 제거: {len(detected_locations)}개 → {len(unique_locations)}개")
+    print(f"주소 중복 제거: {len(detected_locations)}개 → {len(unique_locations)}개")
     
     # 첫 번째 주소만 선택
     if unique_locations:
         selected = unique_locations[0]
         items.append(selected)
-        print(f"🏠 선택된 주소: '{selected['value']}'")
+        print(f"선택된 주소: '{selected['value']}'")
     
     return items
 
@@ -321,21 +349,21 @@ def detect_addresses_smart(text: str) -> List[Dict[str, Any]]:
 async def detect_with_ner_async(text: str, timeout: float = 0.08) -> List[Dict[str, Any]]:
     """비동기 NER 탐지 (타임아웃 적용)"""
     
-    print(f"🤖 2차: NER 보강 (타임아웃: {int(timeout*1000)}ms)")
+    print(f"2차: NER 보강 (타임아웃: {int(timeout*1000)}ms)")
     
     try:
         # 타임아웃 적용
         ner_task = asyncio.create_task(_run_ner_detection(text))
         ner_items = await asyncio.wait_for(ner_task, timeout=timeout)
         
-        print(f"🤖 2차 NER 보강 완료: {len(ner_items)}개 탐지")
+        print(f"2차 NER 보강 완료: {len(ner_items)}개 탐지")
         return ner_items
         
     except asyncio.TimeoutError:
-        print(f"🤖 NER 타임아웃 ({int(timeout*1000)}ms) - 정규식만 사용")
+        print(f"NER 타임아웃 ({int(timeout*1000)}ms) - 정규식만 사용")
         return []
     except Exception as e:
-        print(f"🤖 NER 실행 오류: {e}")
+        print(f"NER 실행 오류: {e}")
         return []
 
 async def _run_ner_detection(text: str) -> List[Dict[str, Any]]:
@@ -361,18 +389,18 @@ async def _run_ner_detection(text: str) -> List[Dict[str, Any]]:
                     "confidence": entity['confidence'],
                     "source": "NER"
                 })
-                print(f"🤖 NER 탐지: {entity['type']} = '{entity['value']}' (신뢰도: {entity['confidence']:.2f})")
+                print(f"NER 탐지: {entity['type']} = '{entity['value']}' (신뢰도: {entity['confidence']:.2f})")
         
         return filtered_entities
         
     except Exception as e:
-        print(f"🤖 NER 모델 실행 실패: {e}")
+        print(f"NER 모델 실행 실패: {e}")
         return []
 
 def merge_detections_with_priority(regex_items: List[Dict[str, Any]], ner_items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """탐지 결과 병합 (규칙 우선, 중복 제거)"""
     
-    print("🔄 탐지 결과 병합 (규칙 우선)")
+    print("탐지 결과 병합 (규칙 우선)")
     
     # 위치 기반 중복 체크
     merged_items = []
@@ -403,14 +431,14 @@ def merge_detections_with_priority(regex_items: List[Dict[str, Any]], ner_items:
             merged_items.append(item)
             used_positions.add(position_key)
     
-    print(f"🔄 병합 완료: 규칙 {len(regex_items)}개 + NER {len(ner_items)}개 → {len(merged_items)}개")
+    print(f"병합 완료: 규칙 {len(regex_items)}개 + NER {len(ner_items)}개 → {len(merged_items)}개")
     
     return merged_items
 
 def assign_tokens(items: List[Dict[str, Any]]) -> Dict[str, str]:
     """치환 토큰 할당 ([PER_0], [ORG_0], [LOC_0] 등)"""
     
-    print("🏷️ 치환 토큰 할당")
+    print("치환 토큰 할당")
     
     # 타입별 카운터
     type_counters = {}
@@ -444,9 +472,9 @@ def assign_tokens(items: List[Dict[str, Any]]) -> Dict[str, str]:
         token_map[pii_value] = token
         type_counters[pii_type] += 1
         
-        print(f"🏷️ {pii_value} → {token}")
+        print(f"{pii_value} → {token}")
     
-    print(f"🏷️ 토큰 할당 완료: {len(token_map)}개")
+    print(f"토큰 할당 완료: {len(token_map)}개")
     
     return token_map
 
@@ -454,7 +482,7 @@ def detect_pii_enhanced(text: str) -> Dict[str, Any]:
     """워크플로우 기반 강화된 PII 탐지"""
     
     print("=" * 60)
-    print("🔍 워크플로우 기반 PII 탐지 시작")
+    print("워크플로우 기반 PII 탐지 시작")
     print("=" * 60)
     
     # 1차: 규칙/정규식 고속 패스
@@ -481,7 +509,7 @@ def detect_pii_enhanced(text: str) -> Dict[str, Any]:
         ner_items = loop.run_until_complete(detect_with_ner_async(text, timeout=0.08))
         loop.close()
     except Exception as e:
-        print(f"🤖 NER 비동기 실행 실패: {e}")
+        print(f"NER 비동기 실행 실패: {e}")
         ner_items = []
     
     # 탐지 결과 병합 (규칙 우선)
@@ -491,7 +519,7 @@ def detect_pii_enhanced(text: str) -> Dict[str, Any]:
     token_map = assign_tokens(merged_items)
     
     print("=" * 60)
-    print(f"🎯 최종 탐지 결과: {len(merged_items)}개")
+    print(f"최종 탐지 결과: {len(merged_items)}개")
     for i, item in enumerate(merged_items, 1):
         token = token_map.get(item['value'], '???')
         print(f"#{i} {item['type']}: '{item['value']}' → {token} (신뢰도: {item['confidence']:.2f}, 출처: {item['source']})")
