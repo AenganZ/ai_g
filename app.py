@@ -1,4 +1,4 @@
-# app.py - 모듈화된 완전 버전 (AenganZ Enhanced)
+# app.py - 모듈화된 완전 버전 (AenganZ Enhanced) - 가명화 모드 기본
 import os
 import json
 import time
@@ -11,7 +11,7 @@ from flask_cors import CORS
 
 # 가명화 모듈 import
 from pseudonymization.manager import get_manager, is_manager_ready, get_manager_status
-from pseudonymization.pools import get_pool_stats
+from pseudonymization.pools import get_data_pool_stats
 from pseudonymization.core import workflow_process_ai_response  # 워크플로우 4단계
 from pseudonymization import __version__, __title__, __description__
 
@@ -52,25 +52,26 @@ def append_json_to_file(path: str, new_entry: Dict[str, Any]) -> None:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 def initialize_manager():
-    """매니저 초기화"""
+    """매니저 초기화 (가명화 모드 기본)"""
     global manager, manager_initialized
     
     try:
         print("🚀 워크플로우 기반 GenAI 가명화기 (AenganZ Enhanced)")
         print("🔧 프레임워크: Flask (모듈 버전)")
         print("🧠 탐지 방식: 1차 정규식 + 2차 NER 보강")
-        print("🏷️ 가명화: 토큰 기반 치환")
+        print("🎭 가명화: 김가명, 이가명 형태 (기본모드)")
+        print("📞 전화번호: 010-0000-0000부터 1씩 증가")
+        print("🏠 주소: 시/도만 표시")
         print("🔄 복원: 양방향 매핑")
         print("🌐 서버 시작 중...")
         
-        print("가명화매니저 초기화 중...")
         print("가명화매니저 초기화 중...")
         
         # 데이터풀 로딩
         print("데이터풀 로딩 중...")
         
-        # 매니저 인스턴스 생성
-        manager = get_manager(enable_ner=True)
+        # 매니저 인스턴스 생성 (가명화 모드 기본)
+        manager = get_manager(use_fake_mode=True)  # 가명화 모드 기본 설정
         
         # NER 모델 2차 보강 활성화
         print("🤖 NER 2차 보강 모드 활성화")
@@ -78,18 +79,21 @@ def initialize_manager():
         
         # 데이터풀 통계 출력
         try:
-            stats = get_pool_stats()
+            stats = get_data_pool_stats()
             print("데이터풀 로딩 성공")
-            print(f"탐지 이름: {stats.get('detection_names', 0):,}개")
-            print(f"탐지 도로: {stats.get('detection_roads', 0):,}개")
-            print(f"탐지 시군구: {stats.get('detection_districts', 0):,}개")
-            print(f"탐지 시도: {stats.get('detection_provinces', 0):,}개")
-            print(f"회사: {stats.get('companies', 0):,}개")
+            print(f"실명: {stats.get('탐지_이름수', 0):,}개")
+            print(f"주소: {stats.get('탐지_주소수', 0):,}개") 
+            print(f"시군구: {stats.get('탐지_시군구수', 0):,}개")
+            print(f"시도: {stats.get('탐지_시도수', 0):,}개")
+            print(f"가명 이름: {stats.get('가명_이름수', 0):,}개")
+            print(f"가명 전화: {stats.get('가명_전화수', 0):,}개")
+            print(f"가명 주소: {stats.get('가명_주소수', 0):,}개")
         except Exception as e:
             print(f"데이터풀 통계 출력 실패: {e}")
         
         manager_initialized = True
-        print("가명화매니저 초기화 완료!")
+        print("🎭 가명화매니저 초기화 완료! (가명화 모드)")
+        print("📝 예시: '홍길동' → '김가명', '010-1234-5678' → '010-0000-0000', '서울 강남구' → '서울시'")
         
         return True
         
@@ -115,7 +119,7 @@ def root():
         initialize_manager()
     
     try:
-        stats = get_pool_stats()
+        stats = get_data_pool_stats()
         manager_status = get_manager_status()
     except:
         stats = {}
@@ -127,6 +131,9 @@ def root():
         "description": __description__,
         "framework": "Flask (모듈 버전)",
         "detection_method": "1차 정규식 + 2차 NER 보강 (워크플로우)",
+        "pseudonymization_mode": "가명화 (김가명, 이가명 형태)",
+        "phone_format": "010-0000-0000부터 1씩 증가",
+        "address_format": "시/도만 표시",
         "manager_status": manager_status,
         "data_pools": stats,
         "timestamp": datetime.now().isoformat()
@@ -144,6 +151,7 @@ def health():
     return jsonify({
         "status": "정상",
         "method": "강화된_탐지",
+        "mode": "가명화_기본",
         "ready": is_manager_ready(),
         "manager_initialized": manager_initialized,
         "timestamp": datetime.now().isoformat()
@@ -172,92 +180,111 @@ def pseudonymize():
         text = data["prompt"]
         request_id = data.get("id", f"pseudo_{int(time.time() * 1000)}_{hash(text) % 100000}")
         
+        # 모드 설정 (요청에서 지정 가능, 기본은 가명화)
+        mode = data.get("mode", "fake")  # "fake" 또는 "token"
+        
         # 빈 텍스트 처리
         if not text.strip():
             return jsonify({
                 "pseudonymized_text": text,
-                "tokenized_text": text,  # 워크플로우용
+                "fake_text": text,
+                "tokenized_text": text,
                 "original_text": text,
                 "detection": {"contains_pii": False, "items": []},
                 "substitution_map": {},
                 "reverse_map": {},
-                "token_map": {},  # 워크플로우용
+                "fake_substitution_map": {},
+                "fake_reverse_map": {},
+                "token_map": {},
                 "processing_time": 0,
+                "processing_mode": mode,
                 "workflow_ready": False
             })
+        
+        print("============================================================")
+        print(f"가명화 요청: {time.strftime('%H:%M:%S')}")
+        print(f"ID: {request_id}")
+        print(f"모드: {'가명화' if mode == 'fake' else '토큰화'}")
+        print(f"원본 텍스트: {text}")
         
         # 가명화 실행
         result = manager.pseudonymize(
             text=text, 
-            log_id=request_id, 
-            detailed_report=True
+            detailed_report=True,
+            force_mode=mode
         )
         
-        # 응답 형식 맞춤 (워크플로우용)
+        print(f"가명화 완료 ({result['stats']['detected_items']}개 항목 탐지)")
+        
+        # 응답 형식 맞춤
         response_data = {
-            "pseudonymized_text": result.get("tokenized_text", result.get("pseudonymized_text", text)),  # 토큰화된 텍스트
-            "tokenized_text": result.get("tokenized_text", text),  # 워크플로우 3단계용 (AI로 전송할 텍스트)
+            "pseudonymized_text": result.get("fake_text", result.get("pseudonymized_text", text)),  # 가명화된 텍스트 (기본)
+            "fake_text": result.get("fake_text", text),  # 가명화된 텍스트
+            "tokenized_text": result.get("tokenized_text", text),  # 토큰화된 텍스트 (워크플로우용)
             "original_text": text,  # 원본 텍스트
             "detection": result.get("detection", {"contains_pii": False, "items": []}),
             "substitution_map": result.get("substitution_map", {}),  # 원본 → 토큰
-            "reverse_map": result.get("reverse_map", {}),  # 토큰 → 원본 (복원용)
+            "reverse_map": result.get("reverse_map", {}),  # 토큰 → 원본
+            "fake_substitution_map": result.get("fake_substitution_map", {}),  # 원본 → 가명
+            "fake_reverse_map": result.get("fake_reverse_map", {}),  # 가명 → 원본
             "token_map": result.get("token_map", {}),  # 워크플로우용
+            "mapping_report": result.get("mapping_report", ""),  # 토큰 매핑 리포트
+            "fake_mapping_report": result.get("fake_mapping_report", ""),  # 가명화 매핑 리포트
             "processing_time": result.get("processing_time", 0),
+            "processing_mode": result.get("processing_mode", mode),
+            "workflow_ready": True,
             "stats": result.get("stats", {}),
-            "mapping_report": result.get("mapping_report", ""),
-            "workflow_ready": True  # 워크플로우 준비 완료
+            "timestamp": datetime.now().isoformat()
         }
         
         # 로그 저장
-        log_entry = {
-            "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "remote_addr": request.remote_addr,
-            "path": request.path,
-            "input": {"id": request_id, "prompt": text},
-            **response_data
-        }
+        try:
+            log_entry = {
+                "timestamp": datetime.now().isoformat(),
+                "request_id": request_id,
+                "original_text": text,
+                "pseudonymized_text": response_data["pseudonymized_text"],
+                "fake_text": response_data["fake_text"],
+                "tokenized_text": response_data["tokenized_text"],
+                "mode": mode,
+                "detected_items": len(result.get("detection", {}).get("items", [])),
+                "processing_time": response_data["processing_time"],
+                "stats": response_data["stats"]
+            }
+            
+            append_json_to_file(LOG_FILE, log_entry)
+            print(f"📝 로그 저장됨: {LOG_FILE}")
+            
+        except Exception as e:
+            print(f"로그 저장 실패: {e}")
         
-        append_json_to_file(LOG_FILE, log_entry)
-        
-        # CORS 헤더 추가
-        response = jsonify(response_data)
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
+        return jsonify(response_data)
         
     except Exception as e:
         error_msg = f"가명화 처리 중 오류 발생: {str(e)}"
-        print(f"오류: {error_msg}")
+        print(f"가명화 실패: {error_msg}")
+        
+        # 에러 로그 저장
+        try:
+            error_log = {
+                "timestamp": datetime.now().isoformat(),
+                "request_id": request_id,
+                "error": error_msg,
+                "original_text": text,
+                "type": "error"
+            }
+            append_json_to_file(LOG_FILE, error_log)
+        except:
+            pass
+        
         import traceback
         traceback.print_exc()
         
-        response = jsonify({"error": error_msg})
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response, 500
-
-@app.route("/status", methods=["GET"])
-def status():
-    """시스템 상태 정보"""
-    try:
-        manager_status = get_manager_status()
-        pool_stats = get_pool_stats()
-        
-        response = jsonify({
-            "system": "정상",
-            "manager": manager_status,
-            "pools": pool_stats,
-            "timestamp": datetime.now().isoformat()
-        })
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
-    except Exception as e:
-        response = jsonify({"error": f"상태 조회 실패: {e}"})
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response, 500
+        return jsonify({"error": error_msg}), 500
 
 @app.route("/restore", methods=["POST", "OPTIONS"])
-def restore_ai_response():
+def restore():
     """워크플로우 4단계: AI 응답 복원"""
-    # CORS preflight 요청 처리
     if request.method == "OPTIONS":
         response = jsonify({"message": "CORS preflight OK"})
         response.headers.add('Access-Control-Allow-Origin', '*')
@@ -266,102 +293,135 @@ def restore_ai_response():
         return response
     
     try:
-        # 요청 데이터 파싱
         data = request.get_json()
-        if not data or "ai_response" not in data or "reverse_map" not in data:
-            return jsonify({"error": "요청에 'ai_response'와 'reverse_map' 필드가 필요합니다"}), 400
+        if not data:
+            return jsonify({"error": "요청 데이터가 필요합니다"}), 400
         
-        ai_response = data["ai_response"]
-        reverse_map = data["reverse_map"]
+        ai_response = data.get("ai_response", "")
+        reverse_map = data.get("reverse_map", {})
+        fake_reverse_map = data.get("fake_reverse_map", {})
+        mode = data.get("mode", "fake")  # "fake" 또는 "token"
         
-        # AI 응답 복원
-        restored_response = manager.process_ai_response(ai_response, reverse_map)
+        if not ai_response:
+            return jsonify({"error": "ai_response 필드가 필요합니다"}), 400
         
-        # 응답 데이터
-        response_data = {
-            "ai_response_tokenized": ai_response,  # 토큰화된 AI 응답
-            "ai_response_restored": restored_response,  # 복원된 최종 답변
-            "restoration_successful": True
-        }
+        print("🔄 워크플로우 4단계: AI 응답 복원 시작")
+        print(f"모드: {'가명화 복원' if mode == 'fake' else '토큰 복원'}")
+        print(f"AI 응답: {ai_response[:100]}...")
         
-        # CORS 헤더 추가
-        response = jsonify(response_data)
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
+        if mode == "fake" and fake_reverse_map:
+            # 가명화 복원
+            from pseudonymization.replacement import get_workflow_manager
+            manager_instance = get_workflow_manager()
+            manager_instance.fake_reverse_map = fake_reverse_map
+            restored_response = manager_instance.restore_from_fake(ai_response)
+        else:
+            # 토큰 복원 (기본)
+            restored_response = workflow_process_ai_response(ai_response, reverse_map)
+        
+        print(f"✅ 복원 완료: {restored_response[:100]}...")
+        
+        return jsonify({
+            "restored_response": restored_response,
+            "original_ai_response": ai_response,
+            "restoration_mode": mode,
+            "timestamp": datetime.now().isoformat()
+        })
         
     except Exception as e:
-        error_msg = f"AI 응답 복원 중 오류 발생: {str(e)}"
-        print(f"❌ {error_msg}")
-        
-        response = jsonify({"error": error_msg})
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response, 500
-
-@app.route("/prompt_logs", methods=["GET"])
-def get_logs():
-    """로그 조회"""
-    try:
-        with open(LOG_FILE, "r", encoding="utf-8") as f:
-            raw = f.read()
-        
-        response = app.response_class(
-            response=raw,
-            status=200,
-            mimetype="application/json; charset=utf-8"
-        )
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
-        
-    except FileNotFoundError:
-        empty = {"logs": []}
-        response = app.response_class(
-            response=json.dumps(empty, ensure_ascii=False),
-            status=200,
-            mimetype="application/json; charset=utf-8"
-        )
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
-    except Exception as e:
-        response = jsonify({"error": f"로그 읽기 오류: {e}"})
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response, 500
-
-@app.route("/prompt_logs", methods=["DELETE"])
-def clear_logs():
-    """로그 삭제"""
-    try:
-        with open(LOG_FILE, "w", encoding="utf-8") as f:
-            json.dump({"logs": []}, f, ensure_ascii=False)
-        
-        response = jsonify({"success": True, "message": "로그가 삭제되었습니다"})
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
-    except Exception as e:
-        response = jsonify({"success": False, "error": str(e)})
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response, 500
-
-if __name__ == "__main__":
-    print("🎭 GenAI 가명화기 (AenganZ Enhanced - 모듈 버전)")
-    print("🔧 프레임워크: Flask (모듈화)")
-    print("🧠 탐지 방식: 패턴 + 정규식 + 실명목록")
-    print("📛 가명화: 명확한 가명 대체")
-    print("🔄 복원: 양방향 매핑")
-    print("🌐 서버 시작 중...")
-    
-    # 초기화
-    initialize_manager()
-    
-    try:
-        app.run(
-            host="127.0.0.1",
-            port=5000,
-            debug=True,
-            threaded=True
-        )
-    except KeyboardInterrupt:
-        print("\n👋 서버 종료")
-    except Exception as e:
-        print(f"❌ 서버 시작 실패: {e}")
+        error_msg = f"복원 처리 중 오류 발생: {str(e)}"
+        print(f"복원 실패: {error_msg}")
         import traceback
         traceback.print_exc()
+        
+        return jsonify({"error": error_msg}), 500
+
+@app.route("/stats", methods=["GET", "OPTIONS"])
+def stats():
+    """통계 정보"""
+    if request.method == "OPTIONS":
+        response = jsonify({"message": "CORS preflight OK"})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', '*')
+        response.headers.add('Access-Control-Allow-Methods', '*')
+        return response
+    
+    try:
+        if manager and hasattr(manager, 'get_stats'):
+            manager_stats = manager.get_stats()
+        else:
+            manager_stats = {"error": "매니저가 초기화되지 않았습니다"}
+        
+        pool_stats = get_data_pool_stats()
+        
+        return jsonify({
+            "manager_stats": manager_stats,
+            "pool_stats": pool_stats,
+            "system_info": {
+                "version": __version__,
+                "title": __title__,
+                "description": __description__,
+                "manager_initialized": manager_initialized,
+                "default_mode": "가명화 (김가명, 이가명 형태)"
+            },
+            "timestamp": datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        return jsonify({"error": f"통계 조회 실패: {str(e)}"}), 500
+
+@app.route("/set-mode", methods=["POST", "OPTIONS"])
+def set_mode():
+    """가명화 모드 변경"""
+    if request.method == "OPTIONS":
+        response = jsonify({"message": "CORS preflight OK"})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', '*')
+        response.headers.add('Access-Control-Allow-Methods', '*')
+        return response
+    
+    try:
+        data = request.get_json()
+        if not data or "mode" not in data:
+            return jsonify({"error": "mode 필드가 필요합니다 ('fake' 또는 'token')"}), 400
+        
+        mode = data["mode"]
+        if mode not in ["fake", "token"]:
+            return jsonify({"error": "mode는 'fake' 또는 'token'이어야 합니다"}), 400
+        
+        if manager and hasattr(manager, 'set_fake_mode'):
+            manager.set_fake_mode(mode == "fake")
+            
+        mode_str = "가명화 (김가명, 이가명 형태)" if mode == "fake" else "토큰화 ([PER_0], [LOC_0] 형태)"
+        print(f"🔧 처리 모드 변경: {mode_str}")
+        
+        return jsonify({
+            "message": f"모드가 {mode_str}로 변경되었습니다",
+            "current_mode": mode,
+            "timestamp": datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        return jsonify({"error": f"모드 변경 실패: {str(e)}"}), 500
+
+# ===== 서버 실행 =====
+if __name__ == "__main__":
+    print("=" * 60)
+    print("🚀 GenAI 가명화기 (AenganZ Enhanced) v4.0.0")
+    print("🎭 가명화 모드 기본 설정")
+    print("=" * 60)
+    
+    # 서버 시작 전 초기화
+    initialize_manager()
+    
+    print("🌐 서버 시작...")
+    print("📋 API 엔드포인트:")
+    print("   GET  /           : 서버 정보")
+    print("   GET  /health     : 상태 확인")
+    print("   POST /pseudonymize : 가명화 처리")
+    print("   POST /restore    : AI 응답 복원")
+    print("   GET  /stats      : 통계 정보")
+    print("   POST /set-mode   : 모드 변경")
+    print("=" * 60)
+    
+    app.run(host="0.0.0.0", port=5000, debug=False)

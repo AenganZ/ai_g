@@ -1,6 +1,6 @@
 # pseudonymization/manager.py
 """
-가명화 매니저 - 수정된 버전
+가명화 매니저 - 수정된 버전 (가명화 지원)
 전체 가명화 프로세스 관리 + 한글 로그
 """
 
@@ -8,15 +8,16 @@ import time
 import json
 import os
 from typing import Dict, Any, Optional, List
-from .core import pseudonymize_text as core_pseudonymize_text
+from .core import pseudonymize_text as core_pseudonymize_text, pseudonymize_text_with_fake
 from .model import load_ner_model, is_ner_loaded
 from .pools import get_pools, initialize_pools
 
 class PseudonymizationManager:
-    """가명화 프로세스 전체 관리"""
+    """가명화 프로세스 전체 관리 (가명화 모드 지원)"""
     
-    def __init__(self, enable_ner: bool = True):
+    def __init__(self, enable_ner: bool = True, use_fake_mode: bool = True):
         self.ner_enabled = enable_ner
+        self.use_fake_mode = use_fake_mode  # True: 가명화, False: 토큰화
         self.pools_initialized = False
         self.ner_model_loaded = False
         
@@ -28,10 +29,13 @@ class PseudonymizationManager:
             "processing_times": [],
             "avg_detection_time": 0,
             "avg_replacement_time": 0,
-            "ner_mode_requests": 0
+            "ner_mode_requests": 0,
+            "fake_mode_requests": 0,
+            "token_mode_requests": 0
         }
         
         print("가명화매니저 초기화 중...")
+        print(f"가명화 모드: {'ON (김가명, 이가명 형태)' if use_fake_mode else 'OFF (토큰화)'}")
         self._initialize()
     
     def _initialize(self):
@@ -64,126 +68,151 @@ class PseudonymizationManager:
             print(f"매니저 초기화 실패: {e}")
             raise
     
-    def get_status(self) -> Dict[str, Any]:
-        """매니저 상태 정보"""
-        return {
-            "initialized": self.pools_initialized,
-            "ner_enabled": self.ner_enabled,
-            "ner_loaded": self.ner_model_loaded,
-            "stats": self.stats.copy()
-        }
-    
-    def pseudonymize(self, text: str, log_id: Optional[str] = None, detailed_report: bool = False) -> Dict[str, Any]:
-        """텍스트 가명화 (통합 인터페이스)"""
-        if not text or not text.strip():
-            return {
-                'pseudonymized_text': text,
-                'original_text': text,
-                'detection': {'contains_pii': False, 'items': []},
-                'substitution_map': {},
-                'reverse_map': {},
-                'processing_time': 0,
-                'stats': {'items_by_type': {}, 'detection_stats': {}, 'total_items': 0}
-            }
+    def pseudonymize(self, text: str, detailed_report: bool = True, force_mode: str = None) -> Dict[str, Any]:
+        """
+        텍스트 가명화 처리
         
+        Args:
+            text: 원본 텍스트
+            detailed_report: 상세 리포트 생성 여부
+            force_mode: 강제 모드 ('fake' 또는 'token')
+        """
         try:
-            start_time = time.time()
-            
-            if log_id:
-                print("============================================================")
-                print(f"가명화 요청: {time.strftime('%H:%M:%S')}")
-                print(f"ID: {log_id}")
-                print(f"원본 텍스트: {text}")
-                
-            print(f"가명화 시작: {text[:50]}...")
-            print("PII 탐지 (NER 간소화 + 정규식 중심)")
-            
-            # 핵심 가명화 실행
-            result = core_pseudonymize_text(text, detailed_report=detailed_report)
+            # 모드 결정
+            if force_mode == 'fake':
+                use_fake = True
+            elif force_mode == 'token':
+                use_fake = False
+            else:
+                use_fake = self.use_fake_mode
             
             # 통계 업데이트
+            if use_fake:
+                self.stats['fake_mode_requests'] += 1
+            else:
+                self.stats['token_mode_requests'] += 1
+            
+            # 가명화 처리
+            start_time = time.time()
+            
+            if use_fake:
+                print("🎭 가명화 모드로 처리 중...")
+                result = pseudonymize_text_with_fake(text, detailed_report)
+            else:
+                print("🏷️ 토큰화 모드로 처리 중...")
+                result = core_pseudonymize_text(text, detailed_report, use_fake=False)
+            
             processing_time = time.time() - start_time
-            self.stats["successful_requests"] += 1
-            self.stats["total_pii_detected"] += len(result['detection']['items'])
-            self.stats["processing_times"].append(processing_time)
             
-            if self.ner_enabled:
-                self.stats["ner_mode_requests"] += 1
+            # 통계 업데이트
+            self.stats['successful_requests'] += 1
+            self.stats['total_pii_detected'] += result['stats']['detected_items']
+            self.stats['processing_times'].append(processing_time)
             
-            # 세부 시간 통계
-            if 'detection_time' in result['stats']:
-                if self.stats["avg_detection_time"] == 0:
-                    self.stats["avg_detection_time"] = result['stats']['detection_time']
-                else:
-                    self.stats["avg_detection_time"] = (self.stats["avg_detection_time"] + result['stats']['detection_time']) / 2
+            # 평균 시간 계산
+            if self.stats['processing_times']:
+                avg_time = sum(self.stats['processing_times']) / len(self.stats['processing_times'])
+                self.stats['avg_detection_time'] = avg_time
+                self.stats['avg_replacement_time'] = avg_time
             
-            if 'replacement_time' in result['stats']:
-                if self.stats["avg_replacement_time"] == 0:
-                    self.stats["avg_replacement_time"] = result['stats']['replacement_time']
-                else:
-                    self.stats["avg_replacement_time"] = (self.stats["avg_replacement_time"] + result['stats']['replacement_time']) / 2
+            # 결과에 모드 정보 추가
+            result['processing_mode'] = 'fake' if use_fake else 'token'
+            result['manager_stats'] = self.stats.copy()
             
-            print(f"가명화 완료 ({len(result['detection']['items'])}개 항목 탐지)")
-            
-            # 로그 저장
-            if log_id:
-                self._save_log(log_id, text, result)
+            print(f"✅ 가명화 완료 ({result['stats']['detected_items']}개 항목 탐지)")
             
             return result
             
         except Exception as e:
-            self.stats["failed_requests"] += 1
-            print(f"가명화 실패: {e}")
+            self.stats['failed_requests'] += 1
+            print(f"❌ 가명화 실패: {e}")
             raise
     
-    def _save_log(self, log_id: str, original_text: str, result: Dict[str, Any]):
-        """로그 저장"""
-        try:
-            import json
-            log_entry = {
-                "id": log_id,
-                "timestamp": time.time(),
-                "original_length": len(original_text),
-                "detected_items": len(result['detection']['items']),
-                "processing_time": result['processing_time'],
-                "items_by_type": result['stats']['items_by_type'],
-                "detection_stats": result['stats']['detection_stats'],
-                "ner_enabled": self.ner_enabled
+    def set_fake_mode(self, enabled: bool):
+        """가명화 모드 설정"""
+        self.use_fake_mode = enabled
+        mode_str = "가명화 (김가명, 이가명)" if enabled else "토큰화 ([PER_0], [LOC_0])"
+        print(f"🔧 처리 모드 변경: {mode_str}")
+    
+    def get_stats(self) -> Dict[str, Any]:
+        """통계 정보 반환"""
+        pools = get_pools()
+        
+        return {
+            "매니저_통계": self.stats,
+            "데이터풀_통계": {
+                "실명수": len(pools.real_names),
+                "주소수": len(pools.real_addresses) if hasattr(pools, 'real_addresses') else 0,
+                "시도수": len(pools.provinces),
+                "시군구수": len(pools.districts),
+                "가명_이름수": len(pools.fake_names) if hasattr(pools, 'fake_names') else 0,
+                "가명_전화수": len(pools.fake_phones) if hasattr(pools, 'fake_phones') else 0,
+                "가명_주소수": len(pools.fake_addresses) if hasattr(pools, 'fake_addresses') else 0
+            },
+            "모델_상태": {
+                "NER_로딩됨": self.ner_model_loaded,
+                "데이터풀_초기화됨": self.pools_initialized
+            },
+            "처리_모드": {
+                "현재_모드": "가명화" if self.use_fake_mode else "토큰화",
+                "가명화_요청수": self.stats.get('fake_mode_requests', 0),
+                "토큰화_요청수": self.stats.get('token_mode_requests', 0)
             }
-            
-            with open("pseudo-log.json", "a", encoding="utf-8") as f:
-                f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
-            
-            print("로그 저장됨: pseudo-log.json")
-            
-        except Exception as e:
-            print(f"로그 저장 실패: {e}")
+        }
+    
+    def reset_stats(self):
+        """통계 초기화"""
+        self.stats = {
+            "successful_requests": 0,
+            "failed_requests": 0,
+            "total_pii_detected": 0,
+            "processing_times": [],
+            "avg_detection_time": 0,
+            "avg_replacement_time": 0,
+            "ner_mode_requests": 0,
+            "fake_mode_requests": 0,
+            "token_mode_requests": 0
+        }
+        print("📊 통계 초기화 완료")
 
 # 전역 매니저 인스턴스
-_global_manager = None
+_manager_instance = None
 
-def get_manager(enable_ner: bool = True) -> PseudonymizationManager:
-    """매니저 싱글톤 인스턴스"""
-    global _global_manager
-    if _global_manager is None:
-        _global_manager = PseudonymizationManager(enable_ner=enable_ner)
-    return _global_manager
+def get_manager(use_fake_mode: bool = True) -> PseudonymizationManager:
+    """PseudonymizationManager 싱글톤 인스턴스"""
+    global _manager_instance
+    if _manager_instance is None:
+        _manager_instance = PseudonymizationManager(use_fake_mode=use_fake_mode)
+    return _manager_instance
 
 def is_manager_ready() -> bool:
     """매니저 준비 상태 확인"""
-    global _global_manager
-    if _global_manager is None:
+    try:
+        manager = get_manager()
+        return manager.pools_initialized
+    except:
         return False
-    return _global_manager.pools_initialized
 
 def get_manager_status() -> Dict[str, Any]:
     """매니저 상태 정보"""
-    global _global_manager
-    if _global_manager is None:
-        return {"initialized": False}
-    return _global_manager.get_status()
+    try:
+        if _manager_instance is None:
+            return {"status": "초기화되지_않음"}
+        
+        manager = get_manager()
+        return {
+            "status": "준비됨" if manager.pools_initialized else "초기화중",
+            "ner_enabled": manager.ner_enabled,
+            "ner_loaded": manager.ner_model_loaded,
+            "pools_initialized": manager.pools_initialized,
+            "fake_mode": manager.use_fake_mode,
+            "stats": manager.stats
+        }
+    except Exception as e:
+        return {"status": "오류", "error": str(e)}
 
-def pseudonymize_with_manager(text: str, log_id: Optional[str] = None, detailed_report: bool = False) -> Dict[str, Any]:
-    """매니저를 통한 가명화"""
-    manager = get_manager()
-    return manager.pseudonymize(text, log_id=log_id, detailed_report=detailed_report)
+def pseudonymize_with_manager(text: str, use_fake: bool = True, detailed_report: bool = True) -> Dict[str, Any]:
+    """매니저를 통한 가명화 처리"""
+    manager = get_manager(use_fake_mode=use_fake)
+    force_mode = 'fake' if use_fake else 'token'
+    return manager.pseudonymize(text, detailed_report, force_mode=force_mode)
