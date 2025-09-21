@@ -1,40 +1,93 @@
 # pseudonymization/pools.py
 """
-가명 데이터풀 관리 모듈
-탐지된 PII를 치환할 가명 데이터 관리
-(탐지는 detection.py에서 CSV 파일 활용)
+최적화된 데이터풀 관리 모듈 - 깔끔한 버전
+CSV 데이터 내장 + 명확한 가명화 방식
 """
 
 import os
 import random
 import json
-from typing import List, Dict, Any, Optional
+import time
+from typing import List, Dict, Any, Optional, Set
 
-# ==================== 복합 성씨 ====================
-COMPOUND_SURNAMES = [
-    '남궁', '황보', '제갈', '사공', '선우', '서문', '독고', '동방',
-    '갈', '견', '경', '계', '고', '공', '곽', '구', '국', '궁', '궉', '금',
-    '기', '길', '나', '남', '노', '뇌', '누', '단', '담', '당', '대', '도',
-    '독고', '동', '동방', '두', '라', '랑', '려', '련', '렴', '로', '루', '류'
+# CSV 데이터 내장 (성능 최적화)
+KOREAN_FIRST_NAMES = [
+    # 남성 이름
+    '민준', '서준', '도윤', '예준', '시우', '주원', '하준', '지호', '준서', '건우',
+    '현우', '우진', '선우', '연우', '정우', '성민', '준영', '성현', '지우', '현준',
+    '기현', '민성', '재윤', '시온', '유준', '지한', '도현', '민규', '이준', '이안',
+    '진우', '승우', '윤서', '태현', '민찬', '승현', '준호', '재민', '시현', '지원',
+    '한결', '태윤', '유찬', '승민', '지환', '승현', '지훈', '민수', '현수', '준혁',
+    
+    # 여성 이름
+    '서연', '서윤', '지우', '서현', '민서', '하은', '예은', '소율', '지민', '윤서',
+    '하윤', '채원', '지원', '수빈', '다은', '예린', '시은', '소은', '유나', '예나',
+    '채은', '아린', '수아', '연우', '가은', '나은', '혜원', '세은', '아윤', '가윤',
+    '지아', '서아', '하린', '수연', '예원', '유진', '지현', '수민', '유은', '서율',
+    '예서', '지윤', '하율', '채윤', '예진', '서진', '하서', '윤아', '채연', '유주',
+    
+    # 전통/일반 이름
+    '철수', '영희', '순자', '영자', '정자', '미자', '혜자', '옥자', '금자', '순이',
+    '영호', '정호', '성호', '민호', '진호', '기호', '태호', '용호', '석호', '동호',
+    '성민', '현민', '준민', '진민', '태민', '윤민', '수민', '도민', '재민', '기민',
+    '영미', '정미', '수미', '은미', '혜미', '지미', '선미', '경미', '남미', '귀미',
+    '영수', '정수', '민수', '현수', '진수', '기수', '태수', '용수', '석수', '동수'
 ]
 
-# ==================== 단일 성씨 ====================
+# 주소 데이터 내장
+MAJOR_ADDRESSES = {
+    'provinces': [
+        '서울특별시', '부산광역시', '대구광역시', '인천광역시', '광주광역시', 
+        '대전광역시', '울산광역시', '세종특별자치시', '경기도', '강원도',
+        '충청북도', '충청남도', '전라북도', '전라남도', '경상북도', '경상남도', 
+        '제주특별자치도'
+    ],
+    
+    'districts': [
+        # 서울
+        '강남구', '서초구', '송파구', '강동구', '마포구', '용산구', '종로구', '중구',
+        '강서구', '양천구', '구로구', '금천구', '영등포구', '동작구', '관악구',
+        '서대문구', '은평구', '노원구', '도봉구', '강북구', '성북구', '중랑구',
+        '동대문구', '성동구', '광진구',
+        
+        # 부산
+        '해운대구', '부산진구', '동래구', '사하구', '연제구', '수영구', '남구',
+        '북구', '강서구', '사상구', '금정구', '영도구', '중구', '서구', '동구',
+        
+        # 경기도 주요 시
+        '수원시', '성남시', '고양시', '용인시', '부천시', '안산시', '안양시',
+        '남양주시', '화성시', '평택시', '의정부시', '파주시', '시흥시', '김포시'
+    ],
+    
+    'roads': [
+        # 서울 주요 도로
+        '테헤란로', '강남대로', '논현로', '봉은사로', '도산대로', '압구정로',
+        '청담로', '삼성로', '선릉로', '언주로', '영동대로', '한남대로',
+        '이태원로', '한강대로', '여의대로', '마포대로', '홍익로', '연세로',
+        '종로', '을지로', '퇴계로', '남대문로', '세종대로', '동대문로',
+        
+        # 부산 주요 도로
+        '해운대로', '중앙대로', '수영로', '광안해변로', '달맞이길', '동백로',
+        
+        # 기타 도시 주요 도로
+        '동성로', '명덕로', '달구벌대로',  # 대구
+        '충장로', '금남로', '무등로',  # 광주
+        '대전로', '둔산대로', '유성대로'  # 대전
+    ]
+}
+
+# 성씨 데이터
 SINGLE_SURNAMES = [
     '김', '이', '박', '최', '정', '강', '조', '윤', '장', '임',
     '한', '오', '서', '신', '권', '황', '안', '송', '류', '전',
-    '홍', '고', '문', '양', '손', '배', '백', '허', '유', '남',
-    '심', '노', '하', '곽', '성', '차', '주', '우', '구', '민'
+    '홍', '고', '문', '양', '손', '배', '백', '허', '유', '남'
 ]
 
-# ==================== 가명용 기본 데이터 ====================
-# 가명 생성에 사용할 단어들
-FAKE_KEYWORDS = [
-    '테스트', '가명', '익명', '무명', '사용자', '샘플', '더미', '임시'
+COMPOUND_SURNAMES = [
+    '남궁', '황보', '제갈', '사공', '선우', '서문', '독고', '동방'
 ]
 
-
-
-# ==================== 제외 단어 리스트 (이름으로 오인되는 것들) ====================
+# 제외 단어 리스트
 NAME_EXCLUDE_WORDS = {
     # 호칭/직책
     '고객', '회원', '사용자', '관리자', '직원', '담당자', '매니저', '대표',
@@ -50,344 +103,195 @@ NAME_EXCLUDE_WORDS = {
     
     # 행동/상태
     '예약', '문의', '확인', '취소', '변경', '신청', '접수', '처리',
-    '거주', '근무', '방문', '이용', '가입', '탈퇴', '참석', '참여'
+    '거주', '근무', '방문', '이용', '가입', '탈퇴', '참석', '참여',
+    
+    # 일반 명사
+    '이름', '성명', '실명', '가명', '별명', '닉네임',
+    '문제', '상황', '일정', '계획', '방법', '결과', '과정'
 }
 
-# ==================== 주소 데이터 ====================
-# 시/도
-PROVINCES = [
-    '서울', '부산', '대구', '인천', '광주', '대전', '울산', '세종',
-    '경기', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'
-]
-
-# 시/군/구
-DISTRICTS = [
-    '강남구', '서초구', '송파구', '강동구', '마포구', '용산구', '종로구', '중구',
-    '해운대구', '부산진구', '동래구', '사하구', '남동구', '부평구', '계양구',
-    '수원시', '성남시', '고양시', '용인시', '부천시', '안산시', '안양시',
-    '남양주시', '화성시', '평택시', '의정부시', '파주시', '시흥시'
-]
-
-# 동/읍/면
-NEIGHBORHOODS = [
-    '역삼동', '삼성동', '청담동', '논현동', '신사동', '압구정동', '대치동',
-    '도곡동', '개포동', '일원동', '수서동', '세곡동', '자곡동', '율현동',
-    '서초동', '반포동', '방배동', '양재동', '우면동', '원지동', '잠원동',
-    '명동', '을지로', '충무로', '회현동', '남대문로', '북창동', '다동'
-]
-
-# ==================== 회사 데이터 ====================
-COMPANIES = [
-    # IT/테크
-    '삼성전자', 'LG전자', 'SK하이닉스', '네이버', '카카오', '쿠팡', '배달의민족',
-    '토스', '당근마켓', '야놀자', '컬리', '무신사', '지그재그', '에이블리',
-    
-    # 대기업
-    '현대자동차', '기아', '포스코', '현대중공업', 'LG화학', 'SK이노베이션',
-    '롯데그룹', '한화그룹', 'GS그룹', 'CJ그룹', '두산그룹', '한진그룹',
-    
-    # 금융
-    'KB국민은행', '신한은행', '하나은행', '우리은행', '삼성증권', '미래에셋',
-    
-    # 유통/소비재
-    '신세계', '롯데백화점', '현대백화점', '이마트', '홈플러스', '롯데마트',
-    'CU', 'GS25', '세븐일레븐', '이디야커피', '스타벅스코리아', '맥도날드'
-]
-
-# ==================== 데이터풀 클래스 ====================
-class DataPools:
-    """데이터풀 관리 클래스"""
+class PseudonymGenerator:
+    """명확한 가명 생성기"""
     
     def __init__(self):
-        self.names = []
-        self.fake_names = []
-        self.emails = []
-        self.phones = []
-        self.addresses = []
-        self.companies = []
+        self.name_counter = 0
+        self.phone_counter = 0
+        self.email_counter = 0
+        
+    def get_fake_name(self) -> str:
+        """김가명1, 이가명2 형식의 가명 생성"""
+        self.name_counter += 1
+        surnames = ['김', '이', '박', '최', '정', '홍', '강', '조']
+        surname = surnames[(self.name_counter - 1) % len(surnames)]
+        return f"{surname}가명{self.name_counter}"
+    
+    def get_fake_phone(self) -> str:
+        """010-0000-0000부터 순차 증가"""
+        self.phone_counter += 1
+        last_four = f"{self.phone_counter:04d}"
+        return f"010-0000-{last_four}"
+    
+    def get_fake_email(self) -> str:
+        """Pseudonymization1@gamyeong.com 형식"""
+        self.email_counter += 1
+        return f"Pseudonymization{self.email_counter}@gamyeong.com"
+    
+    def get_simplified_address(self, original_address: str) -> str:
+        """주소 간소화: 시/군/구만 추출"""
+        # 시/도 우선 추출
+        for province in MAJOR_ADDRESSES['provinces']:
+            province_short = province.replace('특별시', '시').replace('광역시', '시').replace('특별자치시', '시').replace('도', '').replace('특별자치', '')
+            if province_short in original_address:
+                return province_short
+        
+        # 시/군/구 추출  
+        for district in MAJOR_ADDRESSES['districts']:
+            if district in original_address:
+                if '시' in district:
+                    return district
+                else:
+                    cities = ['대전', '대구', '부산', '인천', '광주', '수원', '성남']
+                    city = random.choice(cities)
+                    return f"{city}시"
+        
+        # 기본값
+        default_cities = ['서울시', '부산시', '대구시', '인천시', '광주시', '대전시']
+        return random.choice(default_cities)
+
+class DataPools:
+    """최적화된 데이터풀 (CSV 내장)"""
+    
+    def __init__(self):
+        # 탐지용 데이터
+        self.real_names: Set[str] = set()
+        self.real_addresses: Set[str] = set()
+        self.road_names: Set[str] = set()
+        self.districts: Set[str] = set()
+        self.provinces: Set[str] = set()
+        
+        # 가명화용 생성기
+        self.generator = PseudonymGenerator()
+        
+        # 기타 데이터
+        self.companies: List[str] = []
+        
         self._initialized = False
     
-    def initialize(self, custom_data: Dict[str, List[str]] = None):
-        """데이터풀 초기화 (가명 생성용만)"""
-        print("📂 가명 데이터풀 초기화 중...")
+    def initialize(self, custom_data: Dict = None):
+        """초고속 초기화 (CSV 파일 없이)"""
+        if self._initialized:
+            return
         
-        # 1. 가명용 이름 생성 (실제 이름이 아닌 가짜 이름)
-        self.names = self._generate_fake_full_names()
+        print("Fast data pool initialization (CSV embedded)...")
+        start_time = time.time()
         
-        # 2. 가명 이름 생성 (익명001 등)
-        self.fake_names = self._generate_fake_names()
+        # 탐지용 이름 생성
+        self._generate_detection_names()
         
-        # 3. 이메일 생성
-        self.emails = self._generate_emails()
+        # 탐지용 주소 데이터 준비
+        self._prepare_address_data()
         
-        # 4. 전화번호 생성
-        self.phones = self._generate_phones()
+        # 기타 데이터 생성
+        self._generate_company_data()
         
-        # 5. 간소화된 주소 생성 (시/도 위주)
-        self.addresses = self._generate_simple_addresses()
-        
-        # 6. 회사명
-        self.companies = COMPANIES.copy()
-        
-        # 7. 커스텀 데이터 추가
+        # 커스텀 데이터 적용
         if custom_data:
-            self._add_custom_data(custom_data)
+            self._apply_custom_data(custom_data)
         
         self._initialized = True
-        self._print_stats()
+        
+        init_time = time.time() - start_time
+        print(f"Fast data pool initialization completed! ({init_time:.3f}s)")
+            
+        print(f"Detection names: {len(self.real_names):,}")
+        print(f"Detection roads: {len(self.road_names):,}")
+        print(f"Detection districts: {len(self.districts):,}")
+        print(f"Detection provinces: {len(self.provinces):,}")
+        print(f"Companies: {len(self.companies):,}")
     
-    def _generate_fake_full_names(self) -> List[str]:
-        """가명용 전체 이름 생성 (치환용)"""
-        fake_full_names = []
+    def _generate_detection_names(self):
+        """탐지용 이름 생성 (모든 성씨 + 이름 조합)"""
+        all_surnames = SINGLE_SURNAMES + COMPOUND_SURNAMES
         
-        # 테스트용 유명인 이름들 (가명으로 사용)
-        fake_full_names.extend([
-            '홍길동', '김철수', '이영희', '박민수', '최지은',
-            '정대한', '강미나', '조현우', '윤서연', '장동건'
-        ])
-        
-        # 성씨 + 가명 조합
-        for surname in SINGLE_SURNAMES[:10]:  # 주요 성씨만
-            fake_full_names.extend([
-                surname + '테스트',
-                surname + '유저',
-                surname + '샘플'
-            ])
-        
-        return fake_full_names
+        for surname in all_surnames:
+            for first_name in KOREAN_FIRST_NAMES:
+                full_name = surname + first_name
+                if 2 <= len(full_name) <= 4:
+                    if full_name not in NAME_EXCLUDE_WORDS and first_name not in NAME_EXCLUDE_WORDS:
+                        self.real_names.add(full_name)
     
-    def _generate_simple_addresses(self) -> List[str]:
-        """간소화된 주소 생성 (시/도 위주)"""
-        addresses = []
+    def _prepare_address_data(self):
+        """탐지용 주소 데이터 준비"""
+        # 시/도
+        for province in MAJOR_ADDRESSES['provinces']:
+            short_name = province.replace('특별시', '').replace('광역시', '').replace('특별자치시', '').replace('도', '').replace('특별자치', '')
+            self.provinces.add(short_name)
+            self.real_addresses.add(short_name)
         
-        # 시/도만 (간소화)
-        addresses.extend(PROVINCES)
+        # 시/군/구
+        for district in MAJOR_ADDRESSES['districts']:
+            self.districts.add(district)
+            self.real_addresses.add(district)
         
-        # 주요 도시 + 구 (몇 개만)
-        addresses.extend([
-            '서울 강남구', '서울 서초구', '서울 송파구',
-            '부산 해운대구', '부산 부산진구',
-            '대구 중구', '인천 남동구'
-        ])
+        # 도로명
+        for road in MAJOR_ADDRESSES['roads']:
+            self.road_names.add(road)
+            self.real_addresses.add(road)
         
-        return addresses
+        # 조합 주소 생성
+        for province in ['서울', '부산', '대구', '인천', '광주', '대전']:
+            for district in random.sample(MAJOR_ADDRESSES['districts'][:20], 5):
+                self.real_addresses.add(f"{province} {district}")
     
-    def _generate_fake_names(self) -> List[str]:
-        """익명 이름 생성 (익명001 형태)"""
-        fake_names = []
+    def _generate_company_data(self):
+        """회사 데이터 생성"""
+        company_types = ['전자', '기술', '시스템', '솔루션', '서비스', '컴퍼니', '그룹', '코퍼레이션']
+        company_prefixes = ['한국', '동아', '대한', '신한', '우리', '하나', '국민', '삼성', 'LG', 'SK']
         
-        # 성씨 + 가명 키워드 (3글자)
-        for surname in SINGLE_SURNAMES[:20]:  # 주요 성씨만
-            for keyword in FAKE_KEYWORDS:
-                if len(keyword) == 2:
-                    fake_names.append(surname + keyword)
-                elif len(keyword) == 3:
-                    fake_names.append(surname + keyword[:2])
-        
-        # 특수 가명
-        fake_names.extend(['홍길동', '김철수', '이영희', '박민수'])
-        fake_names.extend(['A씨', 'B씨', 'C씨', 'X님', 'Y님', 'Z님'])
-        
-        # 익명001 형태
-        for i in range(1, 21):
-            fake_names.append(f'익명{i:03d}')
-            fake_names.append(f'사용자{i:03d}')
-        
-        return fake_names
+        for prefix in company_prefixes:
+            for type_name in company_types:
+                self.companies.append(f"{prefix}{type_name}")
     
-    def _generate_emails(self) -> List[str]:
-        """이메일 주소 생성"""
-        domains = ['gmail.com', 'naver.com', 'daum.net', 'kakao.com', 'hanmail.net']
-        prefixes = ['user', 'test', 'sample', 'demo', 'mail', 'info']
-        
-        emails = []
-        for i in range(100):
-            prefix = random.choice(prefixes)
-            number = random.randint(1000, 9999)
-            domain = random.choice(domains)
-            emails.append(f"{prefix}{number}@{domain}")
-        
-        return emails
-    
-    def _generate_phones(self) -> List[str]:
-        """전화번호 생성"""
-        phones = []
-        
-        # 010 번호 (주요)
-        for i in range(100):
-            middle = random.randint(0, 9999)
-            last = random.randint(0, 9999)
-            phones.append(f"010-{middle:04d}-{last:04d}")
-        
-        # 다른 번호
-        prefixes = ['011', '016', '017', '018', '019']
-        for prefix in prefixes:
-            for i in range(5):
-                middle = random.randint(0, 9999)
-                last = random.randint(0, 9999)
-                phones.append(f"{prefix}-{middle:04d}-{last:04d}")
-        
-        return phones
-    
-
-    
-    def _add_custom_data(self, custom_data: Dict[str, List[str]]):
-        """커스텀 데이터 추가"""
+    def _apply_custom_data(self, custom_data: Dict):
+        """커스텀 데이터 적용"""
         if 'names' in custom_data:
-            self.names.extend(custom_data['names'])
-        if 'fake_names' in custom_data:
-            self.fake_names.extend(custom_data['fake_names'])
-        if 'emails' in custom_data:
-            self.emails.extend(custom_data['emails'])
-        if 'phones' in custom_data:
-            self.phones.extend(custom_data['phones'])
+            self.real_names.update(custom_data['names'])
         if 'addresses' in custom_data:
-            self.addresses.extend(custom_data['addresses'])
+            self.real_addresses.update(custom_data['addresses'])
         if 'companies' in custom_data:
             self.companies.extend(custom_data['companies'])
-    
-    def _print_stats(self):
-        """통계 출력"""
-        print(f"✅ 가명 데이터풀 초기화 완료")
-        print(f"   📛 가명용 이름: {len(self.names)}개")
-        print(f"   🎭 익명 이름: {len(self.fake_names)}개")
-        print(f"   📧 이메일: {len(self.emails)}개")
-        print(f"   📱 전화번호: {len(self.phones)}개")
-        print(f"   🏠 주소: {len(self.addresses)}개")
-        print(f"   🏢 회사: {len(self.companies)}개")
-    
-    def get_random_name(self) -> str:
-        """랜덤 실제 이름 반환"""
-        return random.choice(self.names) if self.names else "홍길동"
-    
-    def get_random_fake_name(self) -> str:
-        """랜덤 가명 반환"""
-        return random.choice(self.fake_names) if self.fake_names else "익명"
-    
-    def get_random_email(self) -> str:
-        """랜덤 이메일 반환"""
-        return random.choice(self.emails) if self.emails else "user@example.com"
-    
-    def get_random_phone(self) -> str:
-        """랜덤 전화번호 반환"""
-        return random.choice(self.phones) if self.phones else "010-0000-0000"
-    
-    def get_random_address(self) -> str:
-        """랜덤 주소 반환 (간소화된)"""
-        # 주로 시/도 단위로 반환 (간소화)
-        # 먼저 시/도만 있는 것 찾기
-        simple_addresses = [addr for addr in self.addresses 
-                          if addr in PROVINCES or len(addr.split()) == 1]
-        
-        if simple_addresses:
-            return random.choice(simple_addresses)
-        
-        # 없으면 시/도 + 시/군/구 형태
-        two_part_addresses = [addr for addr in self.addresses 
-                             if len(addr.split()) == 2]
-        
-        if two_part_addresses:
-            return random.choice(two_part_addresses)
-        
-        # 그것도 없으면 아무거나
-        return random.choice(self.addresses) if self.addresses else "서울"
-    
-    def get_random_company(self) -> str:
-        """랜덤 회사명 반환"""
-        return random.choice(self.companies) if self.companies else "테스트회사"
-    
-    def is_excluded_name(self, text: str) -> bool:
-        """제외할 이름인지 확인"""
-        return text in NAME_EXCLUDE_WORDS
-    
-    def save_to_file(self, filepath: str = "pools_backup.json"):
-        """데이터풀을 파일로 저장"""
-        data = {
-            "names": self.names,
-            "fake_names": self.fake_names,
-            "emails": self.emails,
-            "phones": self.phones,
-            "addresses": self.addresses,
-            "companies": self.companies
-        }
-        
-        with open(filepath, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
-        print(f"📁 데이터풀 저장됨: {filepath}")
-    
-    def load_from_file(self, filepath: str = "pools_backup.json"):
-        """파일에서 데이터풀 로드"""
-        if os.path.exists(filepath):
-            with open(filepath, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-            
-            self.names = data.get('names', [])
-            self.fake_names = data.get('fake_names', [])
-            self.emails = data.get('emails', [])
-            self.phones = data.get('phones', [])
-            self.addresses = data.get('addresses', [])
-            self.companies = data.get('companies', [])
-            
-            self._initialized = True
-            print(f"📂 데이터풀 로드됨: {filepath}")
-            self._print_stats()
-        else:
-            print(f"⚠️ 파일 없음: {filepath}")
-            self.initialize()
 
-# ==================== 전역 인스턴스 ====================
-_pools_instance = None
+# 전역 인스턴스
+_global_pools = None
 
 def get_pools() -> DataPools:
-    """데이터풀 싱글톤 인스턴스 반환"""
-    global _pools_instance
-    
-    if _pools_instance is None:
-        _pools_instance = DataPools()
-        _pools_instance.initialize()
-    
-    return _pools_instance
+    """데이터풀 싱글톤 인스턴스"""
+    global _global_pools
+    if _global_pools is None:
+        _global_pools = DataPools()
+        _global_pools.initialize()
+    return _global_pools
 
-def initialize_pools(custom_data: Dict[str, List[str]] = None):
+def initialize_pools(custom_data: Dict = None):
     """데이터풀 초기화"""
-    pools = get_pools()
-    if not pools._initialized:
-        pools.initialize(custom_data)
+    global _global_pools
+    _global_pools = DataPools()
+    _global_pools.initialize(custom_data)
 
 def reload_pools():
     """데이터풀 재로드"""
-    global _pools_instance
-    _pools_instance = DataPools()
-    _pools_instance.initialize()
-    print("🔄 데이터풀 재로드 완료")
+    global _global_pools
+    _global_pools = None
+    get_pools()
 
-# ==================== 테스트 ====================
-if __name__ == "__main__":
-    print("🎭 가명 데이터풀 모듈 테스트")
-    print("=" * 60)
-    
-    # 초기화
+def get_pool_stats() -> Dict[str, int]:
+    """데이터풀 통계"""
     pools = get_pools()
-    
-    print("\n📝 가명 생성 샘플:")
-    print(f"   가명 이름: {pools.get_random_name()}")
-    print(f"   익명 이름: {pools.get_random_fake_name()}")
-    print(f"   가짜 이메일: {pools.get_random_email()}")
-    print(f"   가짜 전화번호: {pools.get_random_phone()}")
-    print(f"   대체 주소: {pools.get_random_address()}")
-    print(f"   대체 회사: {pools.get_random_company()}")
-    
-    # 복합 성씨 가명 테스트
-    print("\n🏛️ 복합 성씨 가명 예시:")
-    compound_fake_names = [name for name in pools.fake_names 
-                          if any(name.startswith(s) for s in COMPOUND_SURNAMES)]
-    if compound_fake_names:
-        print(f"   {compound_fake_names[:5]}")
-    else:
-        print("   복합 성씨 가명 없음")
-    
-    # 제외 단어 테스트
-    print("\n🚫 제외 단어 테스트:")
-    test_words = ["김철수", "고객", "사용자", "홍길동"]
-    for word in test_words:
-        print(f"   '{word}' 제외?: {pools.is_excluded_name(word)}")
+    return {
+        "detection_names": len(pools.real_names),
+        "detection_addresses": len(pools.real_addresses),
+        "detection_roads": len(pools.road_names),
+        "detection_districts": len(pools.districts),
+        "detection_provinces": len(pools.provinces),
+        "companies": len(pools.companies)
+    }

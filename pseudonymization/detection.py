@@ -1,294 +1,202 @@
 # pseudonymization/detection.py
 """
-PII 탐지 모듈
-CSV 파일(name.csv, address_road.csv)을 활용한 정확한 탐지
+PII 탐지 모듈 - 깔끔한 버전
+NER 간소화 + Regex 중심
 """
 
-import os
 import re
 from typing import List, Dict, Any, Set
-from .pools import get_pools, COMPOUND_SURNAMES, SINGLE_SURNAMES
+from .pools import get_pools, NAME_EXCLUDE_WORDS
 
-# ==================== CSV 데이터 로더 ====================
-class DetectionData:
-    """탐지용 데이터 관리"""
-    
-    def __init__(self):
-        self.real_names: Set[str] = set()  # name.csv에서 로드한 실제 이름들
-        self.real_addresses: Set[str] = set()  # address_road.csv에서 로드한 실제 주소들
-        self.road_names: Set[str] = set()  # 도로명만
-        self.districts: Set[str] = set()  # 시군구만
-        self._loaded = False
-    
-    def load(self):
-        """CSV 파일에서 탐지용 데이터 로드"""
-        if self._loaded:
-            return
-        
-        print("🔍 탐지용 데이터 로딩 중...")
-        
-        # name.csv 로드
-        self._load_names()
-        
-        # address_road.csv 로드
-        self._load_addresses()
-        
-        self._loaded = True
-        print(f"✅ 탐지 데이터 로드 완료 (이름: {len(self.real_names)}개, 주소: {len(self.real_addresses)}개)")
-    
-    def _load_names(self):
-        """name.csv에서 실제 이름 로드"""
-        if not os.path.exists('name.csv'):
-            print("⚠️ name.csv 없음 - 기본 탐지 모드")
-            return
-        
-        try:
-            try:
-                import pandas as pd
-                df = pd.read_csv('name.csv', encoding='utf-8')
-                first_names = df['이름'].tolist()
-                
-                # 성씨와 조합하여 전체 이름 생성 (탐지용)
-                all_surnames = SINGLE_SURNAMES + COMPOUND_SURNAMES
-                
-                for surname in all_surnames:
-                    for first_name in first_names:
-                        full_name = surname + first_name
-                        if 2 <= len(full_name) <= 4:  # 2-4글자만
-                            self.real_names.add(full_name)
-                
-                # 이름만도 추가 (성씨 없이)
-                for first_name in first_names:
-                    if 2 <= len(first_name) <= 3:
-                        self.real_names.add(first_name)
-                
-                print(f"   📛 name.csv: {len(first_names)}개 → {len(self.real_names)}개 이름 조합")
-                
-            except ImportError:
-                import csv
-                with open('name.csv', 'r', encoding='utf-8') as f:
-                    reader = csv.DictReader(f)
-                    for row in reader:
-                        first_name = row['이름']
-                        # 모든 성씨와 조합
-                        for surname in SINGLE_SURNAMES + COMPOUND_SURNAMES:
-                            self.real_names.add(surname + first_name)
-                        # 이름만도 추가
-                        if 2 <= len(first_name) <= 3:
-                            self.real_names.add(first_name)
-                            
-        except Exception as e:
-            print(f"❌ name.csv 로드 실패: {e}")
-    
-    def _load_addresses(self):
-        """address_road.csv에서 실제 주소 로드"""
-        if not os.path.exists('address_road.csv'):
-            print("⚠️ address_road.csv 없음 - 기본 탐지 모드")
-            return
-        
-        try:
-            try:
-                import pandas as pd
-                df = pd.read_csv('address_road.csv', encoding='utf-8')
-                
-                # 도로명
-                road_names = df['도로명'].dropna().unique()
-                self.road_names.update(road_names)
-                
-                # 시도 + 시군구 조합
-                for _, row in df.iterrows():
-                    # 시도만
-                    self.real_addresses.add(row['시도'])
-                    
-                    # 시군구만
-                    if pd.notna(row['시군구']):
-                        self.districts.add(row['시군구'])
-                        
-                        # 시도 + 시군구
-                        self.real_addresses.add(f"{row['시도']} {row['시군구']}")
-                    
-                    # 도로명과 조합
-                    if pd.notna(row['도로명']):
-                        self.real_addresses.add(row['도로명'])
-                        
-                        # 시군구 + 도로명
-                        if pd.notna(row['시군구']):
-                            self.real_addresses.add(f"{row['시군구']} {row['도로명']}")
-                
-                print(f"   🏠 address_road.csv: {len(road_names)}개 도로명, {len(self.real_addresses)}개 주소 조합")
-                
-            except ImportError:
-                import csv
-                with open('address_road.csv', 'r', encoding='utf-8') as f:
-                    reader = csv.DictReader(f)
-                    for row in reader:
-                        if row['시도']:
-                            self.real_addresses.add(row['시도'])
-                        if row['시군구']:
-                            self.districts.add(row['시군구'])
-                            self.real_addresses.add(f"{row['시도']} {row['시군구']}")
-                        if row['도로명']:
-                            self.road_names.add(row['도로명'])
-                            self.real_addresses.add(row['도로명'])
-                            
-        except Exception as e:
-            print(f"❌ address_road.csv 로드 실패: {e}")
-
-# 전역 탐지 데이터 인스턴스
-_detection_data = None
-
-def get_detection_data() -> DetectionData:
-    """탐지 데이터 싱글톤 인스턴스"""
-    global _detection_data
-    if _detection_data is None:
-        _detection_data = DetectionData()
-        _detection_data.load()
-    return _detection_data
-
-# ==================== 정규식 패턴 ====================
-# 이메일
-EMAIL_PATTERN = re.compile(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}')
-
-# 전화번호 (다양한 형식)
+# 정규식 패턴
+EMAIL_PATTERN = re.compile(r'\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b')
 PHONE_PATTERN = re.compile(
     r'(?:010|011|016|017|018|019|02|031|032|033|041|042|043|044|051|052|053|054|055|061|062|063|064)'
     r'[-.\s]?\d{3,4}[-.\s]?\d{4}'
 )
-
-# 나이
+NAME_PATTERN = re.compile(r'([가-힣]{2,4})(님|씨|군|양|이|가|을|를|에게|께서|께|는|은)?')
 AGE_PATTERN = re.compile(r'(\d{1,3})\s*(?:세|살)')
-
-# 주민등록번호
 RRN_PATTERN = re.compile(r'\d{6}[-\s]?\d{7}')
-
-# 신용카드
 CARD_PATTERN = re.compile(r'\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}')
 
-# ==================== PII 탐지 함수 ====================
-def detect_pii_enhanced(text: str) -> Dict[str, Any]:
-    """강화된 PII 탐지 (CSV 데이터 활용)"""
+def detect_with_ner_simple(text: str) -> List[Dict[str, Any]]:
+    """NER 모델 1차 스크리닝 - 가능성 있는 영역 찾기"""
     items = []
-    pools = get_pools()
-    detection_data = get_detection_data()
     
-    print(f"🔍 PII 분석: {text[:50]}...")
+    try:
+        from .model import extract_entities_with_ner, is_ner_loaded
+        
+        if is_ner_loaded():
+            print("NER primary screening (low threshold)")
+            
+            ner_items = extract_entities_with_ner(text)
+            
+            # NER 결과를 1차 스크리닝으로 사용 (낮은 임계값)
+            for item in ner_items:
+                if item['confidence'] > 0.3:  # 낮은 임계값으로 변경
+                    item['confidence'] = 0.6  # 중간 신뢰도로 조정
+                    item['source'] = 'NER-Screen'
+                    items.append(item)
+            
+            print(f"NER screening: {len(items)} potential areas found")
+            
+            # NER가 탐지한 영역 주변의 한국어 패턴도 추가 검색
+            korean_name_hints = []
+            for match in re.finditer(r'([가-힣]{2,4})', text):
+                name_candidate = match.group(1)
+                # 매우 기본적인 필터링만 수행
+                if (len(name_candidate) >= 2 and 
+                    name_candidate not in ['있습니다', '합니다', '입니다', '했습니다']):
+                    korean_name_hints.append({
+                        "type": "이름",
+                        "value": name_candidate,
+                        "start": match.start(),
+                        "end": match.end(),
+                        "confidence": 0.4,  # 낮은 신뢰도
+                        "source": "NER-Hint"
+                    })
+            
+            items.extend(korean_name_hints)
+            print(f"Korean name hints: {len(korean_name_hints)} candidates")
+            
+        else:
+            print("NER model not used (Regex-focused mode)")
+            
+    except Exception as e:
+        print(f"NER screening failed (continuing): {e}")
     
-    # 1. NER 모델 사용
-    ner_items = detect_with_ner(text)
-    items.extend(ner_items)
-    
-    # 2. CSV 기반 이름 탐지 (높은 정확도)
-    name_items = detect_names_from_csv(text, detection_data)
-    items.extend(name_items)
-    
-    # 3. CSV 기반 주소 탐지 (높은 정확도)
-    address_items = detect_addresses_from_csv(text, detection_data)
-    items.extend(address_items)
-    
-    # 4. 정규식 패턴 탐지
-    regex_items = detect_with_regex(text, pools)
-    items.extend(regex_items)
-    
-    # 5. 중복 제거 및 병합
-    unique_items = merge_detections(items)
-    
-    # 6. 결과 반환
-    result = {
-        "contains_pii": len(unique_items) > 0,
-        "items": unique_items,
-        "stats": {
-            "ner": len(ner_items),
-            "csv_names": len(name_items),
-            "csv_addresses": len(address_items),
-            "regex": len(regex_items),
-            "total": len(unique_items)
-        }
-    }
-    
-    print(f"🎯 최종 탐지 결과: {len(unique_items)}개")
-    for idx, item in enumerate(unique_items, 1):
-        print(f"   #{idx} {item['type']}: '{item['value']}' (신뢰도: {item['confidence']:.2f}, 출처: {item['source']})")
-    
-    return result
+    return items
 
-def detect_names_from_csv(text: str, detection_data: DetectionData) -> List[Dict[str, Any]]:
-    """CSV 데이터 기반 이름 탐지 (조사 제거 포함)"""
+def detect_with_regex_enhanced(text: str, pools) -> List[Dict[str, Any]]:
+    """강화된 정규식 탐지 - 실질적 PII 탐지 담당"""
     items = []
     
-    if not detection_data.real_names:
+    print("Enhanced Regex detection (main engine)")
+    
+    # 이메일 탐지
+    for match in EMAIL_PATTERN.finditer(text):
+        items.append({
+            "type": "이메일",
+            "value": match.group(),
+            "start": match.start(),
+            "end": match.end(),
+            "confidence": 1.0,
+            "source": "Regex-Email"
+        })
+        print(f"Email detected: '{match.group()}'")
+    
+    # 전화번호 탐지
+    for match in PHONE_PATTERN.finditer(text):
+        items.append({
+            "type": "전화번호",
+            "value": match.group(),
+            "start": match.start(),
+            "end": match.end(),
+            "confidence": 1.0,
+            "source": "Regex-Phone"
+        })
+        print(f"Phone detected: '{match.group()}'")
+    
+    # 나이 탐지
+    for match in AGE_PATTERN.finditer(text):
+        age_value = match.group(1)
+        age_num = int(age_value)
+        if 1 <= age_num <= 120:
+            items.append({
+                "type": "나이",
+                "value": age_value,
+                "start": match.start(),
+                "end": match.start() + len(age_value),
+                "confidence": 0.95,
+                "source": "Regex-Age"
+            })
+            print(f"Age detected: '{age_value}'")
+    
+    # 주민등록번호 탐지
+    for match in RRN_PATTERN.finditer(text):
+        items.append({
+            "type": "주민등록번호",
+            "value": match.group(),
+            "start": match.start(),
+            "end": match.end(),
+            "confidence": 1.0,
+            "source": "Regex-RRN"
+        })
+        print(f"RRN detected: '{match.group()}'")
+    
+    # 신용카드 탐지
+    for match in CARD_PATTERN.finditer(text):
+        items.append({
+            "type": "신용카드",
+            "value": match.group(),
+            "start": match.start(),
+            "end": match.end(),
+            "confidence": 0.95,
+            "source": "Regex-Card"
+        })
+        print(f"Card detected: '{match.group()}'")
+    
+    return items
+
+def detect_names_with_pools(text: str, pools) -> List[Dict[str, Any]]:
+    """데이터풀 기반 정확한 이름 탐지"""
+    items = []
+    
+    if not pools.real_names:
         return items
     
-    print(f"👤 CSV 기반 이름 탐지 중... ({len(detection_data.real_names)}개 이름)")
+    print(f"Pool-based name detection ({len(pools.real_names):,} names)")
     
-    # 조사 제거를 위한 패턴 - 문자열 제대로 닫기
-    josa_pattern = re.compile(r'(님|씨|군|양|이|가|을|를|에게|에서|한테|께서|께|는|은|이가|이를|이는|이와|이여|아|야)$')
+    josa_pattern = re.compile(r'(님|씨|군|양|이|가|을|를|에게|에서|한테|께서|께|는|은)$')
     
-    # 텍스트에서 실제 이름 찾기
-    for name in detection_data.real_names:
+    detected_count = 0
+    sorted_names = sorted(pools.real_names, key=len, reverse=True)
+    
+    for name in sorted_names:
         if name in text:
-            # 모든 출현 위치 찾기
+            if not is_valid_korean_name(name):
+                continue
+            
             start = 0
             while True:
                 pos = text.find(name, start)
                 if pos == -1:
                     break
                 
-                # 이름 뒤에 조사가 있는지 확인
-                end_pos = pos + len(name)
-                actual_end = end_pos
-                
-                # 조사가 붙어있는 경우 처리 (예: "이영희님")
-                if end_pos < len(text):
-                    rest_text = text[end_pos:]
-                    josa_match = josa_pattern.match(rest_text)
-                    if josa_match:
-                        actual_end = end_pos  # 조사는 포함하지 않음
-                
-                # 앞 문자 확인 (단어 경계)
                 before_ok = pos == 0 or not text[pos-1].isalnum()
+                after_pos = pos + len(name)
+                after_ok = after_pos >= len(text) or not text[after_pos].isalnum()
                 
-                if before_ok:
+                if after_pos < len(text):
+                    rest_text = text[after_pos:]
+                    if josa_pattern.match(rest_text):
+                        after_ok = True
+                
+                if before_ok and after_ok:
                     items.append({
                         "type": "이름",
                         "value": name,
                         "start": pos,
                         "end": pos + len(name),
                         "confidence": 0.95,
-                        "source": "CSV-Names"
+                        "source": "Pool-Names"
                     })
-                    print(f"   ✅ 이름 탐지 (CSV): '{name}'")
+                    detected_count += 1
+                    print(f"Name detected: '{name}'")
                 
                 start = pos + 1
     
-    # 조사가 붙은 형태도 검색 (이영희님, 김철수씨 등)
-    for name in detection_data.real_names:
-        # 이름 + 조사 패턴으로 검색
-        pattern = re.compile(f'{re.escape(name)}(님|씨|군|양)')
-        for match in pattern.finditer(text):
-            items.append({
-                "type": "이름",
-                "value": name,  # 이름만 저장
-                "start": match.start(),
-                "end": match.start() + len(name),
-                "confidence": 0.95,
-                "source": "CSV-Names"
-            })
-            print(f"   ✅ 이름 탐지 (CSV+조사): '{name}' from '{match.group()}'")
-    
+    print(f"Total names detected: {detected_count}")
     return items
 
-def detect_addresses_from_csv(text: str, detection_data: DetectionData) -> List[Dict[str, Any]]:
-    """CSV 데이터 기반 주소 탐지"""
+def detect_addresses_with_pools(text: str, pools) -> List[Dict[str, Any]]:
+    """데이터풀 기반 주소 탐지"""
     items = []
     
-    # 시/도 이름들 (기본)
-    provinces = ['서울', '부산', '대구', '인천', '광주', '대전', '울산', '세종',
-                 '경기', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주']
+    print("Pool-based address detection")
     
-    print(f"🏠 CSV 기반 주소 탐지 중...")
-    
-    # 1. 시/도 탐지 (기본)
-    for province in provinces:
+    # 시/도 탐지
+    for province in pools.provinces:
         if province in text:
             for match in re.finditer(re.escape(province), text):
                 items.append({
@@ -297,166 +205,100 @@ def detect_addresses_from_csv(text: str, detection_data: DetectionData) -> List[
                     "start": match.start(),
                     "end": match.end(),
                     "confidence": 0.95,
-                    "source": "Basic-Province"
+                    "source": "Pool-Province"
                 })
-                print(f"   ✅ 시/도 탐지: '{province}'")
+                print(f"Province detected: '{province}'")
     
-    # 2. CSV 도로명 찾기
-    if detection_data.road_names:
-        for road_name in detection_data.road_names:
-            if road_name in text and len(road_name) >= 2:
-                for match in re.finditer(re.escape(road_name), text):
-                    items.append({
-                        "type": "주소",
-                        "value": road_name,
-                        "start": match.start(),
-                        "end": match.end(),
-                        "confidence": 0.95,
-                        "source": "CSV-Roads"
-                    })
-                    print(f"   ✅ 도로명 탐지 (CSV): '{road_name}'")
+    # 시/군/구 탐지
+    for district in pools.districts:
+        if district in text and len(district) >= 2:
+            for match in re.finditer(re.escape(district), text):
+                items.append({
+                    "type": "주소",
+                    "value": district,
+                    "start": match.start(),
+                    "end": match.end(),
+                    "confidence": 0.9,
+                    "source": "Pool-District"
+                })
+                print(f"District detected: '{district}'")
     
-    # 3. 시군구 찾기
-    if detection_data.districts:
-        for district in detection_data.districts:
-            if district in text and len(district) >= 2:
-                for match in re.finditer(re.escape(district), text):
-                    items.append({
-                        "type": "주소",
-                        "value": district,
-                        "start": match.start(),
-                        "end": match.end(),
-                        "confidence": 0.9,
-                        "source": "CSV-Districts"
-                    })
-                    print(f"   ✅ 시군구 탐지 (CSV): '{district}'")
-    
-    # 4. 조합된 주소 찾기 (시도 + 시군구 등)
-    if detection_data.real_addresses:
-        for address in detection_data.real_addresses:
-            if address in text and len(address) >= 3:
-                for match in re.finditer(re.escape(address), text):
-                    items.append({
-                        "type": "주소",
-                        "value": address,
-                        "start": match.start(),
-                        "end": match.end(),
-                        "confidence": 0.95,
-                        "source": "CSV-Addresses"
-                    })
+    # 도로명 탐지
+    for road in pools.road_names:
+        if road in text and len(road) >= 3:
+            for match in re.finditer(re.escape(road), text):
+                items.append({
+                    "type": "주소",
+                    "value": road,
+                    "start": match.start(),
+                    "end": match.end(),
+                    "confidence": 0.9,
+                    "source": "Pool-Road"
+                })
+                print(f"Road detected: '{road}'")
     
     return items
 
-def detect_with_ner(text: str) -> List[Dict[str, Any]]:
-    """NER 모델을 사용한 탐지"""
-    items = []
+def is_valid_korean_name(name: str) -> bool:
+    """한국 이름 유효성 검사"""
+    if not name or len(name.strip()) == 0:
+        return False
     
-    try:
-        from .model import extract_entities_with_ner, is_ner_loaded
-        
-        if is_ner_loaded():
-            print("🤖 NER 모델로 개체명 추출 중...")
-            ner_items = extract_entities_with_ner(text)
-            items.extend(ner_items)
-            print(f"   NER 결과: {len(ner_items)}개 탐지")
-    except Exception as e:
-        print(f"⚠️ NER 모델 사용 실패: {e}")
+    name = name.strip()
     
-    return items
+    if not (2 <= len(name) <= 4):
+        return False
+    
+    if name in NAME_EXCLUDE_WORDS:
+        return False
+    
+    if not all(ord('가') <= ord(char) <= ord('힣') for char in name):
+        return False
+    
+    if re.search(r'[0-9a-zA-Z!@#$%^&*()_+=\[\]{}|\\:";\'<>?,./]', name):
+        return False
+    
+    if len(set(name)) == 1 and len(name) > 2:
+        return False
+    
+    return True
 
-def detect_with_regex(text: str, pools) -> List[Dict[str, Any]]:
-    """정규식 패턴을 사용한 탐지"""
-    items = []
-    
-    print("🔎 정규식 패턴으로 추가 탐지 중...")
-    
-    # 이메일
-    for match in EMAIL_PATTERN.finditer(text):
-        items.append({
-            "type": "이메일",
-            "value": match.group(),
-            "start": match.start(),
-            "end": match.end(),
-            "confidence": 1.0,
-            "source": "Regex"
-        })
-    
-    # 전화번호
-    for match in PHONE_PATTERN.finditer(text):
-        items.append({
-            "type": "전화번호",
-            "value": match.group(),
-            "start": match.start(),
-            "end": match.end(),
-            "confidence": 1.0,
-            "source": "Regex"
-        })
-    
-    # 주민등록번호
-    for match in RRN_PATTERN.finditer(text):
-        items.append({
-            "type": "주민등록번호",
-            "value": match.group(),
-            "start": match.start(),
-            "end": match.end(),
-            "confidence": 1.0,
-            "source": "Regex"
-        })
-    
-    # 나이
-    for match in AGE_PATTERN.finditer(text):
-        items.append({
-            "type": "나이",
-            "value": match.group(1),
-            "start": match.start(),
-            "end": match.end(),
-            "confidence": 0.9,
-            "source": "Regex"
-        })
-    
-    return items
-
-def merge_detections(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """중복 제거 및 병합 (CSV 우선순위 높음)"""
+def merge_detections_smart(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """스마트 중복 제거 (Regex > Pool > NER)"""
     if not items:
         return []
     
-    print("🧹 중복 제거 및 정렬 중...")
+    print("Smart duplicate removal (Regex > Pool > NER)")
     
-    # 우선순위: CSV > NER > Regex
     priority_map = {
-        'CSV-Names': 0,
-        'CSV-Roads': 0,
-        'CSV-Districts': 0,
-        'CSV-Addresses': 0,
-        'Basic-Province': 0,
-        'NER': 1,
-        'Regex': 2,
-        'Pattern': 3
+        'Regex-Email': 0,
+        'Regex-Phone': 0,
+        'Regex-Age': 0,
+        'Regex-RRN': 0,
+        'Regex-Card': 0,
+        'Pool-Names': 1,
+        'Pool-Province': 1,
+        'Pool-District': 1,
+        'Pool-Road': 1,
+        'NER-Hint': 2
     }
     
-    # 위치 기반 정렬 (우선순위 고려)
-    items.sort(key=lambda x: (x['start'], priority_map.get(x['source'].split('-')[0], 4)))
+    items.sort(key=lambda x: (x['start'], priority_map.get(x['source'], 3)))
     
-    # 겹치는 탐지 제거 (같은 값은 하나만)
     unique_items = []
     seen_values = set()
     
     for item in items:
-        # 같은 값이 이미 있으면 스킵
         value_key = (item['type'], item['value'])
         if value_key in seen_values:
             continue
         
-        # 겹치는 위치의 다른 아이템 확인
         overlap = False
-        for existing in unique_items[:]:  # 복사본으로 순회
+        for existing in unique_items[:]:
             if item['start'] < existing['end'] and item['end'] > existing['start']:
-                # 같은 위치에 있는 경우
-                if item['start'] == existing['start'] and item['end'] == existing['end']:
-                    # 우선순위가 높은 것 선택
-                    item_priority = priority_map.get(item['source'].split('-')[0], 4)
-                    existing_priority = priority_map.get(existing['source'].split('-')[0], 4)
+                if abs(item['start'] - existing['start']) <= 2:
+                    item_priority = priority_map.get(item['source'], 3)
+                    existing_priority = priority_map.get(existing['source'], 3)
                     
                     if item_priority < existing_priority:
                         unique_items.remove(existing)
@@ -470,48 +312,67 @@ def merge_detections(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             unique_items.append(item)
             seen_values.add(value_key)
     
-    # 최종 정렬
     unique_items.sort(key=lambda x: x['start'])
-    
     return unique_items
 
-# ==================== 테스트 ====================
-if __name__ == "__main__":
-    print("🔍 PII 탐지 모듈 테스트 (CSV 활용)")
-    print("=" * 60)
+def detect_pii_enhanced(text: str) -> Dict[str, Any]:
+    """강화된 PII 탐지 - NER 간소화 + Regex 중심"""
+    items = []
+    pools = get_pools()
     
-    # CSV 파일 확인
-    print("\n📁 CSV 파일 상태:")
-    print(f"   name.csv: {'✅ 있음' if os.path.exists('name.csv') else '❌ 없음'}")
-    print(f"   address_road.csv: {'✅ 있음' if os.path.exists('address_road.csv') else '❌ 없음'}")
+    print(f"PII analysis (Regex-focused): {text[:50]}...")
     
-    # 탐지 데이터 로드
-    detection_data = get_detection_data()
-    print(f"\n📊 로드된 탐지 데이터:")
-    print(f"   이름: {len(detection_data.real_names)}개")
-    print(f"   주소: {len(detection_data.real_addresses)}개")
-    print(f"   도로명: {len(detection_data.road_names)}개")
+    # NER 간소화 (힌트만)
+    ner_items = detect_with_ner_simple(text)
+    items.extend(ner_items)
     
-    # 테스트 케이스
-    test_cases = [
-        "김민준님이 서울시 강남구 테헤란로에 삽니다. 010-1234-5678",
-        "이서준 고객님, 부산광역시 해운대구 예약 확인되었습니다.",
-        "박지우씨는 대구광역시 중구 동성로에서 일합니다.",
-        "남궁민수님의 연락처는 02-123-4567입니다.",
-        "이영희님 25세, 대구 중구 거주하시는 분이시죠?"
-    ]
+    # Regex 강화 탐지 (메인 엔진)
+    regex_items = detect_with_regex_enhanced(text, pools)
+    items.extend(regex_items)
     
-    for text in test_cases:
-        print(f"\n테스트: {text}")
-        result = detect_pii_enhanced(text)
-        
-        print(f"통계: NER={result['stats']['ner']}, "
-              f"CSV이름={result['stats']['csv_names']}, "
-              f"CSV주소={result['stats']['csv_addresses']}, "
-              f"정규식={result['stats']['regex']}")
-        
-        if result['items']:
-            for item in result['items']:
-                print(f"  - {item['type']}: {item['value']} (출처: {item['source']})")
-        else:
-            print("  탐지된 PII 없음")
+    # 데이터풀 이름 탐지
+    name_items = detect_names_with_pools(text, pools)
+    items.extend(name_items)
+    
+    # 데이터풀 주소 탐지
+    address_items = detect_addresses_with_pools(text, pools)
+    items.extend(address_items)
+    
+    # 스마트 중복 제거
+    unique_items = merge_detections_smart(items)
+    
+    result = {
+        "contains_pii": len(unique_items) > 0,
+        "items": unique_items,
+        "stats": {
+            "ner_hints": len(ner_items),
+            "regex_main": len(regex_items),
+            "pool_names": len(name_items),
+            "pool_addresses": len(address_items),
+            "total": len(unique_items)
+        }
+    }
+    
+    print(f"Final detection result: {len(unique_items)} items")
+    for idx, item in enumerate(unique_items, 1):
+        print(f"#{idx} {item['type']}: '{item['value']}' (confidence: {item['confidence']:.2f}, source: {item['source']})")
+    
+    return result
+
+# 호환성 함수들
+def detect_with_ner(text: str) -> List[Dict[str, Any]]:
+    return detect_with_ner_simple(text)
+
+def detect_with_regex(text: str, pools) -> List[Dict[str, Any]]:
+    return detect_with_regex_enhanced(text, pools)
+
+def detect_names_from_csv(text: str, detection_data=None):
+    pools = get_pools()
+    return detect_names_with_pools(text, pools)
+
+def detect_addresses_from_csv(text: str, detection_data=None):
+    pools = get_pools()
+    return detect_addresses_with_pools(text, pools)
+
+def merge_detections(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    return merge_detections_smart(items)

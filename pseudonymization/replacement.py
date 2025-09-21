@@ -1,7 +1,7 @@
 # pseudonymization/replacement.py
 """
-가명화 치환 모듈
-탐지된 PII를 실제 데이터로 치환
+가명화 치환 모듈 - 깔끔한 버전
+김가명1, 010-0000-0001, Pseudonymization1@gamyeong.com 형식
 """
 
 import random
@@ -10,308 +10,305 @@ from collections import defaultdict
 from .pools import get_pools
 
 class ReplacementManager:
-    """가명화 치환 관리자"""
+    """명확한 가명화 치환 관리자"""
     
     def __init__(self):
         self.pools = get_pools()
-        self.used_names = set()
-        self.used_emails = set()
-        self.used_phones = set()
-        self.used_companies = set()
+        
+        # 일관성 유지를 위한 매핑 히스토리
+        self.name_mappings: Dict[str, str] = {}
+        self.email_mappings: Dict[str, str] = {}
+        self.phone_mappings: Dict[str, str] = {}
+        self.address_mappings: Dict[str, str] = {}
+        self.company_mappings: Dict[str, str] = {}
+        self.age_mappings: Dict[str, str] = {}
+        self.rrn_mappings: Dict[str, str] = {}
+        self.card_mappings: Dict[str, str] = {}
+        
+        # 사용된 값들 추적
+        self.used_fake_names: set = set()
+        self.used_fake_phones: set = set()
+        self.used_fake_emails: set = set()
     
     def assign_replacements(self, items: List[Dict[str, Any]]) -> Tuple[Dict[str, str], Dict[str, str]]:
-        """탐지된 PII에 대체값 할당"""
-        substitution_map = {}  # 원본 → 가명
-        reverse_map = {}       # 가명 → 원본
+        """탐지된 PII에 명확한 가명 할당"""
+        substitution_map = {}
+        reverse_map = {}
+        
+        print(f"Clear pseudonym assignment started: {len(items)} items")
         
         # 타입별로 그룹화
         items_by_type = defaultdict(list)
         for item in items:
             items_by_type[item['type']].append(item['value'])
         
-        # 주소 처리 (먼저 처리해서 간소화)
-        if '주소' in items_by_type:
-            self._handle_addresses(items_by_type['주소'], substitution_map, reverse_map)
+        # 각 타입별로 처리
+        for pii_type, values in items_by_type.items():
+            unique_values = list(set(values))
+            
+            if pii_type == '이름':
+                self._handle_names_fake(unique_values, substitution_map, reverse_map)
+            elif pii_type == '전화번호':
+                self._handle_phones_sequential(unique_values, substitution_map, reverse_map)
+            elif pii_type == '이메일':
+                self._handle_emails_pseudonym(unique_values, substitution_map, reverse_map)
+            elif pii_type == '주소':
+                self._handle_addresses_simplified(unique_values, substitution_map, reverse_map)
+            elif pii_type == '회사':
+                self._handle_companies_generic(unique_values, substitution_map, reverse_map)
+            elif pii_type == '나이':
+                self._handle_ages_similar(unique_values, substitution_map, reverse_map)
+            elif pii_type == '주민등록번호':
+                self._handle_rrn_fake(unique_values, substitution_map, reverse_map)
+            elif pii_type == '신용카드':
+                self._handle_cards_fake(unique_values, substitution_map, reverse_map)
+            else:
+                self._handle_generic_masked(pii_type, unique_values, substitution_map, reverse_map)
         
-        # 이름 처리
-        if '이름' in items_by_type:
-            self._handle_names(items_by_type['이름'], substitution_map, reverse_map)
-        
-        # 전화번호 처리
-        if '전화번호' in items_by_type:
-            self._handle_phones(items_by_type['전화번호'], substitution_map, reverse_map)
-        
-        # 이메일 처리
-        if '이메일' in items_by_type:
-            self._handle_emails(items_by_type['이메일'], substitution_map, reverse_map)
-        
-        # 회사 처리
-        if '회사' in items_by_type:
-            self._handle_companies(items_by_type['회사'], substitution_map, reverse_map)
-        
-        # 나이 처리
-        if '나이' in items_by_type:
-            self._handle_ages(items_by_type['나이'], substitution_map, reverse_map)
-        
-        # 주민등록번호 처리
-        if '주민등록번호' in items_by_type:
-            self._handle_rrn(items_by_type['주민등록번호'], substitution_map, reverse_map)
-        
-        # 신용카드 처리
-        if '신용카드' in items_by_type:
-            self._handle_cards(items_by_type['신용카드'], substitution_map, reverse_map)
-        
+        print(f"Clear pseudonym assignment completed: {len(substitution_map)} mappings")
         return substitution_map, reverse_map
     
-    def _handle_addresses(self, addresses: List[str], sub_map: Dict, rev_map: Dict):
-        """주소 간소화 처리"""
-        unique_addresses = list(set(addresses))
-        
-        print(f"🏠 주소 간소화: {len(unique_addresses)}개 → 1개 지역명")
-        
-        # 하나의 간단한 지역으로 통합
-        fake_location = self.pools.get_random_address()
-        print(f"   선택된 지역: {fake_location}")
-        
-        for addr in unique_addresses:
-            sub_map[addr] = fake_location
-            if fake_location not in rev_map:
-                rev_map[fake_location] = addr
-            print(f"   주소 간소화: '{addr}' → '{fake_location}'")
-    
-    def _handle_names(self, names: List[str], sub_map: Dict, rev_map: Dict):
-        """이름 처리"""
-        for original_name in set(names):
-            # 이미 처리된 경우 스킵
-            if original_name in sub_map:
-                continue
-            
-            # 중복 방지를 위한 가명 선택
-            fake_name = self._get_unique_fake_name()
-            
-            sub_map[original_name] = fake_name
-            rev_map[fake_name] = original_name
-            print(f"   할당: {original_name} → {fake_name}")
-    
-    def _get_unique_fake_name(self) -> str:
-        """중복되지 않는 가명 이름 선택"""
-        attempts = 0
-        while attempts < 100:
-            fake_name = self.pools.get_random_fake_name()
-            if fake_name not in self.used_names:
-                self.used_names.add(fake_name)
-                return fake_name
-            attempts += 1
-        
-        # 시도 실패 시 번호 붙이기
-        base_name = self.pools.get_random_fake_name()
-        counter = 1
-        while f"{base_name}{counter}" in self.used_names:
-            counter += 1
-        final_name = f"{base_name}{counter}"
-        self.used_names.add(final_name)
-        return final_name
-    
-    def _handle_phones(self, phones: List[str], sub_map: Dict, rev_map: Dict):
-        """전화번호 처리"""
-        for phone in set(phones):
-            if phone in sub_map:
-                continue
-            
-            # 중복되지 않는 전화번호 생성
-            fake_phone = self._get_unique_phone()
-            
-            sub_map[phone] = fake_phone
-            rev_map[fake_phone] = phone
-            print(f"   할당: {phone} → {fake_phone}")
-    
-    def _get_unique_phone(self) -> str:
-        """중복되지 않는 전화번호 생성"""
-        attempts = 0
-        while attempts < 100:
-            fake_phone = self.pools.get_random_phone()
-            if fake_phone not in self.used_phones:
-                self.used_phones.add(fake_phone)
-                return fake_phone
-            attempts += 1
-        
-        # 완전 랜덤 생성
-        while True:
-            fake_phone = f"010-{random.randint(0, 9999):04d}-{random.randint(0, 9999):04d}"
-            if fake_phone not in self.used_phones:
-                self.used_phones.add(fake_phone)
-                return fake_phone
-    
-    def _handle_emails(self, emails: List[str], sub_map: Dict, rev_map: Dict):
-        """이메일 처리"""
-        for email in set(emails):
-            if email in sub_map:
-                continue
-            
-            fake_email = self._get_unique_email()
-            
-            sub_map[email] = fake_email
-            rev_map[fake_email] = email
-    
-    def _get_unique_email(self) -> str:
-        """중복되지 않는 이메일 생성"""
-        attempts = 0
-        while attempts < 100:
-            fake_email = self.pools.get_random_email()
-            if fake_email not in self.used_emails:
-                self.used_emails.add(fake_email)
-                return fake_email
-            attempts += 1
-        
-        # 완전 랜덤 생성
-        counter = random.randint(10000, 99999)
-        fake_email = f"user{counter}@example.com"
-        self.used_emails.add(fake_email)
-        return fake_email
-    
-    def _handle_companies(self, companies: List[str], sub_map: Dict, rev_map: Dict):
-        """회사명 처리"""
-        for company in set(companies):
-            if company in sub_map:
-                continue
-            
-            # 다른 회사로 치환
-            available = [c for c in self.pools.companies 
-                        if c != company and c not in self.used_companies]
-            
-            if available:
-                fake_company = random.choice(available)
-                self.used_companies.add(fake_company)
+    def _handle_names_fake(self, names: List[str], substitution_map: Dict[str, str], reverse_map: Dict[str, str]):
+        """이름 → 김가명1, 이가명2 형식"""
+        for name in names:
+            if name in self.name_mappings:
+                replacement = self.name_mappings[name]
             else:
-                fake_company = f"테스트회사{random.randint(1, 99)}"
+                replacement = self.pools.generator.get_fake_name()
+                
+                while replacement in self.used_fake_names:
+                    replacement = self.pools.generator.get_fake_name()
+                
+                self.name_mappings[name] = replacement
+                self.used_fake_names.add(replacement)
             
-            sub_map[company] = fake_company
-            rev_map[fake_company] = company
+            substitution_map[name] = replacement
+            reverse_map[replacement] = name
+            print(f"Name: {name} → {replacement}")
     
-    def _handle_ages(self, ages: List[str], sub_map: Dict, rev_map: Dict):
-        """나이 처리"""
-        for age in set(ages):
-            if age in sub_map:
-                continue
-            
-            try:
-                original_age = int(age)
-                # ±10년 범위로 변경
-                fake_age = str(max(1, original_age + random.randint(-10, 10)))
-            except:
-                fake_age = str(random.randint(20, 65))
-            
-            sub_map[age] = fake_age
-            rev_map[fake_age] = age
-    
-    def _handle_rrn(self, rrns: List[str], sub_map: Dict, rev_map: Dict):
-        """주민등록번호 마스킹"""
-        for rrn in set(rrns):
-            if rrn in sub_map:
-                continue
-            
-            # 앞 6자리만 남기고 마스킹
-            if len(rrn) >= 6:
-                masked = rrn[:6] + "-*******"
+    def _handle_phones_sequential(self, phones: List[str], substitution_map: Dict[str, str], reverse_map: Dict[str, str]):
+        """전화번호 → 010-0000-0001 순차 증가"""
+        for phone in phones:
+            if phone in self.phone_mappings:
+                replacement = self.phone_mappings[phone]
             else:
-                masked = "******-*******"
+                replacement = self.pools.generator.get_fake_phone()
+                
+                while replacement in self.used_fake_phones:
+                    replacement = self.pools.generator.get_fake_phone()
+                
+                self.phone_mappings[phone] = replacement
+                self.used_fake_phones.add(replacement)
             
-            sub_map[rrn] = masked
-            rev_map[masked] = rrn
+            substitution_map[phone] = replacement
+            reverse_map[replacement] = phone
+            print(f"Phone: {phone} → {replacement}")
     
-    def _handle_cards(self, cards: List[str], sub_map: Dict, rev_map: Dict):
-        """신용카드 마스킹"""
-        for card in set(cards):
-            if card in sub_map:
-                continue
-            
-            # 앞 4자리와 뒤 4자리만 보이게
-            clean_card = card.replace("-", "").replace(" ", "")
-            if len(clean_card) >= 16:
-                masked = f"{clean_card[:4]}-****-****-{clean_card[-4:]}"
+    def _handle_emails_pseudonym(self, emails: List[str], substitution_map: Dict[str, str], reverse_map: Dict[str, str]):
+        """이메일 → Pseudonymization1@gamyeong.com 형식"""
+        for email in emails:
+            if email in self.email_mappings:
+                replacement = self.email_mappings[email]
             else:
-                masked = "****-****-****-****"
+                replacement = self.pools.generator.get_fake_email()
+                
+                while replacement in self.used_fake_emails:
+                    replacement = self.pools.generator.get_fake_email()
+                
+                self.email_mappings[email] = replacement
+                self.used_fake_emails.add(replacement)
             
-            sub_map[card] = masked
-            rev_map[masked] = card
+            substitution_map[email] = replacement
+            reverse_map[replacement] = email
+            print(f"Email: {email} → {replacement}")
+    
+    def _handle_addresses_simplified(self, addresses: List[str], substitution_map: Dict[str, str], reverse_map: Dict[str, str]):
+        """주소 → 시/군/구만 (간소화)"""
+        for address in addresses:
+            if address in self.address_mappings:
+                replacement = self.address_mappings[address]
+            else:
+                replacement = self.pools.generator.get_simplified_address(address)
+                self.address_mappings[address] = replacement
+            
+            substitution_map[address] = replacement
+            reverse_map[replacement] = address
+            print(f"Address: {address} → {replacement}")
+    
+    def _handle_companies_generic(self, companies: List[str], substitution_map: Dict[str, str], reverse_map: Dict[str, str]):
+        """회사 → 일반적인 회사명"""
+        generic_companies = [
+            '테스트회사', '샘플기업', '가명조직', '임시회사', '예시기업',
+            '더미회사', '가상기업', '모의회사', '시험조직', '연습회사'
+        ]
+        
+        for company in companies:
+            if company in self.company_mappings:
+                replacement = self.company_mappings[company]
+            else:
+                replacement = random.choice(generic_companies)
+                self.company_mappings[company] = replacement
+            
+            substitution_map[company] = replacement
+            reverse_map[replacement] = company
+            print(f"Company: {company} → {replacement}")
+    
+    def _handle_ages_similar(self, ages: List[str], substitution_map: Dict[str, str], reverse_map: Dict[str, str]):
+        """나이 → 비슷한 연령대로 변경"""
+        for age in ages:
+            if age in self.age_mappings:
+                replacement = self.age_mappings[age]
+            else:
+                try:
+                    original_age = int(age)
+                    min_age = max(20, original_age - 5)
+                    max_age = min(65, original_age + 5)
+                    replacement = str(random.randint(min_age, max_age))
+                except:
+                    replacement = str(random.randint(25, 45))
+                
+                self.age_mappings[age] = replacement
+            
+            substitution_map[age] = replacement
+            reverse_map[replacement] = age
+            print(f"Age: {age} → {replacement}")
+    
+    def _handle_rrn_fake(self, rrns: List[str], substitution_map: Dict[str, str], reverse_map: Dict[str, str]):
+        """주민등록번호 → 가상의 주민등록번호"""
+        for rrn in rrns:
+            if rrn in self.rrn_mappings:
+                replacement = self.rrn_mappings[rrn]
+            else:
+                year = random.randint(70, 99)
+                month = random.randint(1, 12)
+                day = random.randint(1, 28)
+                gender = random.randint(1, 4)
+                rest = random.randint(100000, 999999)
+                
+                replacement = f"{year:02d}{month:02d}{day:02d}-{gender}{rest:06d}"
+                self.rrn_mappings[rrn] = replacement
+            
+            substitution_map[rrn] = replacement
+            reverse_map[replacement] = rrn
+            print(f"RRN: {rrn} → {replacement}")
+    
+    def _handle_cards_fake(self, cards: List[str], substitution_map: Dict[str, str], reverse_map: Dict[str, str]):
+        """신용카드 → 가상의 카드번호"""
+        for card in cards:
+            if card in self.card_mappings:
+                replacement = self.card_mappings[card]
+            else:
+                last_four = f"{random.randint(1, 9999):04d}"
+                replacement = f"0000-0000-0000-{last_four}"
+                self.card_mappings[card] = replacement
+            
+            substitution_map[card] = replacement
+            reverse_map[replacement] = card
+            print(f"Card: {card} → {replacement}")
+    
+    def _handle_generic_masked(self, pii_type: str, values: List[str], substitution_map: Dict[str, str], reverse_map: Dict[str, str]):
+        """기타 타입 → 마스킹"""
+        for value in values:
+            replacement = f"[{pii_type.upper()}_MASKED]"
+            
+            substitution_map[value] = replacement
+            reverse_map[replacement] = value
+            print(f"{pii_type}: {value} → {replacement}")
 
-def apply_replacements(text: str, substitution_map: Dict[str, str]) -> str:
-    """텍스트에 치환 적용"""
-    masked = text
+def apply_replacements_smart(text: str, substitution_map: Dict[str, str]) -> str:
+    """스마트 텍스트 치환 (순서 고려)"""
+    if not substitution_map:
+        return text
     
-    # 길이가 긴 것부터 치환 (짧은 것이 긴 것의 일부인 경우 방지)
+    print(f"Smart text substitution: {len(substitution_map)} mappings")
+    
+    # 긴 문자열부터 치환
     sorted_items = sorted(substitution_map.items(), key=lambda x: len(x[0]), reverse=True)
     
+    result = text
+    replacements_made = 0
+    
     for original, replacement in sorted_items:
-        if original in masked:
-            masked = masked.replace(original, replacement)
-            print(f"🔧 치환: '{original}' → '{replacement}'")
+        if original in result:
+            old_count = result.count(original)
+            result = result.replace(original, replacement)
+            
+            if old_count > 0:
+                replacements_made += 1
+                print(f"Substitution: '{original}' → '{replacement}' ({old_count} times)")
     
-    # 후처리: 연속된 같은 단어 제거
-    masked = remove_duplicates(masked)
-    
-    return masked
+    print(f"Smart substitution completed: {replacements_made} applied")
+    return result
 
-def remove_duplicates(text: str) -> str:
-    """연속된 중복 단어 제거"""
-    words = text.split()
-    cleaned_words = []
-    prev_word = None
+def restore_text_smart(pseudonymized_text: str, reverse_map: Dict[str, str]) -> str:
+    """스마트 텍스트 복원"""
+    if not reverse_map:
+        return pseudonymized_text
     
-    for word in words:
-        if word != prev_word:
-            cleaned_words.append(word)
-        else:
-            print(f"   🔧 중복 제거: '{word}' 연속 발생 → 1개로 통합")
-        prev_word = word
-    
-    return ' '.join(cleaned_words)
-
-def restore_text(masked_text: str, reverse_map: Dict[str, str]) -> str:
-    """가명화된 텍스트 복원"""
-    restored = masked_text
-    
-    # 길이가 긴 것부터 복원
     sorted_items = sorted(reverse_map.items(), key=lambda x: len(x[0]), reverse=True)
     
-    for fake, original in sorted_items:
-        if fake in restored:
-            restored = restored.replace(fake, original)
+    result = pseudonymized_text
+    for pseudonym, original in sorted_items:
+        result = result.replace(pseudonym, original)
     
-    return restored
+    return result
 
-# ==================== 테스트 ====================
-if __name__ == "__main__":
-    print("🔄 가명화 치환 모듈 테스트")
+def create_detailed_mapping_report(substitution_map: Dict[str, str], reverse_map: Dict[str, str]) -> str:
+    """상세한 매핑 리포트 생성"""
+    if not substitution_map:
+        return "No mapped items."
     
-    # 테스트 데이터
-    test_items = [
-        {"type": "이름", "value": "김철수"},
-        {"type": "이름", "value": "고객"},  # 제외되어야 함
-        {"type": "주소", "value": "부산"},
-        {"type": "주소", "value": "해운대구"},
-        {"type": "전화번호", "value": "010-1234-5678"},
-        {"type": "이메일", "value": "test@example.com"},
-        {"type": "회사", "value": "삼성전자"}
-    ]
+    report = "Detailed Pseudonymization Mapping Report\n"
+    report += "=" * 50 + "\n"
     
-    # 치환 관리자
-    manager = ReplacementManager()
+    by_type = defaultdict(list)
     
-    # 치환값 할당
-    sub_map, rev_map = manager.assign_replacements(test_items)
+    for original, replacement in substitution_map.items():
+        if '@' in original:
+            pii_type = 'Email'
+        elif any(char.isdigit() for char in original) and ('010' in original or '02' in original):
+            pii_type = 'Phone'
+        elif original.count('-') == 2 and len(original.replace('-', '')) == 13:
+            pii_type = 'RRN'
+        elif original.count('-') == 3 and len(original.replace('-', '')) == 16:
+            pii_type = 'Card'
+        elif original.isdigit() and 1 <= int(original) <= 120:
+            pii_type = 'Age'
+        elif any(keyword in original for keyword in ['시', '구', '군', '로', '동']):
+            pii_type = 'Address'
+        elif len(original) >= 2 and all(ord('가') <= ord(char) <= ord('힣') for char in original):
+            pii_type = 'Name'
+        else:
+            pii_type = 'Other'
+        
+        by_type[pii_type].append((original, replacement))
     
-    print("\n📝 치환 맵:")
-    for original, fake in sub_map.items():
-        print(f"   {original} → {fake}")
+    for pii_type, mappings in by_type.items():
+        report += f"\n{pii_type} ({len(mappings)} items):\n"
+        for original, replacement in mappings:
+            report += f"   • {original} → {replacement}\n"
     
-    # 텍스트 적용 테스트
-    test_text = "김철수 고객님, 부산 해운대구의 삼성전자에서 일하시는 분이시군요. 010-1234-5678로 연락드리겠습니다."
+    report += f"\nTotal: {len(substitution_map)} PII pseudonymized\n"
+    report += "All pseudonyms are clearly distinguishable.\n"
     
-    masked_text = apply_replacements(test_text, sub_map)
-    print(f"\n원본: {test_text}")
-    print(f"가명: {masked_text}")
+    return report
+
+# 호환성 함수들
+def apply_replacements(text: str, substitution_map: Dict[str, str]) -> str:
+    return apply_replacements_smart(text, substitution_map)
+
+def restore_text(pseudonymized_text: str, reverse_map: Dict[str, str]) -> str:
+    return restore_text_smart(pseudonymized_text, reverse_map)
+
+def remove_duplicates(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """중복 제거 (위치 기반)"""
+    unique_items = []
+    seen_positions = set()
     
-    # 복원 테스트
-    restored = restore_text(masked_text, rev_map)
-    print(f"복원: {restored}")
+    for item in items:
+        position_key = (item['start'], item['end'], item['value'])
+        if position_key not in seen_positions:
+            unique_items.append(item)
+            seen_positions.add(position_key)
+    
+    return unique_items

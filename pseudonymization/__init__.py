@@ -121,21 +121,21 @@ __all__ = [
     '__author__'
 ]
 
-# 모듈 로드 시 정보 출력
+# 모듈 로드 시 정보 출력 (개발 모드)
 def _print_module_info():
     """모듈 정보 출력"""
     import os
     if os.getenv('DEBUG') == '1' or os.getenv('FLASK_DEBUG') == 'True':
-        print(f"📦 {__title__} v{__version__}")
-        print(f"   {__description__}")
-        print(f"   작성자: {__author__}")
-        print(f"   모듈 구조:")
-        print(f"      📂 pools.py - 데이터풀 관리")
-        print(f"      🔍 detection.py - PII 탐지")
-        print(f"      🔄 replacement.py - 가명화 치환")
-        print(f"      🎯 core.py - 통합 인터페이스")
-        print(f"      🤖 model.py - NER 모델")
-        print(f"      📊 manager.py - 전체 관리")
+        print(f"{__title__} v{__version__}")
+        print(f"{__description__}")
+        print(f"Author: {__author__}")
+        print("Module structure:")
+        print("  pools.py - Data pool management")
+        print("  detection.py - PII detection")
+        print("  replacement.py - Pseudonymization replacement")
+        print("  core.py - Integrated interface")
+        print("  model.py - NER model")
+        print("  manager.py - Overall management")
 
 # 자동 초기화 (옵션)
 def auto_initialize():
@@ -152,9 +152,9 @@ def auto_initialize():
             name="NER-AutoLoader"
         ).start()
         
-        print("✅ 가명화 모듈 자동 초기화 완료")
+        print("Pseudonymization module auto-initialization completed")
     except Exception as e:
-        print(f"⚠️ 자동 초기화 실패: {e}")
+        print(f"Auto-initialization failed: {e}")
 
 # 개발 모드에서 정보 출력
 try:
