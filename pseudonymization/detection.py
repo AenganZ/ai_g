@@ -1,209 +1,185 @@
 # pseudonymization/detection.py
 """
-워크플로우 기반 PII 탐지 모듈
-1차: 규칙/정규식 고속 패스
-2차: NER 보강 (비동기, 타임아웃, 높은 임계치)
-치환 토큰: [PER_0], [ORG_0], [LOC_0] 등
+워크플로우 기반 PII 탐지 모듈 (강화된 버전)
+1차: 규칙/정규식 고속 패스 (90ms 내외)
+2차: NER 보강 (타임아웃 80ms, 높은 임계치)
 """
 
 import re
 import asyncio
-import time
-from typing import List, Dict, Any, Set
-
-# 정규식 패턴 (1차 고속 패스)
-EMAIL_PATTERN = re.compile(r'\S+@\S+\.\S+')
-PHONE_PATTERN = re.compile(
-    r'(?:010|011|016|017|018|019|02|031|032|033|041|042|043|044|051|052|053|054|055|061|062|063|064)'
-    r'[-.\s]?\d{3,4}[-.\s]?\d{4}'
-)
-AGE_PATTERN = re.compile(r'(\d{1,3})\s*(?:세|살)')
-RRN_PATTERN = re.compile(r'\d{6}[-\s]?\d{7}')
-CARD_PATTERN = re.compile(r'\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}')
-ACCOUNT_PATTERN = re.compile(r'\d{10,16}')  # 계좌번호
-
-# 특별 처리가 필요한 지역
-SPECIAL_CITIES = {
-    '대구': 'city',  # 대구는 시이지만 "구"로 끝남
-    '대전': 'city',
-    '부산': 'city',
-    '서울': 'city',
-    '인천': 'city',
-    '광주': 'city',
-    '울산': 'city'
-}
+from typing import List, Dict, Any
+from .pools import get_pools
 
 def detect_with_regex_fast(text: str) -> List[Dict[str, Any]]:
-    """1차: 규칙/정규식 고속 패스"""
-    items = []
+    """1차: 규칙/정규식 고속 패스 (핵심 패턴만)"""
     
     print("🚀 1차: 규칙/정규식 고속 패스")
     
-    # 이메일 탐지
-    for match in EMAIL_PATTERN.finditer(text):
+    items = []
+    
+    # 이메일 (고신뢰도)
+    email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+    for match in re.finditer(email_pattern, text):
         items.append({
             "type": "이메일",
             "value": match.group(),
             "start": match.start(),
             "end": match.end(),
-            "confidence": 1.0,
-            "source": "규칙-이메일"
+            "confidence": 0.95,
+            "source": "정규식-이메일"
         })
         print(f"📧 이메일 탐지: '{match.group()}'")
     
-    # 전화번호 탐지
-    for match in PHONE_PATTERN.finditer(text):
-        items.append({
-            "type": "전화번호",
-            "value": match.group(),
-            "start": match.start(),
-            "end": match.end(),
-            "confidence": 1.0,
-            "source": "규칙-전화번호"
-        })
-        print(f"📞 전화번호 탐지: '{match.group()}'")
+    # 전화번호 (한국식)
+    phone_patterns = [
+        r'01[0-9]-\d{4}-\d{4}',  # 010-1234-5678
+        r'01[0-9]\d{4}\d{4}',     # 01012345678
+        r'\d{2,3}-\d{3,4}-\d{4}', # 02-123-4567, 031-1234-5678
+    ]
     
-    # 나이 탐지
-    for match in AGE_PATTERN.finditer(text):
-        age_value = match.group(1)
-        age_num = int(age_value)
-        if 1 <= age_num <= 120:
+    for pattern in phone_patterns:
+        for match in re.finditer(pattern, text):
             items.append({
-                "type": "나이",
-                "value": age_value,
+                "type": "전화번호",
+                "value": match.group(),
                 "start": match.start(),
-                "end": match.start() + len(age_value),
-                "confidence": 1.0,
-                "source": "규칙-나이"
+                "end": match.end(),
+                "confidence": 0.9,
+                "source": "정규식-전화번호"
             })
-            print(f"🎂 나이 탐지: '{age_value}'")
+            print(f"📞 전화번호 탐지: '{match.group()}'")
     
-    # 주민등록번호 탐지
-    for match in RRN_PATTERN.finditer(text):
-        items.append({
-            "type": "주민등록번호",
-            "value": match.group(),
-            "start": match.start(),
-            "end": match.end(),
-            "confidence": 1.0,
-            "source": "규칙-주민등록번호"
-        })
-        print(f"🆔 주민등록번호 탐지: '{match.group()}'")
+    # 주민등록번호 (부분 마스킹 포함)
+    rrn_patterns = [
+        r'\d{6}-[1-4]\d{6}',  # 123456-1234567
+        r'\d{6}-[1-4]\*{6}',  # 123456-1******
+    ]
     
-    # 신용카드 탐지
-    for match in CARD_PATTERN.finditer(text):
-        items.append({
-            "type": "신용카드",
-            "value": match.group(),
-            "start": match.start(),
-            "end": match.end(),
-            "confidence": 1.0,
-            "source": "규칙-신용카드"
-        })
-        print(f"💳 신용카드 탐지: '{match.group()}'")
+    for pattern in rrn_patterns:
+        for match in re.finditer(pattern, text):
+            items.append({
+                "type": "주민등록번호",
+                "value": match.group(),
+                "start": match.start(),
+                "end": match.end(),
+                "confidence": 0.98,
+                "source": "정규식-주민등록번호"
+            })
+            print(f"🆔 주민등록번호 탐지: '{match.group()}'")
     
-    print(f"🚀 1차 고속 패스 완료: {len(items)}개 탐지")
+    # 신용카드 번호
+    card_pattern = r'\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}'
+    for match in re.finditer(card_pattern, text):
+        # 간단한 검증 (연속된 같은 숫자 제외)
+        card_num = re.sub(r'[- ]', '', match.group())
+        if not all(digit == card_num[0] for digit in card_num):
+            items.append({
+                "type": "신용카드",
+                "value": match.group(),
+                "start": match.start(),
+                "end": match.end(),
+                "confidence": 0.85,
+                "source": "정규식-신용카드"
+            })
+            print(f"💳 신용카드 탐지: '{match.group()}'")
+    
+    print(f"🚀 규칙/정규식 탐지 완료: {len(items)}개")
+    
     return items
 
 def detect_names_with_realname_list(text: str) -> List[Dict[str, Any]]:
     """실명 목록 기반 이름 탐지"""
-    items = []
     
     print("👤 실명 목록 기반 이름 탐지")
     
-    # 일반적인 한국어 이름 목록 (확장)
-    common_korean_names = [
-        '김철수', '이영희', '박민수', '최영수', '정민준', '강서윤', '조지우', '윤서현',
-        '장하은', '임예은', '한지민', '오윤서', '서하윤', '신채원', '권지원', '황수빈',
-        '안다은', '송예린', '류시은', '전소은', '홍길동', '김영희', '이철수', '박영수',
-        '최민수', '정영희', '강철수', '조영수', '윤민수', '장영희', '임철수', '한영수',
-        '김민준', '이서준', '박도윤', '최예준', '정시우', '강주원', '조하준', '윤지호',
-        '장준서', '임건우', '한현우', '오우진', '서선우', '신연우', '권정우', '황성민',
-        '김가영', '이나영', '박수영', '최지영', '정민영', '강유영', '조소영', '윤은영'
-    ]
-    
-    # 실명 목록에서 직접 찾기
-    for name in common_korean_names:
-        if name in text:
-            start_pos = text.find(name)
-            items.append({
-                "type": "이름",
-                "value": name,
-                "start": start_pos,
-                "end": start_pos + len(name),
-                "confidence": 0.95,
-                "source": "실명목록"
-            })
-            print(f"👤 실명 탐지: '{name}'")
-    
-    return items
-
-def detect_names_with_patterns(text: str, exclude_detected: Set[str]) -> List[Dict[str, Any]]:
-    """패턴 기반 이름 탐지"""
     items = []
+    pools = get_pools()
     
-    print("🔍 패턴 기반 이름 탐지")
-    
-    # 이름 패턴들 (높은 신뢰도)
-    name_patterns = [
-        r'([가-힣]{2,4})님(?!\w)',          # 이영희님
-        r'([가-힣]{2,4})씨(?!\w)',          # 홍길동씨  
-        r'이름은\s*([가-힣]{2,4})(?!\w)',   # 이름은 홍길동
-        r'저는\s*([가-힣]{2,4})(?!\w)',     # 저는 홍길동
-        r'([가-힣]{2,4})이고(?!\w)',        # 홍길동이고
-    ]
-    
-    # 제외할 단어 (확장)
-    exclude_words = {
-        '고객', '회원', '사용자', '관리자', '직원', '담당자', '선생', '교수',
-        '부장', '과장', '대리', '팀장', '사장', '대표', '예약', '확인', '문의',
-        '연락', '주세', '있습니다', '했습니다', '합니다', '입니다'
-    }
-    
-    for pattern in name_patterns:
-        for match in re.finditer(pattern, text):
-            name = match.group(1)
-            
-            # 이미 탐지된 이름이거나 제외 단어면 스킵
-            if name in exclude_detected or name in exclude_words:
-                continue
-                
-            # 기본 유효성 검사
-            if (len(name) >= 2 and 
-                all(ord('가') <= ord(char) <= ord('힣') for char in name)):
-                
+    # 실명 목록에서 탐지
+    for name in pools.real_names:
+        if len(name) >= 2:  # 2글자 이상
+            for match in re.finditer(re.escape(name), text):
                 items.append({
                     "type": "이름",
                     "value": name,
-                    "start": match.start(1),
-                    "end": match.end(1),
-                    "confidence": 0.85,
-                    "source": "패턴-이름"
+                    "start": match.start(),
+                    "end": match.end(),
+                    "confidence": 0.95,
+                    "source": "실명목록"
                 })
-                print(f"👤 패턴 이름 탐지: '{name}'")
-                exclude_detected.add(name)
+                print(f"👤 실명 탐지: '{name}'")
+    
+    print(f"👤 실명 목록 탐지 완료: {len(items)}개")
+    
+    return items
+
+def detect_names_with_patterns(text: str, exclude_names: set = None) -> List[Dict[str, Any]]:
+    """패턴 기반 이름 탐지 (중복 방지)"""
+    
+    print("🔍 패턴 기반 이름 탐지")
+    
+    items = []
+    exclude_names = exclude_names or set()
+    pools = get_pools()
+    
+    # 한국어 이름 패턴: [성씨][이름] (2-4글자)
+    korean_name_pattern = r'[가-힣]{2,4}(?=\s|님|씨|은|는|이|가|을|를|에게|께서|와|과|의|로|으로|$|[^\가-힣])'
+    
+    for match in re.finditer(korean_name_pattern, text):
+        name = match.group()
+        
+        # 이미 탐지된 이름 제외
+        if name in exclude_names:
+            continue
+        
+        # 제외 단어 확인
+        if name in pools.name_exclude_words:
+            print(f"🚫 제외 단어 무시: '{name}'")
+            continue
+        
+        # 성씨 패턴 확인
+        if name[0] in pools.compound_surnames or name[0] in pools.single_surnames:
+            items.append({
+                "type": "이름",
+                "value": name,
+                "start": match.start(),
+                "end": match.end(),
+                "confidence": 0.8,
+                "source": "패턴-이름"
+            })
+            print(f"🔍 패턴 이름 탐지: '{name}'")
+    
+    print(f"🔍 패턴 이름 탐지 완료: {len(items)}개")
     
     return items
 
 def detect_addresses_smart(text: str) -> List[Dict[str, Any]]:
-    """스마트 주소 탐지 (중복 방지)"""
-    items = []
+    """스마트 주소 탐지 (첫 번째 주소만 선택)"""
     
     print("🏠 스마트 주소 탐지")
     
-    # 주요 도시 (특별 처리 포함)
-    cities = list(SPECIAL_CITIES.keys()) + ['세종', '경기', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주']
-    
-    # 주요 구
-    districts = [
-        '강남구', '서초구', '송파구', '강동구', '마포구', '용산구', '종로구', '중구',
-        '강서구', '양천구', '구로구', '금천구', '영등포구', '동작구', '관악구',
-        '해운대구', '부산진구', '동래구', '수영구', '남구', '북구', '수원시', '성남시'
-    ]
-    
+    items = []
+    pools = get_pools()
     detected_locations = []
     
     # 시/도 탐지
+    provinces = pools.provinces
+    for province in provinces:
+        if province in text:
+            for match in re.finditer(re.escape(province), text):
+                detected_locations.append({
+                    "type": "주소",
+                    "value": province,
+                    "start": match.start(),
+                    "end": match.end(),
+                    "confidence": 0.9,
+                    "source": "패턴-주소",
+                    "location_type": "province"
+                })
+                print(f"🗺️ 시/도 탐지: '{province}'")
+    
+    # 도시 탐지
+    cities = ["서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종"]
     for city in cities:
         if city in text:
             for match in re.finditer(re.escape(city), text):
@@ -212,13 +188,14 @@ def detect_addresses_smart(text: str) -> List[Dict[str, Any]]:
                     "value": city,
                     "start": match.start(),
                     "end": match.end(),
-                    "confidence": 0.9,
+                    "confidence": 0.85,
                     "source": "패턴-주소",
                     "location_type": "city"
                 })
                 print(f"🏙️ 도시 탐지: '{city}'")
     
     # 구 탐지 (대구 등 특별 처리)
+    districts = pools.districts
     for district in districts:
         if district in text:
             # "대구"가 포함된 경우 특별 처리
@@ -453,6 +430,26 @@ def detect_with_ner(text: str) -> List[Dict[str, Any]]:
         loop.close()
         return result
     except:
+        return []
+
+def detect_with_ner_simple(text: str) -> List[Dict[str, Any]]:
+    """간소화된 NER 탐지 (누락된 함수 추가)"""
+    print("🤖 간소화된 NER 탐지")
+    
+    # 기본적으로 동기적 NER 탐지 시도
+    try:
+        from .model import extract_entities_with_ner, is_ner_loaded
+        
+        if is_ner_loaded():
+            entities = extract_entities_with_ner(text)
+            print(f"🤖 NER 간소 탐지 완료: {len(entities)}개")
+            return entities
+        else:
+            print("🤖 NER 모델 로드되지 않음 - 빈 결과 반환")
+            return []
+            
+    except Exception as e:
+        print(f"🤖 NER 간소 탐지 실패: {e}")
         return []
 
 def detect_with_regex(text: str, pools=None) -> List[Dict[str, Any]]:

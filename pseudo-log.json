@@ -1,85 +1,128 @@
 {
   "logs": [
     {
-      "time": "2025-09-21 23:55:26",
+      "time": "2025-09-22 00:32:36",
       "remote_addr": "127.0.0.1",
       "path": "/pseudonymize",
       "input": {
-        "id": "debug_test_1758466526054",
-        "prompt": "안녕하세요, 제 이름은 홍길동이고 연락처는 010-1234-5678입니다. 서울 강남구에 살고 있습니다."
+        "id": "debug_test_1758468753120",
+        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다."
       },
-      "pseudonymized_text": "안녕하세요, 제 이름은 최익명이고 연락처는 010-0000-5543입니다. 대구시 강남구에 살고 있습니다.",
+      "pseudonymized_text": "[PER_2] 25세, [LOC_0] 중구 거주하시는 분[PER_3]죠? contact@example.com으로 메일 보내드렸습니다.",
+      "tokenized_text": "[PER_2] 25세, [LOC_0] 중구 거주하시는 분[PER_3]죠? contact@example.com으로 메일 보내드렸습니다.",
+      "original_text": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
       "detection": {
         "contains_pii": true,
         "items": [
           {
             "type": "이름",
-            "value": "홍길동",
-            "start": 13,
-            "end": 16,
+            "value": "이영",
+            "start": 0,
+            "end": 2,
             "confidence": 0.95,
             "source": "실명목록"
           },
           {
-            "type": "전화번호",
-            "value": "010-1234-5678",
-            "start": 24,
-            "end": 37,
-            "confidence": 1.0,
-            "source": "정규식"
+            "type": "이름",
+            "value": "이영희",
+            "start": 0,
+            "end": 3,
+            "confidence": 0.95,
+            "source": "실명목록"
+          },
+          {
+            "type": "이름",
+            "value": "이영희님",
+            "start": 0,
+            "end": 4,
+            "confidence": 0.8,
+            "source": "패턴-이름"
           },
           {
             "type": "주소",
-            "value": "서울",
-            "start": 42,
-            "end": 44,
+            "value": "대구",
+            "start": 10,
+            "end": 12,
             "confidence": 0.9,
-            "source": "패턴"
+            "source": "패턴-주소",
+            "location_type": "province"
+          },
+          {
+            "type": "이름",
+            "value": "이시",
+            "start": 23,
+            "end": 25,
+            "confidence": 0.95,
+            "source": "실명목록"
           }
         ],
         "stats": {
           "items_by_type": {
-            "이름": 1,
-            "전화번호": 1,
+            "이름": 4,
             "주소": 1
           },
           "detection_stats": {
-            "실명목록": 1,
-            "정규식": 1,
-            "패턴": 1
+            "실명목록": 3,
+            "패턴-이름": 1,
+            "패턴-주소": 1
           },
-          "total_items": 3
+          "total_items": 5,
+          "token_map": {
+            "이영": "[PER_0]",
+            "이영희": "[PER_1]",
+            "이영희님": "[PER_2]",
+            "대구": "[LOC_0]",
+            "이시": "[PER_3]"
+          }
+        },
+        "token_map": {
+          "이영": "[PER_0]",
+          "이영희": "[PER_1]",
+          "이영희님": "[PER_2]",
+          "대구": "[LOC_0]",
+          "이시": "[PER_3]"
         }
       },
       "substitution_map": {
-        "홍길동": "최익명",
-        "010-1234-5678": "010-0000-5543",
-        "서울": "대구시"
+        "이영": "[PER_0]",
+        "이영희": "[PER_1]",
+        "이영희님": "[PER_2]",
+        "대구": "[LOC_0]",
+        "이시": "[PER_3]"
       },
       "reverse_map": {
-        "최익명": "홍길동",
-        "010-0000-5543": "010-1234-5678",
-        "대구시": "서울"
+        "[PER_0]": "이영",
+        "[PER_1]": "이영희",
+        "[PER_2]": "이영희님",
+        "[LOC_0]": "대구",
+        "[PER_3]": "이시"
       },
-      "processing_time": 0.0,
+      "token_map": {
+        "이영": "[PER_0]",
+        "이영희": "[PER_1]",
+        "이영희님": "[PER_2]",
+        "대구": "[LOC_0]",
+        "이시": "[PER_3]"
+      },
+      "processing_time": 3.4103951454162598,
       "stats": {
-        "detected_items": 3,
-        "replaced_items": 3,
-        "detection_time": 0.0,
+        "detected_items": 5,
+        "replaced_items": 5,
+        "detection_time": 3.4103951454162598,
         "replacement_time": 0.0,
-        "total_time": 0.0,
+        "total_time": 3.4103951454162598,
         "items_by_type": {
-          "이름": 1,
-          "전화번호": 1,
+          "이름": 4,
           "주소": 1
         },
         "detection_stats": {
-          "실명목록": 1,
-          "정규식": 1,
-          "패턴": 1
+          "실명목록": 3,
+          "패턴-이름": 1,
+          "패턴-주소": 1
         }
       },
-      "mapping_report": "상세 가명화 매핑 리포트\n==================================================\n\n주소 (1개 항목):\n   • 홍길동 → 최익명\n\n전화번호 (1개 항목):\n   • 010-1234-5678 → 010-0000-5543\n\n이름 (1개 항목):\n   • 서울 → 대구시\n\n전체: 3개 PII 가명화됨\n모든 가명은 명확하게 구별됩니다.\n"
+      "mapping_report": "워크플로우 기반 토큰 매핑 리포트\n==================================================\n\n이름 (4개 항목):\n   • 이영 ↔ [PER_0]\n   • 이영희 ↔ [PER_1]\n   • 이영희님 ↔ [PER_2]\n   • 이시 ↔ [PER_3]\n\n주소 (1개 항목):\n   • 대구 ↔ [LOC_0]\n\n전체: 5개 PII 토큰화됨\n워크플로우 기반 양방향 매핑 완료\n",
+      "workflow_ready": true
     }
   ]
 }
