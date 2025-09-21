@@ -1,304 +1,196 @@
 # pseudonymization/replacement.py
 """
-가명화 치환 모듈 - 깔끔한 버전
-김가명1, 010-0000-0001, Pseudonymization1@gamyeong.com 형식
+워크플로우 기반 가명화 치환 모듈
+토큰 기반 치환 시스템: [PER_0], [ORG_0], [LOC_0] 등
 """
 
+import re
 import random
-from typing import List, Dict, Any, Tuple
 from collections import defaultdict
-from .pools import get_pools
+from typing import Dict, List, Any, Tuple
 
-class ReplacementManager:
-    """명확한 가명화 치환 관리자"""
+class WorkflowReplacementManager:
+    """워크플로우 기반 토큰 치환 관리자"""
     
     def __init__(self):
-        self.pools = get_pools()
-        
-        # 일관성 유지를 위한 매핑 히스토리
-        self.name_mappings: Dict[str, str] = {}
-        self.email_mappings: Dict[str, str] = {}
-        self.phone_mappings: Dict[str, str] = {}
-        self.address_mappings: Dict[str, str] = {}
-        self.company_mappings: Dict[str, str] = {}
-        self.age_mappings: Dict[str, str] = {}
-        self.rrn_mappings: Dict[str, str] = {}
-        self.card_mappings: Dict[str, str] = {}
-        
-        # 사용된 값들 추적
-        self.used_fake_names: set = set()
-        self.used_fake_phones: set = set()
-        self.used_fake_emails: set = set()
+        self.substitution_map = {}  # 원본 → 토큰
+        self.reverse_map = {}       # 토큰 → 원본  
+        print("🔄 워크플로우 치환매니저 초기화")
     
-    def assign_replacements(self, items: List[Dict[str, Any]]) -> Tuple[Dict[str, str], Dict[str, str]]:
-        """탐지된 PII에 명확한 가명 할당"""
+    def create_substitution_map(self, items: List[Dict[str, Any]], token_map: Dict[str, str]) -> Tuple[Dict[str, str], Dict[str, str]]:
+        """치환 맵 생성 (토큰 기반)"""
+        
+        print(f"🗺️ 치환 맵 생성: {len(items)}개 항목")
+        
         substitution_map = {}
         reverse_map = {}
         
-        print(f"Clear pseudonym assignment started: {len(items)} items")
-        
-        # 타입별로 그룹화
-        items_by_type = defaultdict(list)
         for item in items:
-            items_by_type[item['type']].append(item['value'])
-        
-        # 각 타입별로 처리
-        for pii_type, values in items_by_type.items():
-            unique_values = list(set(values))
+            original = item['value']
+            token = token_map.get(original)
             
-            if pii_type == '이름':
-                self._handle_names_fake(unique_values, substitution_map, reverse_map)
-            elif pii_type == '전화번호':
-                self._handle_phones_sequential(unique_values, substitution_map, reverse_map)
-            elif pii_type == '이메일':
-                self._handle_emails_pseudonym(unique_values, substitution_map, reverse_map)
-            elif pii_type == '주소':
-                self._handle_addresses_simplified(unique_values, substitution_map, reverse_map)
-            elif pii_type == '회사':
-                self._handle_companies_generic(unique_values, substitution_map, reverse_map)
-            elif pii_type == '나이':
-                self._handle_ages_similar(unique_values, substitution_map, reverse_map)
-            elif pii_type == '주민등록번호':
-                self._handle_rrn_fake(unique_values, substitution_map, reverse_map)
-            elif pii_type == '신용카드':
-                self._handle_cards_fake(unique_values, substitution_map, reverse_map)
-            else:
-                self._handle_generic_masked(pii_type, unique_values, substitution_map, reverse_map)
+            if token:
+                substitution_map[original] = token
+                reverse_map[token] = original
+                print(f"🗺️ 매핑: '{original}' ↔ {token}")
         
-        print(f"Clear pseudonym assignment completed: {len(substitution_map)} mappings")
+        self.substitution_map = substitution_map
+        self.reverse_map = reverse_map
+        
+        print(f"🗺️ 치환 맵 생성 완료: {len(substitution_map)}개 매핑")
+        
         return substitution_map, reverse_map
     
-    def _handle_names_fake(self, names: List[str], substitution_map: Dict[str, str], reverse_map: Dict[str, str]):
-        """이름 → 김가명1, 이가명2 형식"""
-        for name in names:
-            if name in self.name_mappings:
-                replacement = self.name_mappings[name]
-            else:
-                replacement = self.pools.generator.get_fake_name()
-                
-                while replacement in self.used_fake_names:
-                    replacement = self.pools.generator.get_fake_name()
-                
-                self.name_mappings[name] = replacement
-                self.used_fake_names.add(replacement)
-            
-            substitution_map[name] = replacement
-            reverse_map[replacement] = name
-            print(f"Name: {name} → {replacement}")
-    
-    def _handle_phones_sequential(self, phones: List[str], substitution_map: Dict[str, str], reverse_map: Dict[str, str]):
-        """전화번호 → 010-0000-0001 순차 증가"""
-        for phone in phones:
-            if phone in self.phone_mappings:
-                replacement = self.phone_mappings[phone]
-            else:
-                replacement = self.pools.generator.get_fake_phone()
-                
-                while replacement in self.used_fake_phones:
-                    replacement = self.pools.generator.get_fake_phone()
-                
-                self.phone_mappings[phone] = replacement
-                self.used_fake_phones.add(replacement)
-            
-            substitution_map[phone] = replacement
-            reverse_map[replacement] = phone
-            print(f"Phone: {phone} → {replacement}")
-    
-    def _handle_emails_pseudonym(self, emails: List[str], substitution_map: Dict[str, str], reverse_map: Dict[str, str]):
-        """이메일 → Pseudonymization1@gamyeong.com 형식"""
-        for email in emails:
-            if email in self.email_mappings:
-                replacement = self.email_mappings[email]
-            else:
-                replacement = self.pools.generator.get_fake_email()
-                
-                while replacement in self.used_fake_emails:
-                    replacement = self.pools.generator.get_fake_email()
-                
-                self.email_mappings[email] = replacement
-                self.used_fake_emails.add(replacement)
-            
-            substitution_map[email] = replacement
-            reverse_map[replacement] = email
-            print(f"Email: {email} → {replacement}")
-    
-    def _handle_addresses_simplified(self, addresses: List[str], substitution_map: Dict[str, str], reverse_map: Dict[str, str]):
-        """주소 → 시/군/구만 (간소화)"""
-        for address in addresses:
-            if address in self.address_mappings:
-                replacement = self.address_mappings[address]
-            else:
-                replacement = self.pools.generator.get_simplified_address(address)
-                self.address_mappings[address] = replacement
-            
-            substitution_map[address] = replacement
-            reverse_map[replacement] = address
-            print(f"Address: {address} → {replacement}")
-    
-    def _handle_companies_generic(self, companies: List[str], substitution_map: Dict[str, str], reverse_map: Dict[str, str]):
-        """회사 → 일반적인 회사명"""
-        generic_companies = [
-            '테스트회사', '샘플기업', '가명조직', '임시회사', '예시기업',
-            '더미회사', '가상기업', '모의회사', '시험조직', '연습회사'
-        ]
+    def restore_from_tokens(self, tokenized_text: str, reverse_map: Dict[str, str]) -> str:
+        """토큰을 원본으로 복원"""
         
-        for company in companies:
-            if company in self.company_mappings:
-                replacement = self.company_mappings[company]
-            else:
-                replacement = random.choice(generic_companies)
-                self.company_mappings[company] = replacement
-            
-            substitution_map[company] = replacement
-            reverse_map[replacement] = company
-            print(f"Company: {company} → {replacement}")
-    
-    def _handle_ages_similar(self, ages: List[str], substitution_map: Dict[str, str], reverse_map: Dict[str, str]):
-        """나이 → 비슷한 연령대로 변경"""
-        for age in ages:
-            if age in self.age_mappings:
-                replacement = self.age_mappings[age]
-            else:
-                try:
-                    original_age = int(age)
-                    min_age = max(20, original_age - 5)
-                    max_age = min(65, original_age + 5)
-                    replacement = str(random.randint(min_age, max_age))
-                except:
-                    replacement = str(random.randint(25, 45))
-                
-                self.age_mappings[age] = replacement
-            
-            substitution_map[age] = replacement
-            reverse_map[replacement] = age
-            print(f"Age: {age} → {replacement}")
-    
-    def _handle_rrn_fake(self, rrns: List[str], substitution_map: Dict[str, str], reverse_map: Dict[str, str]):
-        """주민등록번호 → 가상의 주민등록번호"""
-        for rrn in rrns:
-            if rrn in self.rrn_mappings:
-                replacement = self.rrn_mappings[rrn]
-            else:
-                year = random.randint(70, 99)
-                month = random.randint(1, 12)
-                day = random.randint(1, 28)
-                gender = random.randint(1, 4)
-                rest = random.randint(100000, 999999)
-                
-                replacement = f"{year:02d}{month:02d}{day:02d}-{gender}{rest:06d}"
-                self.rrn_mappings[rrn] = replacement
-            
-            substitution_map[rrn] = replacement
-            reverse_map[replacement] = rrn
-            print(f"RRN: {rrn} → {replacement}")
-    
-    def _handle_cards_fake(self, cards: List[str], substitution_map: Dict[str, str], reverse_map: Dict[str, str]):
-        """신용카드 → 가상의 카드번호"""
-        for card in cards:
-            if card in self.card_mappings:
-                replacement = self.card_mappings[card]
-            else:
-                last_four = f"{random.randint(1, 9999):04d}"
-                replacement = f"0000-0000-0000-{last_four}"
-                self.card_mappings[card] = replacement
-            
-            substitution_map[card] = replacement
-            reverse_map[replacement] = card
-            print(f"Card: {card} → {replacement}")
-    
-    def _handle_generic_masked(self, pii_type: str, values: List[str], substitution_map: Dict[str, str], reverse_map: Dict[str, str]):
-        """기타 타입 → 마스킹"""
-        for value in values:
-            replacement = f"[{pii_type.upper()}_MASKED]"
-            
-            substitution_map[value] = replacement
-            reverse_map[replacement] = value
-            print(f"{pii_type}: {value} → {replacement}")
+        print("🔄 토큰 복원 시작")
+        
+        result = tokenized_text
+        restored_count = 0
+        
+        # 모든 토큰을 원본으로 복원
+        for token, original in reverse_map.items():
+            if token in result:
+                count = result.count(token)
+                result = result.replace(token, original)
+                restored_count += count
+                print(f"🔄 복원: {token} → '{original}' ({count}번)")
+        
+        print(f"🔄 토큰 복원 완료: {restored_count}개 복원")
+        
+        return result
 
-def apply_replacements_smart(text: str, substitution_map: Dict[str, str]) -> str:
-    """스마트 텍스트 치환 (순서 고려)"""
+# 전역 매니저 인스턴스
+_workflow_manager = None
+
+def get_workflow_manager():
+    """WorkflowReplacementManager 싱글톤 인스턴스"""
+    global _workflow_manager
+    if _workflow_manager is None:
+        _workflow_manager = WorkflowReplacementManager()
+    return _workflow_manager
+
+def apply_tokenization(text: str, substitution_map: Dict[str, str]) -> str:
+    """토큰화 적용"""
     if not substitution_map:
         return text
     
-    print(f"Smart text substitution: {len(substitution_map)} mappings")
-    
-    # 긴 문자열부터 치환
-    sorted_items = sorted(substitution_map.items(), key=lambda x: len(x[0]), reverse=True)
+    print(f"🏷️ 토큰화 적용: {len(substitution_map)}개 매핑")
     
     result = text
-    replacements_made = 0
+    applied_count = 0
     
-    for original, replacement in sorted_items:
+    # 긴 문자열부터 치환 (부분 문자열 문제 방지)
+    sorted_items = sorted(substitution_map.items(), key=lambda x: len(x[0]), reverse=True)
+    
+    for original, token in sorted_items:
         if original in result:
-            old_count = result.count(original)
-            result = result.replace(original, replacement)
-            
-            if old_count > 0:
-                replacements_made += 1
-                print(f"Substitution: '{original}' → '{replacement}' ({old_count} times)")
+            count = result.count(original)
+            result = result.replace(original, token)
+            applied_count += count
+            print(f"🏷️ 토큰화: '{original}' → {token} ({count}번)")
     
-    print(f"Smart substitution completed: {replacements_made} applied")
+    print(f"🏷️ 토큰화 완료: {applied_count}개 적용")
     return result
 
-def restore_text_smart(pseudonymized_text: str, reverse_map: Dict[str, str]) -> str:
-    """스마트 텍스트 복원"""
-    if not reverse_map:
-        return pseudonymized_text
-    
-    sorted_items = sorted(reverse_map.items(), key=lambda x: len(x[0]), reverse=True)
-    
-    result = pseudonymized_text
-    for pseudonym, original in sorted_items:
-        result = result.replace(pseudonym, original)
-    
-    return result
+def restore_from_tokens(tokenized_text: str, reverse_map: Dict[str, str]) -> str:
+    """토큰을 원본으로 복원"""
+    manager = get_workflow_manager()
+    return manager.restore_from_tokens(tokenized_text, reverse_map)
 
 def create_detailed_mapping_report(substitution_map: Dict[str, str], reverse_map: Dict[str, str]) -> str:
-    """상세한 매핑 리포트 생성"""
-    if not substitution_map:
-        return "No mapped items."
-    
-    report = "Detailed Pseudonymization Mapping Report\n"
+    """상세 매핑 리포트 생성"""
+    report = "워크플로우 기반 토큰 매핑 리포트\n"
     report += "=" * 50 + "\n"
     
     by_type = defaultdict(list)
     
-    for original, replacement in substitution_map.items():
-        if '@' in original:
-            pii_type = 'Email'
-        elif any(char.isdigit() for char in original) and ('010' in original or '02' in original):
-            pii_type = 'Phone'
-        elif original.count('-') == 2 and len(original.replace('-', '')) == 13:
-            pii_type = 'RRN'
-        elif original.count('-') == 3 and len(original.replace('-', '')) == 16:
-            pii_type = 'Card'
-        elif original.isdigit() and 1 <= int(original) <= 120:
-            pii_type = 'Age'
-        elif any(keyword in original for keyword in ['시', '구', '군', '로', '동']):
-            pii_type = 'Address'
-        elif len(original) >= 2 and all(ord('가') <= ord(char) <= ord('힣') for char in original):
-            pii_type = 'Name'
+    for original, token in substitution_map.items():
+        # 토큰에서 타입 추출
+        if '[PER_' in token:
+            pii_type = '이름'
+        elif '[ORG_' in token:
+            pii_type = '회사'
+        elif '[LOC_' in token:
+            pii_type = '주소'
+        elif '[EMAIL_' in token:
+            pii_type = '이메일'
+        elif '[PHONE_' in token:
+            pii_type = '전화번호'
+        elif '[AGE_' in token:
+            pii_type = '나이'
+        elif '[RRN_' in token:
+            pii_type = '주민등록번호'
+        elif '[CARD_' in token:
+            pii_type = '신용카드'
+        elif '[ACCT_' in token:
+            pii_type = '계좌번호'
         else:
-            pii_type = 'Other'
+            pii_type = '기타'
         
-        by_type[pii_type].append((original, replacement))
+        by_type[pii_type].append((original, token))
     
     for pii_type, mappings in by_type.items():
-        report += f"\n{pii_type} ({len(mappings)} items):\n"
-        for original, replacement in mappings:
-            report += f"   • {original} → {replacement}\n"
+        report += f"\n{pii_type} ({len(mappings)}개 항목):\n"
+        for original, token in mappings:
+            report += f"   • {original} ↔ {token}\n"
     
-    report += f"\nTotal: {len(substitution_map)} PII pseudonymized\n"
-    report += "All pseudonyms are clearly distinguishable.\n"
+    report += f"\n전체: {len(substitution_map)}개 PII 토큰화됨\n"
+    report += "워크플로우 기반 양방향 매핑 완료\n"
     
     return report
 
-# 호환성 함수들
-def apply_replacements(text: str, substitution_map: Dict[str, str]) -> str:
-    return apply_replacements_smart(text, substitution_map)
+# 호환성을 위한 기존 클래스
+class ReplacementManager(WorkflowReplacementManager):
+    """호환성을 위한 클래스"""
+    
+    def assign_replacements(self, items: List[Dict[str, Any]]) -> Tuple[Dict[str, str], Dict[str, str]]:
+        """호환성을 위한 메서드 - 토큰 맵 사용"""
+        
+        # 토큰 맵 생성
+        token_map = {}
+        type_counters = {}
+        
+        type_prefixes = {
+            '이름': 'PER',
+            '회사': 'ORG', 
+            '주소': 'LOC',
+            '이메일': 'EMAIL',
+            '전화번호': 'PHONE',
+            '나이': 'AGE',
+            '주민등록번호': 'RRN',
+            '신용카드': 'CARD',
+            '계좌번호': 'ACCT'
+        }
+        
+        for item in items:
+            pii_type = item['type']
+            pii_value = item['value']
+            
+            if pii_type not in type_counters:
+                type_counters[pii_type] = 0
+            
+            prefix = type_prefixes.get(pii_type, 'MISC')
+            token = f"[{prefix}_{type_counters[pii_type]}]"
+            
+            token_map[pii_value] = token
+            type_counters[pii_type] += 1
+        
+        return self.create_substitution_map(items, token_map)
 
-def restore_text(pseudonymized_text: str, reverse_map: Dict[str, str]) -> str:
-    return restore_text_smart(pseudonymized_text, reverse_map)
+# 호환성 함수들
+def apply_replacements_smart(text: str, substitution_map: Dict[str, str]) -> str:
+    return apply_tokenization(text, substitution_map)
+
+def apply_replacements(text: str, substitution_map: Dict[str, str]) -> str:
+    return apply_tokenization(text, substitution_map)
+
+def restore_text_smart(tokenized_text: str, reverse_map: Dict[str, str]) -> str:
+    return restore_from_tokens(tokenized_text, reverse_map)
+
+def restore_text(tokenized_text: str, reverse_map: Dict[str, str]) -> str:
+    return restore_from_tokens(tokenized_text, reverse_map)
 
 def remove_duplicates(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """중복 제거 (위치 기반)"""
@@ -312,3 +204,17 @@ def remove_duplicates(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             seen_positions.add(position_key)
     
     return unique_items
+
+# 워크플로우 핵심 함수 export
+__all__ = [
+    'ReplacementManager',
+    'WorkflowReplacementManager',
+    'apply_replacements',
+    'apply_replacements_smart',
+    'apply_tokenization',
+    'restore_text',
+    'restore_text_smart', 
+    'restore_from_tokens',
+    'create_detailed_mapping_report',
+    'remove_duplicates'
+]

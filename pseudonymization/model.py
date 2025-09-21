@@ -1,7 +1,7 @@
 # pseudonymization/model.py
 """
-NER 모델 관리 모듈 - 깔끔한 버전
-간소화 모드 + BIO 태그 문제 해결
+NER 모델 관리 모듈 - 수정된 버전
+간소화 모드 + BIO 태그 문제 해결 + 한글 로그
 """
 
 import time
@@ -18,7 +18,7 @@ try:
     NER_AVAILABLE = True
 except ImportError:
     NER_AVAILABLE = False
-    print("transformers library not installed")
+    print("transformers 라이브러리가 설치되지 않았습니다")
 
 # 검증된 한국어 NER 모델들
 NER_MODELS = [
@@ -58,12 +58,12 @@ class WorkingNERModel:
     def load_model(self) -> bool:
         """NER 모델 로드"""
         if not NER_AVAILABLE:
-            print("NER model cannot be loaded - transformers library required")
+            print("NER 모델을 로드할 수 없습니다 - transformers 라이브러리가 필요합니다")
             return False
         
         for model_name in NER_MODELS:
             try:
-                print(f"Loading NER model: {model_name}")
+                print(f"NER 모델 로딩 중: {model_name}")
                 
                 # 토크나이저와 모델 로드
                 self.tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -71,7 +71,7 @@ class WorkingNERModel:
                 
                 # 라벨 매핑 저장
                 self.id2label = self.model.config.id2label
-                print(f"Label mapping: {list(self.id2label.values())[:10]}...")
+                print(f"라벨 매핑: {list(self.id2label.values())[:10]}...")
                 
                 # 파이프라인 생성 (aggregation_strategy="simple" 사용)
                 self.pipeline = pipeline(
@@ -82,23 +82,31 @@ class WorkingNERModel:
                     device=self.device
                 )
                 
+                # 디바이스 설정 출력
+                if self.device == 0:
+                    print("장치 설정: GPU 사용")
+                elif self.device == "mps":
+                    print("장치 설정: Apple Silicon 사용")
+                else:
+                    print("장치 설정: CPU 사용")
+                
                 # 테스트
                 test_text = "김철수는 서울 강남구에 살고 있습니다."
                 test_result = self.extract_entities(test_text)
                 
                 self.loaded = True
                 self.model_name = model_name
-                print(f"NER model loaded successfully: {model_name}")
-                print(f"Test result: {len(test_result)} entities detected")
+                print(f"NER 모델 로딩 성공: {model_name}")
+                print(f"테스트 결과: {len(test_result)}개 엔터티 탐지")
                 for entity in test_result:
                     print(f"  - {entity['type']}: {entity['value']}")
                 return True
                 
             except Exception as e:
-                print(f"{model_name} loading failed: {e}")
+                print(f"{model_name} 로딩 실패: {e}")
                 continue
         
-        print("All NER model loading failed")
+        print("모든 NER 모델 로딩 실패")
         return False
     
     def extract_entities(self, text: str) -> List[Dict[str, Any]]:
@@ -136,13 +144,13 @@ class WorkingNERModel:
                         'confidence': score,
                         'source': 'NER'
                     })
-                    print(f"NER detected: {pii_type} = '{word}' (confidence: {score:.3f})")
+                    print(f"NER 탐지: {pii_type} = '{word}' (신뢰도: {score:.3f})")
             
-            print(f"NER ({self.model_name.split('/')[-1]}) detection: {len(entities)} items")
+            print(f"NER ({self.model_name.split('/')[-1]}) 탐지: {len(entities)}개 항목")
             return entities
             
         except Exception as e:
-            print(f"NER entity extraction failed: {e}")
+            print(f"NER 개체명 추출 실패: {e}")
             return []
     
     def _map_entity_type(self, entity_type: str) -> str:
@@ -192,7 +200,7 @@ def extract_entities_with_ner(text: str) -> List[Dict[str, Any]]:
     model = get_ner_model()
     
     if not model.is_loaded():
-        print("NER model not loaded")
+        print("NER 모델이 로드되지 않았습니다")
         return []
     
     return model.extract_entities(text)

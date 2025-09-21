@@ -1,60 +1,64 @@
 # pseudonymization/core.py
 """
-핵심 가명화 통합 모듈 - 깔끔한 버전
-NER 간소화 + Regex 중심 + 명확한 가명화
+워크플로우 기반 핵심 가명화 통합 모듈
+토큰 기반 가명화 → AI 처리 → 토큰 복원
 """
 
 import time
 from typing import Dict, Any, List
 from .pools import initialize_pools, get_pools
 from .detection import detect_pii_enhanced
-from .replacement import ReplacementManager, apply_replacements_smart, restore_text_smart, create_detailed_mapping_report
+from .replacement import get_workflow_manager, apply_tokenization, restore_from_tokens, create_detailed_mapping_report
 
-# 전역 ReplacementManager
-_replacement_manager = None
-
-def get_replacement_manager() -> ReplacementManager:
-    """ReplacementManager 싱글톤 인스턴스"""
-    global _replacement_manager
-    if _replacement_manager is None:
-        _replacement_manager = ReplacementManager()
-    return _replacement_manager
+# 워크플로우 핵심 함수 export
+__all__ = [
+    'pseudonymize_text',
+    'restore_original', 
+    'workflow_process_ai_response',
+    'load_data_pools',
+    'get_data_pool_stats',
+    'assign_realistic_values',
+    'create_masked_text'
+]
 
 def pseudonymize_text(text: str, detailed_report: bool = True) -> Dict[str, Any]:
     """
-    최적화된 통합 가명화 함수
+    워크플로우 기반 통합 가명화 함수
     
     Args:
         text: 원본 텍스트
         detailed_report: 상세 리포트 생성 여부
         
     Returns:
-        dict: 가명화 결과
+        dict: 가명화 결과 (토큰화된 텍스트 포함)
     """
     start_time = time.time()
-    print(f"Starting pseudonymization: {text[:50]}...")
+    print(f"🚀 워크플로우 기반 가명화 시작: {text[:50]}...")
     
     # 데이터풀 확인 및 초기화
     pools = get_pools()
     if not pools._initialized:
-        print("Initializing data pools...")
+        print("📦 데이터풀 초기화 중...")
         initialize_pools()
     
-    # PII 탐지
-    print("PII detection (NER simplified + Regex focused)")
+    # PII 탐지 (워크플로우 기반)
+    print("🔍 PII 탐지 (워크플로우 기반)")
     detection = detect_pii_enhanced(text)
     
     if not detection['items']:
         processing_time = time.time() - start_time
-        print(f"No PII detected. Processing time: {processing_time:.3f}s")
+        print(f"❌ PII 탐지되지 않음. 처리 시간: {processing_time:.3f}초")
         return {
             "original": text,
             "pseudonymized": text,
+            "pseudonymized_text": text,
+            "tokenized_text": text,  # 워크플로우용
             "masked_prompt": text,
             "detection": detection,
             "substitution_map": {},
             "reverse_map": {},
-            "mapping_report": "No PII detected.",
+            "token_map": {},  # 워크플로우용
+            "mapping_report": "PII가 탐지되지 않았습니다.",
             "processing_time": processing_time,
             "stats": {
                 "detected_items": 0,
@@ -67,15 +71,16 @@ def pseudonymize_text(text: str, detailed_report: bool = True) -> Dict[str, Any]
             }
         }
     
-    # 가명 치환값 할당
+    # 토큰 기반 치환 처리
     detection_time = time.time() - start_time
     replacement_start = time.time()
     
-    manager = get_replacement_manager()
-    substitution_map, reverse_map = manager.assign_replacements(detection['items'])
+    manager = get_workflow_manager()
+    token_map = detection['stats']['token_map']
+    substitution_map, reverse_map = manager.create_substitution_map(detection['items'], token_map)
     
-    # 텍스트 치환
-    pseudonymized = apply_replacements_smart(text, substitution_map)
+    # 텍스트 토큰화
+    tokenized_text = apply_tokenization(text, substitution_map)
     
     replacement_time = time.time() - replacement_start
     total_time = time.time() - start_time
@@ -85,18 +90,21 @@ def pseudonymize_text(text: str, detailed_report: bool = True) -> Dict[str, Any]
     if detailed_report:
         mapping_report = create_detailed_mapping_report(substitution_map, reverse_map)
     
-    print(f"Before: {text}")
-    print(f"After: {pseudonymized}")
-    print(f"Processing time: detection {detection_time:.3f}s, replacement {replacement_time:.3f}s, total {total_time:.3f}s")
+    print(f"📝 이전: {text}")
+    print(f"🏷️ 토큰화: {tokenized_text}")
+    print(f"⏱️ 처리 시간: 탐지 {detection_time:.3f}초, 토큰화 {replacement_time:.3f}초, 전체 {total_time:.3f}초")
     
     # 결과 반환
     result = {
         "original": text,
-        "pseudonymized": pseudonymized,
-        "masked_prompt": pseudonymized,
+        "pseudonymized": tokenized_text,  # 토큰화된 텍스트
+        "pseudonymized_text": tokenized_text,  # 호환성
+        "tokenized_text": tokenized_text,  # 워크플로우용 (AI로 전송할 텍스트)
+        "masked_prompt": tokenized_text,  # 호환성
         "detection": detection,
-        "substitution_map": substitution_map,
-        "reverse_map": reverse_map,
+        "substitution_map": substitution_map,  # 원본 → 토큰
+        "reverse_map": reverse_map,  # 토큰 → 원본
+        "token_map": token_map,  # 워크플로우용
         "mapping_report": mapping_report,
         "processing_time": total_time,
         "stats": {
@@ -105,131 +113,62 @@ def pseudonymize_text(text: str, detailed_report: bool = True) -> Dict[str, Any]
             "detection_time": detection_time,
             "replacement_time": replacement_time,
             "total_time": total_time,
-            "items_by_type": {},
-            "detection_stats": detection['stats']
+            "items_by_type": detection['stats']['items_by_type'],
+            "detection_stats": detection['stats']['detection_stats']
         }
     }
-    
-    # 타입별 통계 추가
-    for item in detection['items']:
-        item_type = item['type']
-        if item_type not in result['stats']['items_by_type']:
-            result['stats']['items_by_type'][item_type] = 0
-        result['stats']['items_by_type'][item_type] += 1
-    
-    print(f"Pseudonymization completed: {len(detection['items'])} PII processed")
-    print(f"Substitution map: {substitution_map}")
     
     return result
 
-def restore_original(pseudonymized_text: str, reverse_map: Dict[str, str]) -> str:
-    """가명화된 텍스트를 원본으로 복원"""
-    return restore_text_smart(pseudonymized_text, reverse_map)
+def restore_original(tokenized_text: str, reverse_map: Dict[str, str]) -> str:
+    """토큰화된 텍스트를 원본으로 복원 (워크플로우 4단계)"""
+    print("🔄 워크플로우 4단계: AI 응답 복원")
+    return restore_from_tokens(tokenized_text, reverse_map)
 
-def batch_pseudonymize(texts: List[str], show_progress: bool = True) -> List[Dict[str, Any]]:
-    """여러 텍스트 일괄 가명화"""
-    if show_progress:
-        print(f"Batch pseudonymization started: {len(texts)} texts")
+def workflow_process_ai_response(ai_response: str, reverse_map: Dict[str, str]) -> str:
+    """워크플로우 4단계: AI 응답을 복원하여 최종 답변 생성"""
     
-    results = []
-    total_start = time.time()
+    print("🤖 AI 응답 수신 및 복원 시작")
+    print(f"🤖 AI 응답 (토큰화됨): {ai_response[:100]}...")
     
-    for i, text in enumerate(texts, 1):
-        if show_progress:
-            print(f"Processing [{i}/{len(texts)}]...")
-        result = pseudonymize_text(text, detailed_report=False)
-        results.append(result)
+    # AI 응답에서 토큰을 원본으로 복원
+    restored_response = restore_from_tokens(ai_response, reverse_map)
     
-    total_time = time.time() - total_start
-    if show_progress:
-        print(f"Batch pseudonymization completed: {len(texts)} texts, total {total_time:.3f}s")
-        print(f"Average time per text: {total_time/len(texts):.3f}s")
+    print(f"✅ 복원된 최종 답변: {restored_response[:100]}...")
     
-    return results
+    return restored_response
 
 def load_data_pools(custom_data: Dict = None):
     """데이터풀 로드"""
+    print("📦 데이터풀 로딩 중...")
     initialize_pools(custom_data)
+    print("📦 데이터풀 로딩 완료")
 
 def get_data_pool_stats() -> Dict[str, int]:
-    """데이터풀 통계"""
-    from .pools import get_pool_stats
-    return get_pool_stats()
-
-def get_performance_benchmark() -> Dict[str, Any]:
-    """성능 벤치마크 생성"""
+    """데이터풀 통계 정보"""
     pools = get_pools()
-    
-    # 다양한 크기의 테스트 텍스트
-    test_cases = [
-        "김민준님 안녕하세요.",
-        "이영희님이 서울시 강남구에 거주합니다. 연락처는 010-1234-5678입니다.",
-        "안녕하세요 박지우님, 저는 최수민입니다. 부산광역시 해운대구 센텀시티에서 근무하고 있으며, 연락처는 051-123-4567이고 이메일은 contact@example.com입니다. 나이는 30세이고, 회사는 삼성전자입니다."
-    ]
-    
-    benchmark_results = {}
-    
-    for i, test_text in enumerate(test_cases, 1):
-        print(f"Benchmark {i}: {len(test_text)} characters")
-        
-        start_time = time.time()
-        result = pseudonymize_text(test_text, detailed_report=False)
-        end_time = time.time()
-        
-        benchmark_results[f"test_{i}"] = {
-            "text_length": len(test_text),
-            "detected_items": len(result['detection']['items']),
-            "processing_time": end_time - start_time,
-            "detection_stats": result['stats']['detection_stats']
-        }
-    
-    # 전체 통계
-    total_time = sum(r['processing_time'] for r in benchmark_results.values())
-    total_items = sum(r['detected_items'] for r in benchmark_results.values())
-    
     return {
-        "data_pools": get_data_pool_stats(),
-        "benchmark_results": benchmark_results,
-        "summary": {
-            "total_tests": len(test_cases),
-            "total_processing_time": total_time,
-            "total_detected_items": total_items,
-            "average_time_per_item": total_time / max(1, total_items),
-            "items_per_second": total_items / total_time if total_time > 0 else 0
-        }
+        "탐지_이름수": len(pools.real_names),
+        "탐지_주소수": len(pools.real_addresses),
+        "탐지_도로수": len(pools.road_names),
+        "탐지_시군구수": len(pools.districts),
+        "탐지_시도수": len(pools.provinces),
+        "회사수": len(pools.companies)
     }
 
-def validate_pseudonymization(original: str, pseudonymized: str, reverse_map: Dict[str, str]) -> Dict[str, Any]:
-    """가명화 결과 검증"""
-    # 복원 테스트
-    restored = restore_original(pseudonymized, reverse_map)
-    restoration_success = (original == restored)
+# 호환성을 위한 기존 함수들
+def assign_realistic_values(items: List[Dict[str, Any]]) -> Dict[str, str]:
+    """호환성을 위한 함수"""
+    manager = get_workflow_manager()
     
-    # 가명 품질 확인
-    quality_checks = {
-        "has_fake_names": "가명" in pseudonymized,
-        "has_sequential_phones": "010-0000-" in pseudonymized,
-        "has_pseudonym_emails": "Pseudonymization" in pseudonymized and "@gamyeong.com" in pseudonymized,
-        "no_original_emails": "@" in original and "@example.com" not in pseudonymized and "@naver.com" not in pseudonymized,
-        "simplified_addresses": True
-    }
+    # 간단한 토큰 맵 생성
+    token_map = {}
+    for i, item in enumerate(items):
+        token_map[item['value']] = f"[ITEM_{i}]"
     
-    return {
-        "restoration_success": restoration_success,
-        "quality_checks": quality_checks,
-        "quality_score": sum(quality_checks.values()) / len(quality_checks),
-        "original_length": len(original),
-        "pseudonymized_length": len(pseudonymized),
-        "length_difference": len(pseudonymized) - len(original)
-    }
-
-# 호환성을 위한 함수들
-def assign_realistic_values(items):
-    """기존 코드 호환성을 위한 함수"""
-    manager = get_replacement_manager()
-    substitution_map, _ = manager.assign_replacements(items)
+    substitution_map, _ = manager.create_substitution_map(items, token_map)
     return substitution_map
 
-def create_masked_text(text, items, substitution_map):
-    """기존 코드 호환성을 위한 함수"""
-    return apply_replacements_smart(text, substitution_map)
+def create_masked_text(text: str, substitution_map: Dict[str, str]) -> str:
+    """호환성을 위한 함수"""
+    return apply_tokenization(text, substitution_map)

@@ -1,411 +1,85 @@
 {
   "logs": [
     {
-      "time": "2025-09-21 21:17:36",
+      "time": "2025-09-21 23:55:26",
       "remote_addr": "127.0.0.1",
       "path": "/pseudonymize",
       "input": {
-        "id": "popup_test_1758457025991",
-        "prompt": "테스트입니다. 제 이름은 김철수이고 연락처는 010-1234-5678입니다."
-      },
-      "detection": {
-        "contains_pii": true,
-        "items": [
-          {
-            "type": "이름",
-            "value": "이름",
-            "start": 10,
-            "end": 12,
-            "confidence": 0.95,
-            "source": "CSV-Names"
-          },
-          {
-            "type": "이름",
-            "value": "김철수",
-            "start": 14,
-            "end": 17,
-            "confidence": 0.95,
-            "source": "CSV-Names"
-          },
-          {
-            "type": "전화번호",
-            "value": "010-1234-5678",
-            "start": 25,
-            "end": 38,
-            "confidence": 1.0,
-            "source": "Regex"
-          }
-        ],
-        "stats": {
-          "ner": 0,
-          "csv_names": 2,
-          "csv_addresses": 0,
-          "regex": 1,
-          "total": 3
-        }
-      },
-      "substitution_map": {
-        "김철수": "윤가명",
-        "이름": "안샘플",
-        "010-1234-5678": "010-9159-9925"
-      },
-      "reverse_map": {
-        "윤가명": "김철수",
-        "안샘플": "이름",
-        "010-9159-9925": "010-1234-5678"
-      },
-      "performance": {
-        "items_detected": 3
-      }
-    },
-    {
-      "time": "2025-09-21 21:25:43",
-      "remote_addr": "127.0.0.1",
-      "path": "/pseudonymize",
-      "input": {
-        "id": "pseudo_1758457511355_2zdkb22ag",
-        "prompt": "안녕하세요 명환님, 저는 프론트 매니저입니다. 오늘 잘 부탁드립니다. 혹시 무슨 문제가 있으시다면 01048272947 또는 qwe@gmail.com으로 연락 부탁드립니다."
-      },
-      "detection": {
-        "contains_pii": true,
-        "items": [
-          {
-            "type": "이름",
-            "value": "명환",
-            "start": 6,
-            "end": 8,
-            "confidence": 0.95,
-            "source": "CSV-Names"
-          },
-          {
-            "type": "이름",
-            "value": "오늘",
-            "start": 26,
-            "end": 28,
-            "confidence": 0.95,
-            "source": "CSV-Names"
-          },
-          {
-            "type": "전화번호",
-            "value": "01048272947",
-            "start": 55,
-            "end": 66,
-            "confidence": 1.0,
-            "source": "Regex"
-          },
-          {
-            "type": "이메일",
-            "value": "qwe@gmail.com",
-            "start": 70,
-            "end": 83,
-            "confidence": 1.0,
-            "source": "Regex"
-          }
-        ],
-        "stats": {
-          "ner": 0,
-          "csv_names": 3,
-          "csv_addresses": 0,
-          "regex": 2,
-          "total": 4
-        }
-      },
-      "substitution_map": {
-        "오늘": "류무명",
-        "명환": "정테스",
-        "01048272947": "010-3280-7557",
-        "qwe@gmail.com": "test2535@hanmail.net"
-      },
-      "reverse_map": {
-        "류무명": "오늘",
-        "정테스": "명환",
-        "010-3280-7557": "01048272947",
-        "test2535@hanmail.net": "qwe@gmail.com"
-      },
-      "performance": {
-        "items_detected": 4
-      }
-    },
-    {
-      "time": "2025-09-21 21:44:20",
-      "remote_addr": "127.0.0.1",
-      "path": "/pseudonymize",
-      "input": {
-        "id": "debug_test_1758458658910",
+        "id": "debug_test_1758466526054",
         "prompt": "안녕하세요, 제 이름은 홍길동이고 연락처는 010-1234-5678입니다. 서울 강남구에 살고 있습니다."
       },
-      "detection": {
-        "contains_pii": true,
-        "items": [
-          {
-            "type": "전화번호",
-            "value": "010-1234-5678",
-            "start": 24,
-            "end": 37,
-            "confidence": 1.0,
-            "source": "Regex"
-          },
-          {
-            "type": "주소",
-            "value": "서울",
-            "start": 42,
-            "end": 44,
-            "confidence": 0.95,
-            "source": "Fast-Province"
-          },
-          {
-            "type": "주소",
-            "value": "강남구",
-            "start": 45,
-            "end": 48,
-            "confidence": 0.9,
-            "source": "Fast-Districts"
-          },
-          {
-            "type": "주소",
-            "value": "남구",
-            "start": 46,
-            "end": 48,
-            "confidence": 0.9,
-            "source": "Fast-Districts"
-          }
-        ],
-        "stats": {
-          "ner": 0,
-          "fast_names": 0,
-          "fast_addresses": 3,
-          "regex": 1,
-          "total": 4
-        }
-      },
-      "substitution_map": {
-        "010-1234-5678": "032-540-9000",
-        "서울": "인천",
-        "강남구": "부산진구",
-        "남구": "대구"
-      },
-      "reverse_map": {
-        "032-540-9000": "010-1234-5678",
-        "인천": "서울",
-        "부산진구": "강남구",
-        "대구": "남구"
-      },
-      "performance": {
-        "items_detected": 4
-      }
-    },
-    {
-      "time": "2025-09-21 21:44:31",
-      "remote_addr": "127.0.0.1",
-      "path": "/pseudonymize",
-      "input": {
-        "id": "debug_test_1758458670368",
-        "prompt": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요."
-      },
+      "pseudonymized_text": "안녕하세요, 제 이름은 최익명이고 연락처는 010-0000-5543입니다. 대구시 강남구에 살고 있습니다.",
       "detection": {
         "contains_pii": true,
         "items": [
           {
             "type": "이름",
-            "value": "김철수",
-            "start": 0,
-            "end": 3,
-            "confidence": 0.95,
-            "source": "Fast-Names"
-          },
-          {
-            "type": "주소",
-            "value": "부산",
-            "start": 9,
-            "end": 11,
-            "confidence": 0.95,
-            "source": "Fast-Province"
-          },
-          {
-            "type": "주소",
-            "value": "해운대구",
-            "start": 12,
-            "end": 16,
-            "confidence": 0.9,
-            "source": "Fast-Districts"
-          },
-          {
-            "type": "주소",
-            "value": "대구",
-            "start": 14,
-            "end": 16,
-            "confidence": 0.95,
-            "source": "Fast-Province"
-          },
-          {
-            "type": "전화번호",
-            "value": "010-9876-5432",
-            "start": 36,
-            "end": 49,
-            "confidence": 1.0,
-            "source": "Regex"
-          }
-        ],
-        "stats": {
-          "ner": 0,
-          "fast_names": 1,
-          "fast_addresses": 3,
-          "regex": 1,
-          "total": 5
-        }
-      },
-      "substitution_map": {
-        "김철수": "조민준",
-        "해운대구": "해운대구",
-        "부산": "부산",
-        "대구": "인천",
-        "010-9876-5432": "010-1600-9200"
-      },
-      "reverse_map": {
-        "조민준": "김철수",
-        "해운대구": "해운대구",
-        "부산": "부산",
-        "인천": "대구",
-        "010-1600-9200": "010-9876-5432"
-      },
-      "performance": {
-        "items_detected": 5
-      }
-    },
-    {
-      "time": "2025-09-21 21:44:47",
-      "remote_addr": "127.0.0.1",
-      "path": "/pseudonymize",
-      "input": {
-        "id": "debug_test_1758458686761",
-        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다."
-      },
-      "detection": {
-        "contains_pii": true,
-        "items": [
-          {
-            "type": "이름",
-            "value": "이영희",
-            "start": 0,
-            "end": 3,
-            "confidence": 0.95,
-            "source": "Fast-Names"
-          },
-          {
-            "type": "나이",
-            "value": "25",
-            "start": 5,
-            "end": 8,
-            "confidence": 0.9,
-            "source": "Regex"
-          },
-          {
-            "type": "주소",
-            "value": "대구",
-            "start": 10,
-            "end": 12,
-            "confidence": 0.95,
-            "source": "Fast-Province"
-          },
-          {
-            "type": "주소",
-            "value": "중구",
+            "value": "홍길동",
             "start": 13,
-            "end": 15,
-            "confidence": 0.9,
-            "source": "Fast-Districts"
+            "end": 16,
+            "confidence": 0.95,
+            "source": "실명목록"
           },
-          {
-            "type": "이메일",
-            "value": "contact@example.com",
-            "start": 28,
-            "end": 47,
-            "confidence": 1.0,
-            "source": "Regex"
-          }
-        ],
-        "stats": {
-          "ner": 0,
-          "fast_names": 1,
-          "fast_addresses": 2,
-          "regex": 2,
-          "total": 5
-        }
-      },
-      "substitution_map": {
-        "이영희": "윤하준",
-        "25": "29",
-        "대구": "인천",
-        "중구": "부산",
-        "contact@example.com": "sample0019@naver.com"
-      },
-      "reverse_map": {
-        "윤하준": "이영희",
-        "29": "25",
-        "인천": "대구",
-        "부산": "중구",
-        "sample0019@naver.com": "contact@example.com"
-      },
-      "performance": {
-        "items_detected": 5
-      }
-    },
-    {
-      "time": "2025-09-21 22:09:24",
-      "remote_addr": "127.0.0.1",
-      "path": "/pseudonymize",
-      "input": {
-        "id": "debug_test_1758460163976",
-        "prompt": "안녕하세요, 제 이름은 홍길동이고 연락처는 010-1234-5678입니다. 서울 강남구에 살고 있습니다."
-      },
-      "detection": {
-        "contains_pii": true,
-        "items": [
           {
             "type": "전화번호",
             "value": "010-1234-5678",
             "start": 24,
             "end": 37,
             "confidence": 1.0,
-            "source": "Regex-Phone"
+            "source": "정규식"
           },
           {
             "type": "주소",
             "value": "서울",
             "start": 42,
             "end": 44,
-            "confidence": 0.95,
-            "source": "Pool-Province"
-          },
-          {
-            "type": "주소",
-            "value": "강남구",
-            "start": 45,
-            "end": 48,
             "confidence": 0.9,
-            "source": "Pool-District"
+            "source": "패턴"
           }
         ],
         "stats": {
-          "ner_hints": 0,
-          "regex_main": 1,
-          "pool_names": 0,
-          "pool_addresses": 3,
-          "total": 3
+          "items_by_type": {
+            "이름": 1,
+            "전화번호": 1,
+            "주소": 1
+          },
+          "detection_stats": {
+            "실명목록": 1,
+            "정규식": 1,
+            "패턴": 1
+          },
+          "total_items": 3
         }
       },
       "substitution_map": {
-        "010-1234-5678": "010-0000-0001",
-        "강남구": "대전시",
-        "서울": "대전시"
+        "홍길동": "최익명",
+        "010-1234-5678": "010-0000-5543",
+        "서울": "대구시"
       },
       "reverse_map": {
-        "010-0000-0001": "010-1234-5678",
-        "대전시": "서울"
+        "최익명": "홍길동",
+        "010-0000-5543": "010-1234-5678",
+        "대구시": "서울"
       },
-      "performance": {
-        "items_detected": 3
-      }
+      "processing_time": 0.0,
+      "stats": {
+        "detected_items": 3,
+        "replaced_items": 3,
+        "detection_time": 0.0,
+        "replacement_time": 0.0,
+        "total_time": 0.0,
+        "items_by_type": {
+          "이름": 1,
+          "전화번호": 1,
+          "주소": 1
+        },
+        "detection_stats": {
+          "실명목록": 1,
+          "정규식": 1,
+          "패턴": 1
+        }
+      },
+      "mapping_report": "상세 가명화 매핑 리포트\n==================================================\n\n주소 (1개 항목):\n   • 홍길동 → 최익명\n\n전화번호 (1개 항목):\n   • 010-1234-5678 → 010-0000-5543\n\n이름 (1개 항목):\n   • 서울 → 대구시\n\n전체: 3개 PII 가명화됨\n모든 가명은 명확하게 구별됩니다.\n"
     }
   ]
 }

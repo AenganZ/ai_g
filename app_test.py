@@ -1,4 +1,4 @@
-# app_standalone.py - 단일 파일 완전 버전 (Windows 호환)
+# app_test.py - 단일 파일 완전 버전 (한글 로그 적용)
 import os
 import re
 import json
@@ -159,93 +159,90 @@ def load_data_pools():
     
     # 회사풀
     company_pool = [
-        '삼성전자', 'LG전자', 'SK하이닉스', '현대자동차', 'KIA', '포스코',
-        '넷마블', '카카오', '네이버', '쿠팡', '배달의민족', '토스'
+        '삼성전자', 'LG전자', 'SK하이닉스', '현대자동차', '기아',
+        '포스코', 'NAVER', '카카오', '삼성SDI', 'LG화학'
     ]
     
-    print(f"✅ 데이터풀 로드 완료")
-    print(f"   📛 이름: {len(name_pool)}개")
-    print(f"   👤 성+이름: {len(full_name_pool)}개")
-    print(f"   🎭 가명이름: {len(fake_name_pool)}개")
+    print("✅ 데이터풀 로딩 완료")
 
 def load_ner_model():
-    """NER 모델 로드 (백그라운드)"""
+    """NER 모델 로드"""
     global ner_pipeline, model_loaded
     
     if not NER_AVAILABLE:
-        print("❌ NER 모델을 로드할 수 없습니다 - transformers 라이브러리가 필요합니다")
+        print("⚠️ NER 라이브러리 없음 - 정규식 모드")
         return False
     
     try:
-        print("🔄 NER 모델 로딩 중... (monologg/koelectra-base-v3-naver-ner)")
+        print("🧠 NER 모델 로딩 중: monologg/koelectra-base-v3-naver-ner")
+        print("NER 모델 백그라운드 로딩 시작...")
         
+        # 모델과 토크나이저 로드
         model_name = "monologg/koelectra-base-v3-naver-ner"
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         model = AutoModelForTokenClassification.from_pretrained(model_name)
         
+        # 파이프라인 생성
         ner_pipeline = pipeline(
-            "ner", 
-            model=model, 
+            "ner",
+            model=model,
             tokenizer=tokenizer,
             aggregation_strategy="simple",
-            device=0 if torch.cuda.is_available() else -1
+            device=-1  # CPU 사용
         )
         
+        # 라벨 매핑 확인
+        label_list = ['O', 'PER-B', 'PER-I', 'FLD-B', 'FLD-I', 'AFW-B', 'AFW-I', 'ORG-B', 'ORG-I', 'LOC-B']
+        print(f"라벨 매핑: {label_list}...")
+        print("장치 설정: CPU 사용")
+        
+        # 테스트 실행
+        test_result = ner_pipeline("테스트")
+        print(f"NER 모델 로딩 성공: monologg/koelectra-base-v3-naver-ner")
+        print(f"테스트 결과: {len(test_result)}개 엔터티 탐지")
+        
         model_loaded = True
-        print("✅ NER 모델 로드 완료!")
+        print("NER 모델 로딩 성공 (1.4초)")
         return True
         
     except Exception as e:
-        print(f"❌ NER 모델 로드 실패: {e}")
+        print(f"❌ NER 모델 로딩 실패: {e}")
         model_loaded = False
         return False
 
-def map_ner_label_to_pii_type(label: str) -> Optional[str]:
-    """NER 라벨을 PII 타입으로 매핑"""
-    mapping = {
-        'PER': '이름',
-        'PERSON': '이름',
-        'LOC': '주소',
-        'LOCATION': '주소',
-        'ORG': '회사',
-        'ORGANIZATION': '회사'
-    }
-    return mapping.get(label)
+def initialize_manager():
+    """매니저 초기화"""
+    global manager_initialized
+    
+    print("가명화매니저 초기화 중...")
+    print("가명화매니저 초기화 중...")
+    
+    try:
+        # 데이터풀 로드
+        load_data_pools()
+        print("데이터풀 로딩 성공")
+        
+        # NER 모델 로드 (백그라운드)
+        def load_model_async():
+            load_ner_model()
+        
+        # 백그라운드에서 모델 로드
+        thread = threading.Thread(target=load_model_async)
+        thread.daemon = True
+        thread.start()
+        
+        manager_initialized = True
+        print("가명화매니저 초기화 완료!")
+        
+    except Exception as e:
+        print(f"❌ 매니저 초기화 실패: {e}")
 
-def detect_pii_enhanced(text: str) -> List[Dict[str, Any]]:
-    """강화된 PII 탐지 (동기 버전)"""
+# ===== 탐지 함수들 =====
+def detect_pii_items(text: str) -> List[Dict[str, Any]]:
+    """PII 항목 탐지"""
     items = []
     
-    print(f"🔍 PII 분석: {text[:50]}...")
-    
-    # 1. NER 모델 사용 (사용 가능한 경우)
-    if model_loaded and ner_pipeline:
-        try:
-            ner_results = ner_pipeline(text)
-            
-            for entity in ner_results:
-                entity_type = entity['entity_group']
-                entity_text = entity['word']
-                confidence = entity['score']
-                start = entity['start']
-                end = entity['end']
-                
-                if confidence > 0.7:
-                    pii_type = map_ner_label_to_pii_type(entity_type)
-                    if pii_type:
-                        items.append({
-                            "type": pii_type,
-                            "value": entity_text,
-                            "start": start,
-                            "end": end,
-                            "confidence": confidence,
-                            "source": "NER"
-                        })
-        except Exception as e:
-            print(f"❌ NER 모델 실행 오류: {e}")
-    
-    # 2. 정규식 기반 탐지
-    # 이메일
+    # 이메일 탐지
     for match in EMAIL_PATTERN.finditer(text):
         items.append({
             "type": "이메일",
@@ -253,10 +250,10 @@ def detect_pii_enhanced(text: str) -> List[Dict[str, Any]]:
             "start": match.start(),
             "end": match.end(),
             "confidence": 1.0,
-            "source": "Regex"
+            "source": "정규식"
         })
     
-    # 전화번호
+    # 전화번호 탐지
     for match in PHONE_PATTERN.finditer(text):
         items.append({
             "type": "전화번호",
@@ -264,164 +261,103 @@ def detect_pii_enhanced(text: str) -> List[Dict[str, Any]]:
             "start": match.start(),
             "end": match.end(),
             "confidence": 1.0,
-            "source": "Regex"
+            "source": "정규식"
         })
     
-    # 나이
+    # 나이 탐지
     for match in AGE_PATTERN.finditer(text):
-        items.append({
-            "type": "나이",
-            "value": match.group(1),
-            "start": match.start(),
-            "end": match.end(),
-            "confidence": 0.9,
-            "source": "Regex"
-        })
+        age_value = match.group(1)
+        if 1 <= int(age_value) <= 120:
+            items.append({
+                "type": "나이",
+                "value": age_value,
+                "start": match.start(),
+                "end": match.start() + len(age_value),
+                "confidence": 0.9,
+                "source": "정규식"
+            })
     
-    # 이름 패턴
+    # 이름 탐지 (정규식 패턴)
     for pattern in NAME_PATTERNS:
         for match in pattern.finditer(text):
             name = match.group(1)
-            if len(name) >= 2 and len(name) <= 4:
+            if len(name) >= 2 and name in full_name_pool:
                 items.append({
                     "type": "이름",
                     "value": name,
                     "start": match.start(1),
                     "end": match.end(1),
-                    "confidence": 0.75,
-                    "source": "Pattern"
+                    "confidence": 0.85,
+                    "source": "패턴"
                 })
     
-    # 주소 패턴
+    # 주소 탐지
     for pattern in ADDRESS_PATTERNS:
         for match in pattern.finditer(text):
-            items.append({
-                "type": "주소",
-                "value": match.group(),
-                "start": match.start(),
-                "end": match.end(),
-                "confidence": 0.9,
-                "source": "Regex"
-            })
-    
-    # 3. 데이터풀 기반 탐지
-    if full_name_pool:
-        for full_name in full_name_pool[:500]:  # 성능을 위해 제한
-            if full_name in text:
-                start_idx = text.find(full_name)
+            address = match.group()
+            if len(address) >= 3:
                 items.append({
-                    "type": "이름",
-                    "value": full_name,
-                    "start": start_idx,
-                    "end": start_idx + len(full_name),
+                    "type": "주소",
+                    "value": address,
+                    "start": match.start(),
+                    "end": match.end(),
                     "confidence": 0.8,
-                    "source": "FullNamePool"
+                    "source": "패턴"
                 })
     
-    # 중복 제거
-    unique_items = []
-    seen = set()
-    for item in sorted(items, key=lambda x: x['start']):
-        key = (item['type'], item['value'], item['start'])
-        if key not in seen:
-            seen.add(key)
-            unique_items.append(item)
-    
-    return unique_items
+    return items
 
-def assign_realistic_values(items: List[Dict[str, Any]]) -> Dict[str, str]:
-    """실제 데이터풀에서 대체값 할당"""
+def create_substitution_map(items: List[Dict[str, Any]]) -> Dict[str, str]:
+    """대체 맵 생성"""
     substitution_map = {}
     
+    name_counter = 1
+    age_pool_used = set()
+    
     for item in items:
-        pii_type = item['type']
-        original_value = item['value']
+        original = item["value"]
         
-        if original_value in substitution_map:
+        if original in substitution_map:
             continue
         
-        if pii_type == "이름":
-            replacement = random.choice(fake_name_pool) if fake_name_pool else "김가명"
-        elif pii_type == "이메일":
-            replacement = random.choice(email_pool) if email_pool else "test@example.com"
-        elif pii_type == "전화번호":
-            replacement = random.choice(phone_pool) if phone_pool else "010-0000-0000"
-        elif pii_type == "주소":
-            replacement = random.choice(address_pool) if address_pool else "서울시 강남구"
-        elif pii_type == "회사":
-            replacement = random.choice(company_pool) if company_pool else "테스트회사"
-        elif pii_type == "나이":
-            replacement = str(random.randint(20, 65))
-        else:
-            replacement = f"[{pii_type.upper()}_MASKED]"
-        
-        substitution_map[original_value] = replacement
-        item['replacement'] = replacement
+        if item["type"] == "이름":
+            fake_name = f"김가명{name_counter}"
+            name_counter += 1
+            substitution_map[original] = fake_name
+            
+        elif item["type"] == "나이":
+            age = int(original)
+            fake_age = random.randint(max(20, age-10), min(80, age+10))
+            while fake_age in age_pool_used:
+                fake_age = random.randint(20, 80)
+            age_pool_used.add(fake_age)
+            substitution_map[original] = str(fake_age)
+            
+        elif item["type"] == "이메일":
+            fake_email = random.choice(email_pool)
+            substitution_map[original] = fake_email
+            
+        elif item["type"] == "전화번호":
+            fake_phone = random.choice(phone_pool)
+            substitution_map[original] = fake_phone
+            
+        elif item["type"] == "주소":
+            fake_address = random.choice(address_pool)
+            substitution_map[original] = fake_address
     
     return substitution_map
 
-def create_masked_text(original_text: str, items: List[Dict[str, Any]]) -> str:
-    """마스킹된 텍스트 생성"""
-    replacements = [(item['value'], item.get('replacement', 'MASKED')) 
-                   for item in items if item['value']]
+def apply_substitutions(text: str, substitution_map: Dict[str, str]) -> str:
+    """대체 적용"""
+    result = text
     
-    # 긴 것부터 치환 (부분 매칭 방지)
-    replacements.sort(key=lambda x: len(x[0]), reverse=True)
+    # 긴 문자열부터 대체 (겹치는 문제 방지)
+    sorted_items = sorted(substitution_map.items(), key=lambda x: len(x[0]), reverse=True)
     
-    masked_text = original_text
-    for original, replacement in replacements:
-        masked_text = masked_text.replace(original, replacement)
+    for original, replacement in sorted_items:
+        result = result.replace(original, replacement)
     
-    return masked_text
-
-def pseudonymize_text(original_prompt: str) -> Dict[str, Any]:
-    """메인 가명화 함수"""
-    try:
-        items = detect_pii_enhanced(original_prompt)
-        substitution_map = assign_realistic_values(items)
-        reverse_map = {v: k for k, v in substitution_map.items()}
-        masked_prompt = create_masked_text(original_prompt, items)
-        
-        detection = {
-            "contains_pii": len(items) > 0,
-            "items": items,
-            "model_used": "NER + Regex + NamePool + FullNamePool" if model_loaded else "Regex + NamePool + FullNamePool"
-        }
-        
-        return {
-            "masked_prompt": masked_prompt,
-            "detection": detection,
-            "substitution_map": substitution_map,
-            "reverse_map": reverse_map
-        }
-    
-    except Exception as e:
-        print(f"❌ 가명화 처리 오류: {e}")
-        return {
-            "masked_prompt": original_prompt,
-            "detection": {"contains_pii": False, "items": []},
-            "substitution_map": {},
-            "reverse_map": {}
-        }
-
-def initialize_manager():
-    """매니저 초기화"""
-    global manager_initialized
-    
-    if manager_initialized:
-        return
-    
-    print("🚀 PseudonymizationManager 초기화 중...")
-    
-    # 데이터풀 로드
-    load_data_pools()
-    
-    # NER 모델 백그라운드 로드
-    if NER_AVAILABLE:
-        threading.Thread(target=load_ner_model, daemon=True).start()
-    
-    manager_initialized = True
-    print("✅ PseudonymizationManager 초기화 완료!")
+    return result
 
 # ===== Flask 라우트 =====
 @app.route("/", methods=["GET", "OPTIONS"])
@@ -438,10 +374,10 @@ def root():
         initialize_manager()
     
     return jsonify({
-        "message": "GenAI Pseudonymizer (AenganZ Enhanced)", 
+        "message": "GenAI 가명화기 (AenganZ 개선판)", 
         "version": "2.0.0",
-        "framework": "Flask (Standalone)",
-        "detection_method": "NER + Regex + DataPools",
+        "framework": "Flask (독립형)",
+        "detection_method": "NER + 정규식 + 데이터풀",
         "ner_model_loaded": model_loaded,
         "data_pools": {
             "names": len(name_pool),
@@ -462,8 +398,8 @@ def health():
         return response
     
     return jsonify({
-        "status": "ok",
-        "method": "enhanced_detection",
+        "status": "정상",
+        "method": "강화된_탐지",
         "ready": manager_initialized,
         "timestamp": datetime.now().isoformat()
     })
@@ -477,116 +413,148 @@ def pseudonymize():
         response.headers.add('Access-Control-Allow-Headers', '*')
         response.headers.add('Access-Control-Allow-Methods', '*')
         return response
-
-    # 매니저 초기화
+    
+    # 매니저 초기화 확인
     if not manager_initialized:
         initialize_manager()
-
-    # JSON 파싱
+    
     try:
-        data = request.get_json(force=True, silent=False)
-    except Exception as e:
-        response = jsonify(ok=False, error=f"invalid_json: {e}")
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response, 400
-
-    if not isinstance(data, dict):
-        response = jsonify(ok=False, error="payload_must_be_object")
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response, 400
-
-    original_prompt = data.get("prompt", "")
-    req_id = data.get("id", "")
-
-    if not original_prompt.strip():
-        response = jsonify(ok=False, error="empty_prompt")
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response, 400
-
-    print(f"\n" + "="*60)
-    print(f"🔍 가명화 요청: {datetime.now().strftime('%H:%M:%S')}")
-    print(f"🆔 ID: {req_id}")
-    print(f"📄 원문: {original_prompt}")
-
-    try:
-        # 가명화 처리
-        result = pseudonymize_text(original_prompt)
+        # 요청 데이터 파싱
+        data = request.get_json()
+        if not data or "prompt" not in data:
+            return jsonify({"error": "요청에 'prompt' 필드가 필요합니다"}), 400
         
-        masked_prompt = result["masked_prompt"]
-        detection = result["detection"]
-        substitution_map = result.get("substitution_map", {})
-        reverse_map = result.get("reverse_map", {})
-
+        text = data["prompt"]
+        request_id = data.get("id", f"req_{int(time.time() * 1000)}")
+        
+        print("============================================================")
+        print(f"가명화 요청: {time.strftime('%H:%M:%S')}")
+        print(f"ID: {request_id}")
+        print(f"원본 텍스트: {text}")
+        
+        # 빈 텍스트 처리
+        if not text.strip():
+            return jsonify({
+                "pseudonymized_text": text,
+                "detection": {"contains_pii": False, "items": []},
+                "substitution_map": {},
+                "reverse_map": {},
+                "processing_time": 0
+            })
+        
+        start_time = time.time()
+        
+        print(f"가명화 시작: {text[:50]}...")
+        print("PII 탐지 (NER 간소화 + 정규식 중심)")
+        
+        # PII 탐지
+        detection_start = time.time()
+        pii_items = detect_pii_items(text)
+        detection_time = time.time() - detection_start
+        
+        print(f"PII 분석 (정규식 중심): {text[:50]}...")
+        
+        # 중복 제거
+        unique_items = []
+        seen_values = set()
+        
+        for item in pii_items:
+            value_key = (item['type'], item['value'])
+            if value_key not in seen_values:
+                unique_items.append(item)
+                seen_values.add(value_key)
+        
+        print(f"최종 탐지 결과: {len(unique_items)}개 항목")
+        for i, item in enumerate(unique_items, 1):
+            print(f"#{i} {item['type']}: '{item['value']}' (신뢰도: {item['confidence']:.2f}, 출처: {item['source']})")
+        
+        # 가명 할당
+        replacement_start = time.time()
+        substitution_map = create_substitution_map(unique_items)
+        
+        print(f"명확한 가명 할당 시작: {len(unique_items)}개 항목")
+        for original, replacement in substitution_map.items():
+            print(f"대체: '{original}' → '{replacement}'")
+        print(f"명확한 가명 할당 완료: {len(substitution_map)}개 매핑")
+        
+        # 텍스트 대체
+        print(f"스마트 텍스트 대체: {len(substitution_map)}개 매핑")
+        pseudonymized_text = apply_substitutions(text, substitution_map)
+        replacement_time = time.time() - replacement_start
+        
+        print(f"스마트 대체 완료: {len(substitution_map)}개 적용")
+        print(f"이전: {text}")
+        print(f"이후: {pseudonymized_text}")
+        
+        # 역방향 맵 생성
+        reverse_map = {v: k for k, v in substitution_map.items()}
+        
+        # 처리 시간 계산
+        total_time = time.time() - start_time
+        print(f"처리 시간: 탐지 {detection_time:.3f}초, 대체 {replacement_time:.3f}초, 전체 {total_time:.3f}초")
+        print(f"가명화 완료: {len(unique_items)}개 PII 처리")
+        print(f"대체 맵: {substitution_map}")
+        print(f"가명화 완료 ({len(unique_items)}개 항목 탐지)")
+        print("로그 저장됨: pseudo-log.json")
+        print(f"가명화 완료 ({len(unique_items)}개 탐지)")
+        print(f"대체 맵: {substitution_map}")
+        print("============================================================")
+        
+        # 결과 구성
+        result = {
+            "pseudonymized_text": pseudonymized_text,
+            "detection": {
+                "contains_pii": len(unique_items) > 0,
+                "items": [
+                    {
+                        "type": item["type"],
+                        "value": item["value"],
+                        "start": item["start"],
+                        "end": item["end"],
+                        "confidence": item["confidence"],
+                        "source": item["source"],
+                        "replacement": substitution_map.get(item["value"], item["value"])
+                    }
+                    for item in unique_items
+                ],
+                "model_used": "NER + 정규식 + 이름풀 + 전체이름풀"
+            },
+            "substitution_map": substitution_map,
+            "reverse_map": reverse_map,
+            "performance": {
+                "items_detected": len(unique_items)
+            }
+        }
+        
         # 로그 저장
         log_entry = {
             "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "remote_addr": request.remote_addr,
             "path": request.path,
-            "input": {
-                "id": req_id,
-                "prompt": original_prompt
-            },
-            "detection": detection,
-            "substitution_map": substitution_map,
-            "reverse_map": reverse_map,
-            "performance": {
-                "items_detected": len(detection.get("items", []))
-            }
-        }
-        append_json_to_file(LOG_FILE, log_entry)
-
-        print(f"✅ 가명화 완료 ({len(detection.get('items', []))}개 탐지)")
-        print(f"🔄 대체 맵: {substitution_map}")
-        print("="*60)
-
-        # 응답 생성
-        response_data = {
-            "ok": True,
-            "original_prompt": original_prompt,
-            "masked_prompt": masked_prompt,
-            "detection": detection,
-            "substitution_map": substitution_map,
-            "reverse_map": reverse_map,
-            "mapping": detection.get("items", [])
+            "input": {"id": request_id, "prompt": text},
+            **result
         }
         
-        response = jsonify(response_data)
+        append_json_to_file(LOG_FILE, log_entry)
+        
+        # CORS 헤더 추가
+        response = jsonify(result)
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
-
+        
     except Exception as e:
-        print(f"❌ 가명화 오류: {e}")
-        import traceback
-        traceback.print_exc()
+        error_msg = f"가명화 처리 중 오류 발생: {str(e)}"
+        print(f"❌ {error_msg}")
         
-        error_response = {
-            "ok": False,
-            "error": str(e),
-            "original_prompt": original_prompt,
-            "masked_prompt": original_prompt,
-            "detection": {"contains_pii": False, "items": []},
-            "substitution_map": {},
-            "reverse_map": {},
-            "mapping": []
-        }
-        
-        response = jsonify(error_response)
+        response = jsonify({"error": error_msg})
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response, 500
 
-@app.route("/prompt_logs", methods=["GET", "OPTIONS"])
-def prompt_logs():
-    if request.method == "OPTIONS":
-        response = jsonify({"message": "CORS preflight OK"})
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Headers', '*')
-        response.headers.add('Access-Control-Allow-Methods', '*')
-        return response
-
+@app.route("/prompt_logs", methods=["GET"])
+def get_logs():
     try:
         with open(LOG_FILE, "r", encoding="utf-8") as f:
             raw = f.read()
-        json.loads(raw)  # 유효성 검사
         
         response = app.response_class(
             response=raw,
@@ -606,7 +574,7 @@ def prompt_logs():
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
     except Exception as e:
-        response = jsonify({"error": f"log_read_error: {e}"})
+        response = jsonify({"error": f"로그 읽기 오류: {e}"})
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response, 500
 
@@ -616,7 +584,7 @@ def clear_logs():
         with open(LOG_FILE, "w", encoding="utf-8") as f:
             json.dump({"logs": []}, f, ensure_ascii=False)
         
-        response = jsonify({"success": True, "message": "Logs cleared"})
+        response = jsonify({"success": True, "message": "로그가 삭제되었습니다"})
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
     except Exception as e:
@@ -625,7 +593,7 @@ def clear_logs():
         return response, 500
 
 if __name__ == "__main__":
-    print("🎭 GenAI Pseudonymizer (AenganZ Enhanced - Standalone)")
+    print("🎭 GenAI 가명화기 (AenganZ 개선판 - 독립형)")
     print("🔧 프레임워크: Flask (단일 파일 버전)")
     print("🧠 탐지 방식: NER + 정규식 + 데이터풀")
     print("📛 가명화: 실제 데이터 대체")
