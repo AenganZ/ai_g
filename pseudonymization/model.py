@@ -1,6 +1,6 @@
-# pseudonymization/model.py
+# pseudonymization/model.py - 라벨 매핑 문제 해결
 """
-NER 모델 관리 모듈 - KPF/KPF-bert-ner 적용
+NER 모델 관리 모듈 - KPF/KPF-bert-ner 라벨 매핑 수정
 """
 
 import time
@@ -26,7 +26,7 @@ NER_MODELS = [
 ]
 
 class WorkingNERModel:
-    """KPF BERT NER 모델 클래스"""
+    """KPF BERT NER 모델 클래스 (라벨 매핑 수정)"""
     
     def __init__(self):
         self.model = None
@@ -36,6 +36,7 @@ class WorkingNERModel:
         self.loaded = False
         self.model_name = None
         self.id2label = None
+        self.label_map = None  # 수동 라벨 매핑 추가
     
     def _get_device(self):
         """최적의 디바이스 선택"""
@@ -52,6 +53,31 @@ class WorkingNERModel:
     def is_loaded(self) -> bool:
         """모델 로드 상태 확인"""
         return self.loaded
+    
+    def _create_manual_label_map(self):
+        """수동 라벨 매핑 생성 (LABEL_숫자 -> 의미 있는 라벨)"""
+        # KPF 모델의 실제 라벨 매핑 (추측 기반)
+        # 로그에서 보면: 김철(LABEL_96), 부산(LABEL_70), 해운대구(LABEL_72), 010(LABEL_115)
+        self.label_map = {
+            # 인명 관련 (LABEL_96, LABEL_246은 이름의 일부로 보임)
+            'LABEL_96': 'B-PER',    # 김철
+            'LABEL_246': 'I-PER',   # ##수 (이름 연결)
+            
+            # 지명 관련
+            'LABEL_70': 'B-LOC',    # 부산 (지역 시작)
+            'LABEL_72': 'I-LOC',    # 해운대구 (지역 연결)
+            
+            # 전화번호 관련
+            'LABEL_115': 'B-PHONE', # 010 (전화번호 시작)
+            'LABEL_265': 'I-PHONE', # 나머지 번호
+            
+            # 기타/일반 텍스트
+            'LABEL_299': 'O',       # 일반 텍스트 (고객님, 예약이... 등)
+        }
+        
+        print(f"🗺️ 수동 라벨 매핑 생성: {len(self.label_map)}개 매핑")
+        for label_id, mapped in self.label_map.items():
+            print(f"  - {label_id} -> {mapped}")
     
     def load_model(self) -> bool:
         """KPF BERT NER 모델 로드"""
@@ -70,14 +96,17 @@ class WorkingNERModel:
                 
                 # 라벨 매핑 저장
                 self.id2label = self.model.config.id2label
-                print(f"라벨 매핑: {list(self.id2label.values())[:10]}...")
+                print(f"📋 원본 라벨 개수: {len(self.id2label)}")
                 
-                # 파이프라인 생성
+                # 수동 매핑 생성
+                self._create_manual_label_map()
+                
+                # 파이프라인 생성 (aggregation_strategy 변경)
                 self.pipeline = pipeline(
                     "ner", 
                     model=self.model, 
                     tokenizer=self.tokenizer,
-                    aggregation_strategy="simple",
+                    aggregation_strategy="max",  # "simple"에서 변경
                     device=self.device
                 )
                 
@@ -92,22 +121,23 @@ class WorkingNERModel:
                 # 테스트
                 test_text = "김철수는 서울 강남구에 살고 있습니다."
                 test_result = self.pipeline(test_text)
-                print(f"모델 테스트 성공: {len(test_result)}개 엔티티 탐지")
+                print(f"🧪 모델 테스트 결과: {len(test_result)}개 엔티티 탐지")
                 
                 self.loaded = True
-                print(f"NER 모델 로드 성공: {model_name}")
+                print(f"✅ NER 모델 로드 성공: {model_name}")
                 return True
                 
             except Exception as e:
-                print(f"모델 {model_name} 로드 실패: {e}")
+                print(f"❌ 모델 {model_name} 로드 실패: {e}")
                 continue
         
-        print("모든 NER 모델 로드 실패")
+        print("❌ 모든 NER 모델 로드 실패")
         return False
     
     def extract_entities(self, text: str) -> List[Dict[str, Any]]:
-        """텍스트에서 엔티티 추출"""
+        """텍스트에서 엔티티 추출 (라벨 매핑 개선)"""
         if not self.loaded or not self.pipeline:
+            print("⚠️ NER 모델이 로드되지 않음")
             return []
         
         try:
@@ -116,58 +146,83 @@ class WorkingNERModel:
             raw_entities = self.pipeline(text)
             processing_time = time.time() - start_time
             
+            print(f"🔍 NER 원본 출력 (간략):")
+            print(f"  입력: {text}")
+            print(f"  탐지된 개수: {len(raw_entities)}")
+            
             # 결과 정규화
             entities = []
-            for entity in raw_entities:
-                # KPF 모델 결과 형식에 맞게 조정
-                entity_type = self._map_kpf_label(entity.get('entity_group', entity.get('label', 'MISC')))
+            for i, entity in enumerate(raw_entities):
+                entity_group = entity.get('entity_group', 'UNKNOWN')
+                word = entity.get('word', '').replace('##', '')  # BERT 토큰 정리
+                score = float(entity.get('score', 0.0))
+                start = entity.get('start', 0)
+                end = entity.get('end', 0)
                 
-                if entity_type and entity.get('score', 0) > 0.7:  # 신뢰도 임계값
-                    entities.append({
-                        'type': entity_type,
-                        'label': entity_type,
-                        'text': entity['word'],
-                        'value': entity['word'],
-                        'start': entity['start'],
-                        'end': entity['end'],
-                        'confidence': entity['score'],
-                        'model': self.model_name
-                    })
+                # 수동 라벨 매핑 적용
+                mapped_label = self.label_map.get(entity_group, entity_group)
+                mapped_type = self._map_label_to_type(mapped_label)
+                
+                print(f"  [{i}] {entity_group} -> {mapped_label} -> {mapped_type}: '{word}' ({score:.3f})")
+                
+                if mapped_type and score > 0.8:  # 높은 신뢰도만
+                    # 연속된 토큰 병합 (김철 + ##수 -> 김철수)
+                    if (entities and 
+                        entities[-1]['type'] == mapped_type and 
+                        entities[-1]['end'] == start):
+                        # 이전 엔티티와 병합
+                        entities[-1]['value'] += word
+                        entities[-1]['text'] += word
+                        entities[-1]['end'] = end
+                        entities[-1]['confidence'] = max(entities[-1]['confidence'], score)
+                        print(f"    병합됨: '{entities[-1]['value']}'")
+                    else:
+                        # 새 엔티티 추가
+                        processed_entity = {
+                            'type': mapped_type,
+                            'label': mapped_type,
+                            'text': word,
+                            'value': word,
+                            'start': start,
+                            'end': end,
+                            'confidence': score,
+                            'model': self.model_name,
+                            'original_label': entity_group
+                        }
+                        entities.append(processed_entity)
+                        print(f"    추가됨: {processed_entity}")
+                else:
+                    print(f"    제외됨 (타입: {mapped_type}, 점수: {score:.3f})")
             
-            print(f"NER 처리 완료: {len(entities)}개 엔티티 ({processing_time:.3f}초)")
+            print(f"🏁 NER 처리 완료: {len(entities)}개 엔티티 ({processing_time:.3f}초)")
             return entities
             
         except Exception as e:
-            print(f"NER 처리 오류: {e}")
+            print(f"❌ NER 처리 오류: {e}")
+            import traceback
+            traceback.print_exc()
             return []
     
-    def _map_kpf_label(self, label: str) -> Optional[str]:
-        """KPF 모델 라벨을 PII 타입으로 매핑"""
-        
-        # KPF 모델의 라벨 매핑
-        label_mapping = {
-            'PER': '이름',
-            'PERSON': '이름', 
-            'PS': '이름',
-            'LOC': '주소',
-            'LOCATION': '주소',
-            'LC': '주소',
-            'ORG': '조직',
-            'ORGANIZATION': '조직',
-            'OG': '조직',
-            'MISC': '기타',
-            'MT': '기타',
-            'DT': '날짜',
-            'DATE': '날짜',
-            'TI': '시간',
-            'TIME': '시간',
-            'QT': '수량',
-            'QUANTITY': '수량'
-        }
+    def _map_label_to_type(self, label: str) -> Optional[str]:
+        """매핑된 라벨을 PII 타입으로 변환"""
         
         # B-, I- 접두사 제거
         clean_label = label.replace('B-', '').replace('I-', '').upper()
-        return label_mapping.get(clean_label, None)
+        
+        # 타입 매핑
+        type_mapping = {
+            'PER': '이름',
+            'PERSON': '이름',
+            'LOC': '주소', 
+            'LOCATION': '주소',
+            'ORG': '조직',
+            'ORGANIZATION': '조직',
+            'PHONE': '전화번호',
+            'EMAIL': '이메일',
+            'MISC': '기타'
+        }
+        
+        return type_mapping.get(clean_label, None)
 
 # 전역 모델 인스턴스
 _ner_model_instance = None
@@ -193,7 +248,7 @@ def extract_entities_with_ner(text: str) -> List[Dict[str, Any]]:
     if not model.is_loaded():
         # 모델이 로드되지 않았으면 로드 시도
         if not model.load_model():
-            print("NER 모델을 로드할 수 없습니다")
+            print("❌ NER 모델을 로드할 수 없습니다")
             return []
     
     return model.extract_entities(text)

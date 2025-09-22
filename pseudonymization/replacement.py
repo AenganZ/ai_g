@@ -1,6 +1,6 @@
-# pseudonymization/replacement.py
+# pseudonymization/replacement.py - 주민번호 관련 코드 제거
 """
-가명화 치환 모듈 (주소 스마트 치환 개선)
+가명화 치환 모듈 (주소 스마트 치환, 주민번호 제거)
 - 토큰 기반 치환
 - 실제 가명 기반 치환  
 - 주소 연속 구문 스마트 치환
@@ -37,7 +37,7 @@ class ReplacementManager:
             if pii_type not in type_counters:
                 type_counters[pii_type] = 0
             
-            # 토큰 생성
+            # 토큰 생성 (주민번호 제거)
             if pii_type == "이름":
                 token = f"[PER_{type_counters[pii_type]}]"
             elif pii_type == "전화번호":
@@ -46,8 +46,8 @@ class ReplacementManager:
                 token = f"[LOC_{type_counters[pii_type]}]"
             elif pii_type == "이메일":
                 token = f"[EMAIL_{type_counters[pii_type]}]"
-            elif pii_type == "주민등록번호":
-                token = f"[SSN_{type_counters[pii_type]}]"
+            elif pii_type == "나이":
+                token = f"[AGE_{type_counters[pii_type]}]"
             else:
                 token = f"[{pii_type.upper()}_{type_counters[pii_type]}]"
             
@@ -71,13 +71,11 @@ class WorkflowReplacementManager:
             "전화번호": 0,
             "이메일": 0,
             "주소": 0,
-            "주민등록번호": 0
+            "나이": 0  # 주민번호 제거
         }
     
     def apply_pseudonymization(self, text: str, items: List[Dict[str, Any]]) -> Tuple[str, Dict[str, str], Dict[str, str]]:
         """실제 가명 기반 치환 (주소 스마트 처리)"""
-        
-        print("치환 맵 생성: {}개 항목".format(len(items)))
         
         pseudonymized_text = text
         substitution_map = {}
@@ -103,34 +101,23 @@ class WorkflowReplacementManager:
             if original in substitution_map:
                 continue
             
-            # 가명 생성
+            # 가명 생성 (주민번호 제거)
             replacement = self._generate_replacement(pii_type, original)
             
             substitution_map[original] = replacement
             reverse_map[replacement] = original
-            
-            print(f"매핑: '{original}' ↔ '{replacement}'")
-        
-        print(f"치환 맵 생성 완료: {len(substitution_map)}개 매핑")
         
         # 비주소 텍스트 치환 적용
-        print("가명화 적용: {}개 매핑".format(len([k for k in substitution_map.keys() if not k.startswith('주소_')])))
-        
         replaced_count = 0
         for original, replacement in substitution_map.items():
             if not original.startswith('주소_') and original in pseudonymized_text:
                 pseudonymized_text = pseudonymized_text.replace(original, replacement)
                 replaced_count += 1
-                print(f"가명화: '{original}' → {replacement} ({replaced_count}번)")
-        
-        print(f"가명화 완료: {replaced_count}개 적용")
         
         return pseudonymized_text, substitution_map, reverse_map
     
     def _process_address_smart_replacement(self, text: str, address_items: List[Dict[str, Any]]) -> Tuple[str, Dict[str, str], Dict[str, str]]:
         """주소 스마트 치환 처리 - 큰 단위만 남기고 나머지 제거"""
-        
-        print(f"주소 스마트 치환: {len(address_items)}개 주소 발견")
         
         substitution_map = {}
         reverse_map = {}
@@ -155,14 +142,10 @@ class WorkflowReplacementManager:
         if not main_address:
             main_address = sorted_addresses[0]['value']
         
-        print(f"대표 주소 선택: '{main_address}'")
-        
         # 연속된 주소 구문을 대표 주소로 치환
-        # 예: "부산 해운대구" → "부산"
         address_values = [item['value'] for item in sorted_addresses]
         
         # 연속된 주소 패턴 생성 및 치환
-        # 가장 긴 연속 구문부터 처리
         for start_idx in range(len(address_values)):
             for end_idx in range(len(address_values), start_idx, -1):
                 if end_idx - start_idx <= 1:  # 단일 주소는 스킵
@@ -176,7 +159,6 @@ class WorkflowReplacementManager:
                 if re.search(pattern, processed_text):
                     # 대표 주소로 치환
                     processed_text = re.sub(pattern, main_address, processed_text)
-                    print(f"주소 연속 구문 치환: '{' '.join(sequence)}' → '{main_address}'")
                     
                     substitution_map[f"주소_연속_{start_idx}_{end_idx}"] = main_address
                     reverse_map[main_address] = ' '.join(sequence)
@@ -192,7 +174,6 @@ class WorkflowReplacementManager:
                 before = processed_text
                 processed_text = re.sub(pattern, ' ', processed_text)
                 if before != processed_text:
-                    print(f"부차 주소 제거: '{original}'")
                     substitution_map[f"제거_{original}"] = ""
                     reverse_map[""] = original
         
@@ -201,10 +182,8 @@ class WorkflowReplacementManager:
         
         return processed_text, substitution_map, reverse_map
     
-    # _clean_address 함수 제거 (더 이상 사용하지 않음)
-    
     def _generate_replacement(self, pii_type: str, original: str) -> str:
-        """타입별 가명 생성"""
+        """타입별 가명 생성 (주민번호 제거)"""
         
         if pii_type == "이름":
             replacement = self.pools.fake_names[self.counters["이름"] % len(self.pools.fake_names)]
@@ -212,7 +191,7 @@ class WorkflowReplacementManager:
             return replacement
         
         elif pii_type == "전화번호":
-            replacement = self.pools.fake_phones[self.counters["전화번호"] % len(self.pools.fake_phones)]
+            replacement = self.pools.get_fake_phone()
             self.counters["전화번호"] += 1
             return replacement
         
@@ -227,11 +206,14 @@ class WorkflowReplacementManager:
             self.counters["주소"] += 1
             return replacement
         
-        elif pii_type == "주민등록번호":
-            # 주민등록번호는 고정된 패턴 사용
-            replacement = "000000-0000000"
-            self.counters["주민등록번호"] += 1
-            return replacement
+        elif pii_type == "나이":
+            # 나이는 랜덤하게 변경
+            try:
+                original_age = int(original)
+                fake_age = max(20, min(80, original_age + (-5 if original_age % 2 == 0 else 5)))
+                return str(fake_age)
+            except:
+                return "30"  # 기본값
         
         else:
             return f"[{pii_type}]"
@@ -239,7 +221,7 @@ class WorkflowReplacementManager:
     def _generate_fake_address(self, original: str) -> str:
         """주소별 적절한 가명 주소 생성"""
         
-        # 원본 주소 그대로 반환 (접미사 제거하지 않음)
+        # 원본 주소 그대로 반환
         if original in ["서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종"]:
             return original
         elif original in ["경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주"]:
@@ -332,7 +314,7 @@ def remove_duplicates(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     
     return unique_items
 
-# ===== 호환성 함수들 =====
+# 호환성 함수들
 def get_workflow_manager() -> WorkflowReplacementManager:
     """워크플로우 매니저 인스턴스 반환"""
     return WorkflowReplacementManager()

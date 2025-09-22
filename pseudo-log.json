@@ -1,802 +1,128 @@
 {
   "logs": [
     {
-      "time": "2025-09-22 12:05:05",
+      "time": "2025-09-22 19:39:18",
       "remote_addr": "127.0.0.1",
       "path": "/pseudonymize",
       "input": {
-        "id": "pseudo_1758510304787_sg5qnlqak",
-        "prompt": "준석씨, 지금 바로 대전시 중구 태평동 87로 올수 있어요? 도착하면 010-4218-4488로 전화하고. abc123@gmail.com로 연락주세요"
+        "id": "c710249f6a1f01ad14de",
+        "prompt": "제 주민번호는 039284-2938174입니다!"
       },
       "output": {
-        "pseudonymized_text": "최가명씨, 지금 바로 인천올수 있어요? 도착하면 010-0000-0002로 전화하고. user002@test.co.kr로 연락주세요",
+        "pseudonymized_text": "제 주민번호는 039284-2938174입니다!",
         "detection": {
-          "items": [
-            {
-              "type": "이메일",
-              "value": "abc123@gmail.com",
-              "source": "정규식-이메일"
-            },
-            {
-              "type": "전화번호",
-              "value": "010-4218-4488",
-              "source": "정규식-전화번호"
-            },
-            {
-              "type": "이름",
-              "value": "준석",
-              "source": "패턴-이름"
-            },
-            {
-              "type": "주소",
-              "value": "대전",
-              "source": "패턴-기본주소"
-            }
-          ],
-          "count": 4
+          "items": [],
+          "count": 0
         },
-        "processing_time": 0.400423526763916
+        "processing_time": 2.8495283126831055
       },
-      "items": [
-        {
-          "type": "이메일",
-          "value": "abc123@gmail.com",
-          "source": "정규식-이메일"
-        },
-        {
-          "type": "전화번호",
-          "value": "010-4218-4488",
-          "source": "정규식-전화번호"
-        },
-        {
-          "type": "이름",
-          "value": "준석",
-          "source": "패턴-이름"
-        },
-        {
-          "type": "주소",
-          "value": "대전",
-          "source": "패턴-기본주소"
-        }
-      ],
+      "detection": {
+        "items": [],
+        "count": 0,
+        "contains_pii": false
+      },
       "success": true,
-      "timestamp": "2025-09-22T12:05:05.197841",
+      "timestamp": "2025-09-22T19:39:18.986232",
       "type": "pseudonymize",
-      "request_id": "pseudo_1758510304787_sg5qnlqak",
-      "original_text": "준석씨, 지금 바로 대전시 중구 태평동 87로 올수 있어요? 도착하면 010-4218-4488로 전화하고. abc123@gmail.com로 연락주세요",
-      "detected_items": 4,
+      "request_id": "c710249f6a1f01ad14de",
+      "original_text": "제 주민번호는 039284-2938174입니다!",
+      "detected_items": 0,
       "mode": "modular"
     },
     {
-      "time": "2025-09-22 12:06:56",
+      "time": "2025-09-22 19:44:39",
       "remote_addr": "127.0.0.1",
       "path": "/pseudonymize",
       "input": {
-        "id": "pseudo_1758510415669_ifc9cyhfj",
-        "prompt": "호혁씨, 지금 바로 대전시 동구 용운동으로 올수 있어요? 도착하면 010-4212-4328로 전화하고. hoho12@gmail.com으로 연락주세요"
-      },
-      "output": {
-        "pseudonymized_text": "정무명씨, 지금 바로 광주올수 있어요? 도착하면 010-0000-0003로 전화하고. user003@gmail.com으로 연락주세요",
-        "detection": {
-          "items": [
-            {
-              "type": "이메일",
-              "value": "hoho12@gmail.com",
-              "source": "정규식-이메일"
-            },
-            {
-              "type": "전화번호",
-              "value": "010-4212-4328",
-              "source": "정규식-전화번호"
-            },
-            {
-              "type": "이름",
-              "value": "호혁",
-              "source": "패턴-이름"
-            },
-            {
-              "type": "주소",
-              "value": "대전",
-              "source": "패턴-기본주소"
-            }
-          ],
-          "count": 4
-        },
-        "processing_time": 0.3855769634246826
-      },
-      "items": [
-        {
-          "type": "이메일",
-          "value": "hoho12@gmail.com",
-          "source": "정규식-이메일"
-        },
-        {
-          "type": "전화번호",
-          "value": "010-4212-4328",
-          "source": "정규식-전화번호"
-        },
-        {
-          "type": "이름",
-          "value": "호혁",
-          "source": "패턴-이름"
-        },
-        {
-          "type": "주소",
-          "value": "대전",
-          "source": "패턴-기본주소"
-        }
-      ],
-      "success": true,
-      "timestamp": "2025-09-22T12:06:56.112376",
-      "type": "pseudonymize",
-      "request_id": "pseudo_1758510415669_ifc9cyhfj",
-      "original_text": "호혁씨, 지금 바로 대전시 동구 용운동으로 올수 있어요? 도착하면 010-4212-4328로 전화하고. hoho12@gmail.com으로 연락주세요",
-      "detected_items": 4,
-      "mode": "modular"
-    },
-    {
-      "time": "2025-09-22 13:14:21",
-      "remote_addr": "127.0.0.1",
-      "path": "/pseudonymize",
-      "input": {
-        "id": "debug_test_1758514461547",
+        "id": "debug_test_1758537878750",
         "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다."
       },
       "output": {
-        "pseudonymized_text": "김가명님 31세, 서울거주하시는 분이시죠? user001@example.com으로 메일 보내드렸습니다.",
+        "pseudonymized_text": "김가명님 21세, 서울거주하시는 분이시죠? user001@example.com으로 메일 보내드렸습니다.",
         "detection": {
           "items": [
             {
               "type": "이메일",
               "value": "contact@example.com",
-              "source": "정규식-이메일"
+              "source": "정규식-이메일",
+              "confidence": 0.95
             },
             {
               "type": "이름",
               "value": "이영희",
-              "source": "실명목록"
+              "source": "AI-패턴분석",
+              "confidence": 0.85
             },
             {
               "type": "주소",
               "value": "대구",
-              "source": "패턴-기본주소"
+              "source": "패턴-복합주소",
+              "confidence": 0.98
             },
             {
               "type": "나이",
               "value": "25",
-              "source": "정규식-나이"
+              "source": "정규식-나이",
+              "confidence": 1.0
             }
           ],
-          "count": 4
+          "count": 4,
+          "contains_pii": true
         },
-        "processing_time": 0.3771681785583496
+        "processing_time": 0.5008547306060791
       },
-      "items": [
-        {
-          "type": "이메일",
-          "value": "contact@example.com",
-          "source": "정규식-이메일"
-        },
-        {
-          "type": "이름",
-          "value": "이영희",
-          "source": "실명목록"
-        },
-        {
-          "type": "주소",
-          "value": "대구",
-          "source": "패턴-기본주소"
-        },
-        {
-          "type": "나이",
-          "value": "25",
-          "source": "정규식-나이"
-        }
-      ],
+      "detection": {
+        "items": [
+          {
+            "type": "이메일",
+            "value": "contact@example.com",
+            "token": "user001@example.com",
+            "source": "정규식-이메일",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "이영희",
+            "token": "김가명",
+            "source": "AI-패턴분석",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구",
+            "token": "서울",
+            "source": "패턴-복합주소",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "나이",
+            "value": "25",
+            "token": "21",
+            "source": "정규식-나이",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 4,
+        "contains_pii": true
+      },
       "success": true,
-      "timestamp": "2025-09-22T13:14:21.929361",
+      "timestamp": "2025-09-22T19:44:39.255931",
       "type": "pseudonymize",
-      "request_id": "debug_test_1758514461547",
+      "request_id": "debug_test_1758537878750",
       "original_text": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
       "detected_items": 4,
       "mode": "modular"
     },
     {
-      "time": "2025-09-22 13:20:45",
+      "time": "2025-09-22 19:44:46",
       "remote_addr": "127.0.0.1",
       "path": "/pseudonymize",
       "input": {
-        "id": "pseudo_1758514844921_7ljvcxxex",
-        "prompt": "호혁씨, 지금 바로 대전시 동구 용운동으로 올수 있어요? 도착하면 010-4212-4328로 전화하고. hoho12@gmail.com으로 연락주세요"
-      },
-      "output": {
-        "pseudonymized_text": "김가명씨, 지금 바로 서울올수 있어요? 도착하면 010-0000-0000로 전화하고. user001@example.com으로 연락주세요",
-        "detection": {
-          "items": [
-            {
-              "type": "이메일",
-              "value": "hoho12@gmail.com",
-              "source": "정규식-이메일"
-            },
-            {
-              "type": "전화번호",
-              "value": "010-4212-4328",
-              "source": "정규식-전화번호"
-            },
-            {
-              "type": "이름",
-              "value": "호혁",
-              "source": "패턴-이름"
-            },
-            {
-              "type": "주소",
-              "value": "대전",
-              "source": "패턴-기본주소"
-            }
-          ],
-          "count": 4
-        },
-        "processing_time": 0.39129114151000977
-      },
-      "items": [
-        {
-          "type": "이메일",
-          "value": "hoho12@gmail.com",
-          "source": "정규식-이메일"
-        },
-        {
-          "type": "전화번호",
-          "value": "010-4212-4328",
-          "source": "정규식-전화번호"
-        },
-        {
-          "type": "이름",
-          "value": "호혁",
-          "source": "패턴-이름"
-        },
-        {
-          "type": "주소",
-          "value": "대전",
-          "source": "패턴-기본주소"
-        }
-      ],
-      "success": true,
-      "timestamp": "2025-09-22T13:20:45.323322",
-      "type": "pseudonymize",
-      "request_id": "pseudo_1758514844921_7ljvcxxex",
-      "original_text": "호혁씨, 지금 바로 대전시 동구 용운동으로 올수 있어요? 도착하면 010-4212-4328로 전화하고. hoho12@gmail.com으로 연락주세요",
-      "detected_items": 4,
-      "mode": "modular"
-    },
-    {
-      "time": "2025-09-22 13:29:16",
-      "remote_addr": "127.0.0.1",
-      "path": "/pseudonymize",
-      "input": {
-        "id": "debug_test_1758515356254",
-        "prompt": "안녕하세요, 제 이름은 홍길동이고 연락처는 010-1234-5678입니다. 서울 강남구에 살고 있습니다."
-      },
-      "output": {
-        "pseudonymized_text": "안녕하세요, 제 이름은 김가명이고 연락처는 010-0000-0000입니다. 서울에 살고 있습니다.",
-        "detection": {
-          "items": [
-            {
-              "type": "전화번호",
-              "value": "010-1234-5678",
-              "source": "정규식-전화번호"
-            },
-            {
-              "type": "이름",
-              "value": "홍길동",
-              "source": "실명목록"
-            },
-            {
-              "type": "주소",
-              "value": "서울",
-              "source": "패턴-복합주소"
-            }
-          ],
-          "count": 3
-        },
-        "processing_time": 0.3814971446990967
-      },
-      "items": [
-        {
-          "type": "전화번호",
-          "value": "010-1234-5678",
-          "source": "정규식-전화번호"
-        },
-        {
-          "type": "이름",
-          "value": "홍길동",
-          "source": "실명목록"
-        },
-        {
-          "type": "주소",
-          "value": "서울",
-          "source": "패턴-복합주소"
-        }
-      ],
-      "success": true,
-      "timestamp": "2025-09-22T13:29:16.638772",
-      "type": "pseudonymize",
-      "request_id": "debug_test_1758515356254",
-      "original_text": "안녕하세요, 제 이름은 홍길동이고 연락처는 010-1234-5678입니다. 서울 강남구에 살고 있습니다.",
-      "detected_items": 3,
-      "mode": "modular"
-    },
-    {
-      "time": "2025-09-22 13:29:19",
-      "remote_addr": "127.0.0.1",
-      "path": "/pseudonymize",
-      "input": {
-        "id": "pseudo_1758515359182_86xsk7qcw",
-        "prompt": "호혁씨, 지금 바로 대전시 동구 용운동으로 올수 있어요? 도착하면 010-4212-4328로 전화하고. hoho12@gmail.com으로 연락주세요"
-      },
-      "output": {
-        "pseudonymized_text": "이가명씨, 지금 바로 부산올수 있어요? 도착하면 010-0000-0001로 전화하고. user001@example.com으로 연락주세요",
-        "detection": {
-          "items": [
-            {
-              "type": "이메일",
-              "value": "hoho12@gmail.com",
-              "source": "정규식-이메일"
-            },
-            {
-              "type": "전화번호",
-              "value": "010-4212-4328",
-              "source": "정규식-전화번호"
-            },
-            {
-              "type": "이름",
-              "value": "호혁",
-              "source": "패턴-이름"
-            },
-            {
-              "type": "주소",
-              "value": "대전",
-              "source": "패턴-기본주소"
-            }
-          ],
-          "count": 4
-        },
-        "processing_time": 0.3905515670776367
-      },
-      "items": [
-        {
-          "type": "이메일",
-          "value": "hoho12@gmail.com",
-          "source": "정규식-이메일"
-        },
-        {
-          "type": "전화번호",
-          "value": "010-4212-4328",
-          "source": "정규식-전화번호"
-        },
-        {
-          "type": "이름",
-          "value": "호혁",
-          "source": "패턴-이름"
-        },
-        {
-          "type": "주소",
-          "value": "대전",
-          "source": "패턴-기본주소"
-        }
-      ],
-      "success": true,
-      "timestamp": "2025-09-22T13:29:19.583828",
-      "type": "pseudonymize",
-      "request_id": "pseudo_1758515359182_86xsk7qcw",
-      "original_text": "호혁씨, 지금 바로 대전시 동구 용운동으로 올수 있어요? 도착하면 010-4212-4328로 전화하고. hoho12@gmail.com으로 연락주세요",
-      "detected_items": 4,
-      "mode": "modular"
-    },
-    {
-      "time": "2025-09-22 13:43:45",
-      "remote_addr": "127.0.0.1",
-      "path": "/pseudonymize",
-      "input": {
-        "id": "req_1758516225",
-        "prompt": "호혁씨, 지금 바로 대전시 동구 용운동으로 올수 있어요? 도착하면 010-4212-4328로 전화하고. hoho12@gmail.com으로 연락주세요"
-      },
-      "output": {
-        "pseudonymized_text": "김가명씨, 지금 바로 서울올수 있어요? 도착하면 010-0000-0000로 전화하고. user001@example.com으로 연락주세요",
-        "detection": {
-          "items": [
-            {
-              "type": "이메일",
-              "value": "hoho12@gmail.com",
-              "source": "정규식-이메일"
-            },
-            {
-              "type": "전화번호",
-              "value": "010-4212-4328",
-              "source": "정규식-전화번호"
-            },
-            {
-              "type": "이름",
-              "value": "호혁",
-              "source": "패턴-이름"
-            },
-            {
-              "type": "주소",
-              "value": "대전",
-              "source": "패턴-기본주소"
-            }
-          ],
-          "count": 4
-        },
-        "processing_time": 0.3985731601715088
-      },
-      "items": [
-        {
-          "type": "이메일",
-          "value": "hoho12@gmail.com",
-          "source": "정규식-이메일"
-        },
-        {
-          "type": "전화번호",
-          "value": "010-4212-4328",
-          "source": "정규식-전화번호"
-        },
-        {
-          "type": "이름",
-          "value": "호혁",
-          "source": "패턴-이름"
-        },
-        {
-          "type": "주소",
-          "value": "대전",
-          "source": "패턴-기본주소"
-        }
-      ],
-      "success": true,
-      "timestamp": "2025-09-22T13:43:45.548365",
-      "type": "pseudonymize",
-      "request_id": "req_1758516225",
-      "original_text": "호혁씨, 지금 바로 대전시 동구 용운동으로 올수 있어요? 도착하면 010-4212-4328로 전화하고. hoho12@gmail.com으로 연락주세요",
-      "detected_items": 4,
-      "mode": "modular"
-    },
-    {
-      "time": "2025-09-22 17:39:17",
-      "remote_addr": "127.0.0.1",
-      "path": "/pseudonymize",
-      "input": {
-        "id": "debug_test_1758530356753",
-        "prompt": "안녕하세요, 제 이름은 홍길동이고 연락처는 010-1234-5678입니다. 서울 강남구에 살고 있습니다."
-      },
-      "output": {
-        "pseudonymized_text": "안녕하세요, 제 이름은 김가명이고 연락처는 010-0000-0000입니다. 서울에 살고 있습니다.",
-        "detection": {
-          "items": [
-            {
-              "type": "전화번호",
-              "value": "010-1234-5678",
-              "source": "정규식-전화번호"
-            },
-            {
-              "type": "이름",
-              "value": "홍길동",
-              "source": "실명목록"
-            },
-            {
-              "type": "주소",
-              "value": "서울",
-              "source": "패턴-복합주소"
-            }
-          ],
-          "count": 3
-        },
-        "processing_time": 0.3685891628265381
-      },
-      "items": [
-        {
-          "type": "전화번호",
-          "value": "010-1234-5678",
-          "source": "정규식-전화번호"
-        },
-        {
-          "type": "이름",
-          "value": "홍길동",
-          "source": "실명목록"
-        },
-        {
-          "type": "주소",
-          "value": "서울",
-          "source": "패턴-복합주소"
-        }
-      ],
-      "success": true,
-      "timestamp": "2025-09-22T17:39:17.125848",
-      "type": "pseudonymize",
-      "request_id": "debug_test_1758530356753",
-      "original_text": "안녕하세요, 제 이름은 홍길동이고 연락처는 010-1234-5678입니다. 서울 강남구에 살고 있습니다.",
-      "detected_items": 3,
-      "mode": "modular"
-    },
-    {
-      "time": "2025-09-22 17:39:29",
-      "remote_addr": "127.0.0.1",
-      "path": "/pseudonymize",
-      "input": {
-        "id": "50879b40f1cf9372e88e",
-        "prompt": "동욱아, 우리 내일 점심 뭐 먹기로 했었지?? 010-2918-2381로 전화줘."
-      },
-      "output": {
-        "pseudonymized_text": "동욱아, 우리 내일 점심 뭐 먹기로 했었지?? 010-0000-0001로 전화줘.",
-        "detection": {
-          "items": [
-            {
-              "type": "전화번호",
-              "value": "010-2918-2381",
-              "source": "정규식-전화번호"
-            }
-          ],
-          "count": 1
-        },
-        "processing_time": 0.3853745460510254
-      },
-      "items": [
-        {
-          "type": "전화번호",
-          "value": "010-2918-2381",
-          "source": "정규식-전화번호"
-        }
-      ],
-      "success": true,
-      "timestamp": "2025-09-22T17:39:29.928453",
-      "type": "pseudonymize",
-      "request_id": "50879b40f1cf9372e88e",
-      "original_text": "동욱아, 우리 내일 점심 뭐 먹기로 했었지?? 010-2918-2381로 전화줘.",
-      "detected_items": 1,
-      "mode": "modular"
-    },
-    {
-      "time": "2025-09-22 17:40:55",
-      "remote_addr": "127.0.0.1",
-      "path": "/pseudonymize",
-      "input": {
-        "id": "4fb2c501f1c4461c7515",
-        "prompt": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요."
-      },
-      "output": {
-        "pseudonymized_text": "이가명 고객님, 부산예약이 확인되었습니다. 문의사항은 010-0000-0002로 연락 주세요.",
-        "detection": {
-          "items": [
-            {
-              "type": "전화번호",
-              "value": "010-9876-5432",
-              "source": "정규식-전화번호"
-            },
-            {
-              "type": "이름",
-              "value": "김철수",
-              "source": "실명목록"
-            },
-            {
-              "type": "주소",
-              "value": "부산",
-              "source": "패턴-기본주소"
-            }
-          ],
-          "count": 3
-        },
-        "processing_time": 0.38117194175720215
-      },
-      "items": [
-        {
-          "type": "전화번호",
-          "value": "010-9876-5432",
-          "source": "정규식-전화번호"
-        },
-        {
-          "type": "이름",
-          "value": "김철수",
-          "source": "실명목록"
-        },
-        {
-          "type": "주소",
-          "value": "부산",
-          "source": "패턴-기본주소"
-        }
-      ],
-      "success": true,
-      "timestamp": "2025-09-22T17:40:55.629007",
-      "type": "pseudonymize",
-      "request_id": "4fb2c501f1c4461c7515",
-      "original_text": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요.",
-      "detected_items": 3,
-      "mode": "modular"
-    },
-    {
-      "time": "2025-09-22 17:42:10",
-      "remote_addr": "127.0.0.1",
-      "path": "/pseudonymize",
-      "input": {
-        "id": "5df6c09f9ec372e5c65d",
-        "prompt": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요."
-      },
-      "output": {
-        "pseudonymized_text": "김가명 고객님, 서울예약이 확인되었습니다. 문의사항은 010-0000-0000로 연락 주세요.",
-        "detection": {
-          "items": [
-            {
-              "type": "전화번호",
-              "value": "010-9876-5432",
-              "source": "정규식-전화번호"
-            },
-            {
-              "type": "이름",
-              "value": "김철수",
-              "source": "실명목록"
-            },
-            {
-              "type": "주소",
-              "value": "부산",
-              "source": "패턴-기본주소"
-            }
-          ],
-          "count": 3
-        },
-        "processing_time": 0.3929755687713623
-      },
-      "items": [
-        {
-          "type": "전화번호",
-          "value": "010-9876-5432",
-          "source": "정규식-전화번호"
-        },
-        {
-          "type": "이름",
-          "value": "김철수",
-          "source": "실명목록"
-        },
-        {
-          "type": "주소",
-          "value": "부산",
-          "source": "패턴-기본주소"
-        }
-      ],
-      "success": true,
-      "timestamp": "2025-09-22T17:42:10.780550",
-      "type": "pseudonymize",
-      "request_id": "5df6c09f9ec372e5c65d",
-      "original_text": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요.",
-      "detected_items": 3,
-      "mode": "modular"
-    },
-    {
-      "time": "2025-09-22 17:42:26",
-      "remote_addr": "127.0.0.1",
-      "path": "/pseudonymize",
-      "input": {
-        "id": "aeb26f171940cdb1cece",
-        "prompt": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요."
-      },
-      "output": {
-        "pseudonymized_text": "이가명 고객님, 부산예약이 확인되었습니다. 문의사항은 010-0000-0001로 연락 주세요.",
-        "detection": {
-          "items": [
-            {
-              "type": "전화번호",
-              "value": "010-9876-5432",
-              "source": "정규식-전화번호"
-            },
-            {
-              "type": "이름",
-              "value": "김철수",
-              "source": "실명목록"
-            },
-            {
-              "type": "주소",
-              "value": "부산",
-              "source": "패턴-기본주소"
-            }
-          ],
-          "count": 3
-        },
-        "processing_time": 0.3788788318634033
-      },
-      "items": [
-        {
-          "type": "전화번호",
-          "value": "010-9876-5432",
-          "source": "정규식-전화번호"
-        },
-        {
-          "type": "이름",
-          "value": "김철수",
-          "source": "실명목록"
-        },
-        {
-          "type": "주소",
-          "value": "부산",
-          "source": "패턴-기본주소"
-        }
-      ],
-      "success": true,
-      "timestamp": "2025-09-22T17:42:26.798774",
-      "type": "pseudonymize",
-      "request_id": "aeb26f171940cdb1cece",
-      "original_text": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요.",
-      "detected_items": 3,
-      "mode": "modular"
-    },
-    {
-      "time": "2025-09-22 17:47:18",
-      "remote_addr": "127.0.0.1",
-      "path": "/pseudonymize",
-      "input": {
-        "id": "debug_test_1758530837982",
-        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다."
-      },
-      "output": {
-        "pseudonymized_text": "김가명님 33세, 서울거주하시는 분이시죠? user001@example.com으로 메일 보내드렸습니다.",
-        "detection": {
-          "items": [
-            {
-              "type": "이메일",
-              "value": "contact@example.com",
-              "source": "정규식-이메일"
-            },
-            {
-              "type": "이름",
-              "value": "이영희",
-              "source": "실명목록"
-            },
-            {
-              "type": "주소",
-              "value": "대구",
-              "source": "패턴-기본주소"
-            },
-            {
-              "type": "나이",
-              "value": "25",
-              "source": "정규식-나이"
-            }
-          ],
-          "count": 4
-        },
-        "processing_time": 0.37482404708862305
-      },
-      "items": [
-        {
-          "type": "이메일",
-          "value": "contact@example.com",
-          "source": "정규식-이메일"
-        },
-        {
-          "type": "이름",
-          "value": "이영희",
-          "source": "실명목록"
-        },
-        {
-          "type": "주소",
-          "value": "대구",
-          "source": "패턴-기본주소"
-        },
-        {
-          "type": "나이",
-          "value": "25",
-          "source": "정규식-나이"
-        }
-      ],
-      "success": true,
-      "timestamp": "2025-09-22T17:47:18.360564",
-      "type": "pseudonymize",
-      "request_id": "debug_test_1758530837982",
-      "original_text": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
-      "detected_items": 4,
-      "mode": "modular"
-    },
-    {
-      "time": "2025-09-22 17:47:49",
-      "remote_addr": "127.0.0.1",
-      "path": "/pseudonymize",
-      "input": {
-        "id": "7b997b7529a63fe3828d",
+        "id": "debug_test_1758537886002",
         "prompt": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요."
       },
       "output": {
@@ -806,103 +132,1143 @@
             {
               "type": "전화번호",
               "value": "010-9876-5432",
-              "source": "정규식-전화번호"
+              "source": "정규식-전화번호",
+              "confidence": 0.9
             },
             {
               "type": "이름",
               "value": "김철수",
-              "source": "실명목록"
+              "source": "AI-패턴분석",
+              "confidence": 0.95
             },
             {
               "type": "주소",
               "value": "부산",
-              "source": "패턴-기본주소"
+              "source": "패턴-복합주소",
+              "confidence": 0.98
             }
           ],
-          "count": 3
+          "count": 3,
+          "contains_pii": true
         },
-        "processing_time": 0.3872990608215332
+        "processing_time": 0.5084900856018066
       },
-      "items": [
-        {
-          "type": "전화번호",
-          "value": "010-9876-5432",
-          "source": "정규식-전화번호"
-        },
-        {
-          "type": "이름",
-          "value": "김철수",
-          "source": "실명목록"
-        },
-        {
-          "type": "주소",
-          "value": "부산",
-          "source": "패턴-기본주소"
-        }
-      ],
+      "detection": {
+        "items": [
+          {
+            "type": "전화번호",
+            "value": "010-9876-5432",
+            "token": "010-0000-0000",
+            "source": "정규식-전화번호",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "김철수",
+            "token": "이가명",
+            "source": "AI-패턴분석",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "부산",
+            "token": "부산",
+            "source": "패턴-복합주소",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 3,
+        "contains_pii": true
+      },
       "success": true,
-      "timestamp": "2025-09-22T17:47:49.838798",
+      "timestamp": "2025-09-22T19:44:46.514967",
       "type": "pseudonymize",
-      "request_id": "7b997b7529a63fe3828d",
+      "request_id": "debug_test_1758537886002",
       "original_text": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요.",
       "detected_items": 3,
       "mode": "modular"
     },
     {
-      "time": "2025-09-22 17:48:37",
+      "time": "2025-09-22 19:44:49",
       "remote_addr": "127.0.0.1",
       "path": "/pseudonymize",
       "input": {
-        "id": "04a48463f923cfb15388",
+        "id": "debug_test_1758537889153",
+        "prompt": "안녕하세요, 제 이름은 홍길동이고 연락처는 010-1234-5678입니다. 서울 강남구에 살고 있습니다."
+      },
+      "output": {
+        "pseudonymized_text": "안녕하세요, 제 이름은 박무명이고 연락처는 010-0000-0001입니다. 대구에 살고 있습니다.",
+        "detection": {
+          "items": [
+            {
+              "type": "전화번호",
+              "value": "010-1234-5678",
+              "source": "정규식-전화번호",
+              "confidence": 0.9
+            },
+            {
+              "type": "이름",
+              "value": "홍길동",
+              "source": "AI-패턴분석",
+              "confidence": 0.85
+            },
+            {
+              "type": "주소",
+              "value": "서울",
+              "source": "패턴-복합주소",
+              "confidence": 0.98
+            }
+          ],
+          "count": 3,
+          "contains_pii": true
+        },
+        "processing_time": 0.5071084499359131
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "전화번호",
+            "value": "010-1234-5678",
+            "token": "010-0000-0001",
+            "source": "정규식-전화번호",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "홍길동",
+            "token": "박무명",
+            "source": "AI-패턴분석",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "서울",
+            "token": "대구",
+            "source": "패턴-복합주소",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 3,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-22T19:44:49.665268",
+      "type": "pseudonymize",
+      "request_id": "debug_test_1758537889153",
+      "original_text": "안녕하세요, 제 이름은 홍길동이고 연락처는 010-1234-5678입니다. 서울 강남구에 살고 있습니다.",
+      "detected_items": 3,
+      "mode": "modular"
+    },
+    {
+      "time": "2025-09-22 19:46:18",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "681a78c54f76471bc231",
+        "prompt": "안녕하세요 명환씨, 김준석입니다. 추가적인 의견 있으시면 010-3124-2124로 전화주세요. junseok314@gmail.com"
+      },
+      "output": {
+        "pseudonymized_text": "안녕하세요 정무명, 최가명입니다. 추가적인 의견 있으시면 010-0000-0002로 전화주세요. user002@test.co.kr",
+        "detection": {
+          "items": [
+            {
+              "type": "이메일",
+              "value": "junseok314@gmail.com",
+              "source": "정규식-이메일",
+              "confidence": 0.95
+            },
+            {
+              "type": "전화번호",
+              "value": "010-3124-2124",
+              "source": "정규식-전화번호",
+              "confidence": 0.9
+            },
+            {
+              "type": "이름",
+              "value": "김준석",
+              "source": "AI-패턴분석",
+              "confidence": 0.95
+            },
+            {
+              "type": "이름",
+              "value": "명환씨",
+              "source": "AI-패턴분석",
+              "confidence": 1.0
+            },
+            {
+              "type": "이름",
+              "value": "명환",
+              "source": "AI-패턴분석",
+              "confidence": 1.0
+            }
+          ],
+          "count": 5,
+          "contains_pii": true
+        },
+        "processing_time": 0.5274167060852051
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "이메일",
+            "value": "junseok314@gmail.com",
+            "token": "user002@test.co.kr",
+            "source": "정규식-이메일",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "전화번호",
+            "value": "010-3124-2124",
+            "token": "010-0000-0002",
+            "source": "정규식-전화번호",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "김준석",
+            "token": "최가명",
+            "source": "AI-패턴분석",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "명환씨",
+            "token": "정무명",
+            "source": "AI-패턴분석",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "명환",
+            "token": "홍가명",
+            "source": "AI-패턴분석",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 5,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-22T19:46:18.986990",
+      "type": "pseudonymize",
+      "request_id": "681a78c54f76471bc231",
+      "original_text": "안녕하세요 명환씨, 김준석입니다. 추가적인 의견 있으시면 010-3124-2124로 전화주세요. junseok314@gmail.com",
+      "detected_items": 5,
+      "mode": "modular"
+    },
+    {
+      "time": "2025-09-22 19:51:27",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "debug_test_1758538285394",
+        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다."
+      },
+      "output": {
+        "pseudonymized_text": "김가명님 23세, 서울거주하시는 분이시죠? user001@example.com으로 메일 보내드렸습니다.",
+        "detection": {
+          "items": [
+            {
+              "type": "이메일",
+              "value": "contact@example.com",
+              "source": "정규식-이메일",
+              "confidence": 0.95
+            },
+            {
+              "type": "이름",
+              "value": "이영희",
+              "source": "정규식-이름패턴",
+              "confidence": 0.75
+            },
+            {
+              "type": "주소",
+              "value": "대구",
+              "source": "정규식-복합주소",
+              "confidence": 0.98
+            },
+            {
+              "type": "나이",
+              "value": "25",
+              "source": "정규식-나이",
+              "confidence": 1.0
+            }
+          ],
+          "count": 4,
+          "contains_pii": true
+        },
+        "processing_time": 2.477133274078369
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "이메일",
+            "value": "contact@example.com",
+            "token": "user001@example.com",
+            "source": "정규식-이메일",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "이영희",
+            "token": "김가명",
+            "source": "정규식-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구",
+            "token": "서울",
+            "source": "정규식-복합주소",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "나이",
+            "value": "25",
+            "token": "23",
+            "source": "정규식-나이",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 4,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-22T19:51:27.876932",
+      "type": "pseudonymize",
+      "request_id": "debug_test_1758538285394",
+      "original_text": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
+      "detected_items": 4,
+      "mode": "modular"
+    },
+    {
+      "time": "2025-09-22 19:53:55",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "debug_test_1758538433693",
         "prompt": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요."
       },
       "output": {
-        "pseudonymized_text": "박무명 고객님, 대구예약이 확인되었습니다. 문의사항은 010-0000-0001로 연락 주세요.",
+        "pseudonymized_text": "김가명 고객님, 서울예약이 확인되었습니다. 문의사항은 010-0000-0000로 연락 주세요.",
         "detection": {
           "items": [
             {
               "type": "전화번호",
               "value": "010-9876-5432",
-              "source": "정규식-전화번호"
+              "source": "정규식-전화번호",
+              "confidence": 0.9
             },
             {
               "type": "이름",
               "value": "김철수",
-              "source": "실명목록"
+              "source": "정규식-이름패턴",
+              "confidence": 0.75
             },
             {
               "type": "주소",
               "value": "부산",
-              "source": "패턴-기본주소"
+              "source": "정규식-복합주소",
+              "confidence": 0.98
             }
           ],
-          "count": 3
+          "count": 3,
+          "contains_pii": true
         },
-        "processing_time": 0.38352203369140625
+        "processing_time": 2.2073206901550293
       },
-      "items": [
-        {
-          "type": "전화번호",
-          "value": "010-9876-5432",
-          "source": "정규식-전화번호"
-        },
-        {
-          "type": "이름",
-          "value": "김철수",
-          "source": "실명목록"
-        },
-        {
-          "type": "주소",
-          "value": "부산",
-          "source": "패턴-기본주소"
-        }
-      ],
+      "detection": {
+        "items": [
+          {
+            "type": "전화번호",
+            "value": "010-9876-5432",
+            "token": "010-0000-0000",
+            "source": "정규식-전화번호",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "김철수",
+            "token": "김가명",
+            "source": "정규식-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "부산",
+            "token": "서울",
+            "source": "정규식-복합주소",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 3,
+        "contains_pii": true
+      },
       "success": true,
-      "timestamp": "2025-09-22T17:48:37.546278",
+      "timestamp": "2025-09-22T19:53:55.904733",
       "type": "pseudonymize",
-      "request_id": "04a48463f923cfb15388",
+      "request_id": "debug_test_1758538433693",
       "original_text": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요.",
       "detected_items": 3,
+      "mode": "modular"
+    },
+    {
+      "time": "2025-09-22 20:03:06",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "debug_test_1758538984626",
+        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다."
+      },
+      "output": {
+        "pseudonymized_text": "이가명 24세, 서울거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
+        "detection": {
+          "items": [
+            {
+              "type": "이름",
+              "value": "이영희",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "주소",
+              "value": "대구",
+              "source": "normalizers-주소",
+              "confidence": 0.95
+            },
+            {
+              "type": "나이",
+              "value": "25",
+              "source": "normalizers-나이",
+              "confidence": 1.0
+            },
+            {
+              "type": "이름",
+              "value": "이영희님",
+              "source": "NER-보완",
+              "confidence": 0.9999423027038574
+            },
+            {
+              "type": "주소",
+              "value": "중구",
+              "source": "NER-보완",
+              "confidence": 0.9999650716781616
+            }
+          ],
+          "count": 5,
+          "contains_pii": true
+        },
+        "processing_time": 1.7543723583221436
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "이름",
+            "value": "이영희",
+            "token": "김가명",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구",
+            "token": "서울",
+            "source": "normalizers-주소",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "나이",
+            "value": "25",
+            "token": "24",
+            "source": "normalizers-나이",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "이영희님",
+            "token": "이가명",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "중구",
+            "token": "중구",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 5,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-22T20:03:06.385742",
+      "type": "pseudonymize",
+      "request_id": "debug_test_1758538984626",
+      "original_text": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
+      "detected_items": 5,
+      "mode": "modular"
+    },
+    {
+      "time": "2025-09-22 20:05:36",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "c6fb380f439391d981e8",
+        "prompt": "안녕하세요 전명환씨, 저는 이번 회의 담당자입니다.\n흔쾌히 응해주셔서 감사합니다.\n추후 회의 일정은 아래의 이메일로 보내드리겠습니다.\n감사합니다.\n\n오준석 대리\njunseok124@gmail.com, 010-2481-2488"
+      },
+      "output": {
+        "pseudonymized_text": "안녕하세요 홍가명, 저는 박무명 회의 최가명입니다.\n흔쾌히 응해주셔서 감사합니다.\n추후 회의 일정은 아래의 이메일로 보내드리겠습니다.\n감사합니다.\n\n조무명 대리\nuser001@example.com, 010-0000-0000",
+        "detection": {
+          "items": [
+            {
+              "type": "이메일",
+              "value": "junseok124@gmail.com",
+              "source": "normalizers-이메일",
+              "confidence": 0.95
+            },
+            {
+              "type": "전화번호",
+              "value": "010-2481-2488",
+              "source": "normalizers-전화번호",
+              "confidence": 0.95
+            },
+            {
+              "type": "이름",
+              "value": "이번",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "이름",
+              "value": "담당자",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "이름",
+              "value": "전명환",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "이름",
+              "value": "전명환씨",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "이름",
+              "value": "오준석",
+              "source": "NER-보완",
+              "confidence": 0.9999994039535522
+            },
+            {
+              "type": "전화번호",
+              "value": "010- 2481 - 2488",
+              "source": "NER-보완",
+              "confidence": 0.9999935626983643
+            }
+          ],
+          "count": 8,
+          "contains_pii": true
+        },
+        "processing_time": 0.0954136848449707
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "이메일",
+            "value": "junseok124@gmail.com",
+            "token": "user001@example.com",
+            "source": "normalizers-이메일",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "전화번호",
+            "value": "010-2481-2488",
+            "token": "010-0000-0000",
+            "source": "normalizers-전화번호",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "이번",
+            "token": "박무명",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "담당자",
+            "token": "최가명",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "전명환",
+            "token": "정무명",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "전명환씨",
+            "token": "홍가명",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "오준석",
+            "token": "조무명",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "전화번호",
+            "value": "010- 2481 - 2488",
+            "token": "010-0000-0001",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 8,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-22T20:05:36.356789",
+      "type": "pseudonymize",
+      "request_id": "c6fb380f439391d981e8",
+      "original_text": "안녕하세요 전명환씨, 저는 이번 회의 담당자입니다.\n흔쾌히 응해주셔서 감사합니다.\n추후 회의 일정은 아래의 이메일로 보내드리겠습니다.\n감사합니다.\n\n오준석 대리\njunseok124@gmail.com, 010-2481-2488",
+      "detected_items": 8,
+      "mode": "modular"
+    },
+    {
+      "time": "2025-09-22 20:09:13",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "debug_test_1758539352125",
+        "prompt": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요."
+      },
+      "output": {
+        "pseudonymized_text": "김가명 고객님, 서울예약이 확인되었습니다. 문의사항은 010-0000-0000로 연락 주세요.",
+        "detection": {
+          "items": [
+            {
+              "type": "전화번호",
+              "value": "010-9876-5432",
+              "source": "normalizers-전화번호",
+              "confidence": 0.95
+            },
+            {
+              "type": "이름",
+              "value": "김철수",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "주소",
+              "value": "부산",
+              "source": "normalizers-주소",
+              "confidence": 0.95
+            },
+            {
+              "type": "주소",
+              "value": "해운대구",
+              "source": "NER-보완",
+              "confidence": 0.9999997615814209
+            },
+            {
+              "type": "전화번호",
+              "value": "010- 9876 - 5432로",
+              "source": "NER-보완",
+              "confidence": 0.9999997615814209
+            }
+          ],
+          "count": 5,
+          "contains_pii": true
+        },
+        "processing_time": 1.6544125080108643
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "전화번호",
+            "value": "010-9876-5432",
+            "token": "010-0000-0000",
+            "source": "normalizers-전화번호",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "김철수",
+            "token": "김가명",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "부산",
+            "token": "서울",
+            "source": "normalizers-주소",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "해운대구",
+            "token": "해운대구",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "전화번호",
+            "value": "010- 9876 - 5432로",
+            "token": "010-0000-0001",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 5,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-22T20:09:13.784545",
+      "type": "pseudonymize",
+      "request_id": "debug_test_1758539352125",
+      "original_text": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요.",
+      "detected_items": 5,
+      "mode": "modular"
+    },
+    {
+      "time": "2025-09-22 20:10:30",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "78318251672755ec0f59",
+        "prompt": "안녕하세요 전명환씨, 저는 이번 회의 담당자입니다.\r\n흔쾌히 응해주셔서 감사합니다.\r\n추후 회의 일정은 아래의 이메일로 보내드리겠습니다.\r\n감사합니다.\r\n\r\n오준석 대리\r\njunseok124@gmail.com, 010-2481-2488"
+      },
+      "output": {
+        "pseudonymized_text": "안녕하세요 이가명씨, 저는 이번 회의 담당자입니다.\r\n흔쾌히 응해주셔서 감사합니다.\r\n추후 회의 일정은 아래의 이메일로 보내드리겠습니다.\r\n감사합니다.\r\n\r\n박무명 대리\r\nuser001@example.com, 010-0000-0002",
+        "detection": {
+          "items": [
+            {
+              "type": "이메일",
+              "value": "junseok124@gmail.com",
+              "source": "normalizers-이메일",
+              "confidence": 0.95
+            },
+            {
+              "type": "전화번호",
+              "value": "010-2481-2488",
+              "source": "normalizers-전화번호",
+              "confidence": 0.95
+            },
+            {
+              "type": "이름",
+              "value": "전명환",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "이름",
+              "value": "오준석",
+              "source": "NER-보완",
+              "confidence": 0.9999994039535522
+            },
+            {
+              "type": "전화번호",
+              "value": "010- 2481 - 2488",
+              "source": "NER-보완",
+              "confidence": 0.9999935626983643
+            }
+          ],
+          "count": 5,
+          "contains_pii": true
+        },
+        "processing_time": 0.11247086524963379
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "이메일",
+            "value": "junseok124@gmail.com",
+            "token": "user001@example.com",
+            "source": "normalizers-이메일",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "전화번호",
+            "value": "010-2481-2488",
+            "token": "010-0000-0002",
+            "source": "normalizers-전화번호",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "전명환",
+            "token": "이가명",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "오준석",
+            "token": "박무명",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "전화번호",
+            "value": "010- 2481 - 2488",
+            "token": "010-0000-0003",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 5,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-22T20:10:30.500996",
+      "type": "pseudonymize",
+      "request_id": "78318251672755ec0f59",
+      "original_text": "안녕하세요 전명환씨, 저는 이번 회의 담당자입니다.\r\n흔쾌히 응해주셔서 감사합니다.\r\n추후 회의 일정은 아래의 이메일로 보내드리겠습니다.\r\n감사합니다.\r\n\r\n오준석 대리\r\njunseok124@gmail.com, 010-2481-2488",
+      "detected_items": 5,
+      "mode": "modular"
+    },
+    {
+      "time": "2025-09-22 20:11:38",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "9feada337878a8102c1e",
+        "prompt": "안녕하세요 전명환 학생, 학생 주임입니다. 앞으로는 더욱 더 조심해주면 좋겠네요.\n\r\njuimm41@gmail.com, 01041124243"
+      },
+      "output": {
+        "pseudonymized_text": "안녕하세요 최가명 학생, 학생 주임입니다. 앞으로는 더욱 더 조심해주면 좋겠네요.\n\r\nuser002@test.co.kr, 010-0000-0005",
+        "detection": {
+          "items": [
+            {
+              "type": "이메일",
+              "value": "juimm41@gmail.com",
+              "source": "normalizers-이메일",
+              "confidence": 0.95
+            },
+            {
+              "type": "전화번호",
+              "value": "010-4112-4243",
+              "source": "normalizers-전화번호",
+              "confidence": 0.95
+            },
+            {
+              "type": "이름",
+              "value": "전명환",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "전화번호",
+              "value": "01041124243",
+              "source": "NER-보완",
+              "confidence": 0.9897814989089966
+            }
+          ],
+          "count": 4,
+          "contains_pii": true
+        },
+        "processing_time": 0.07720208168029785
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "이메일",
+            "value": "juimm41@gmail.com",
+            "token": "user002@test.co.kr",
+            "source": "normalizers-이메일",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "전화번호",
+            "value": "010-4112-4243",
+            "token": "010-0000-0004",
+            "source": "normalizers-전화번호",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "전명환",
+            "token": "최가명",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "전화번호",
+            "value": "01041124243",
+            "token": "010-0000-0005",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 4,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-22T20:11:38.372711",
+      "type": "pseudonymize",
+      "request_id": "9feada337878a8102c1e",
+      "original_text": "안녕하세요 전명환 학생, 학생 주임입니다. 앞으로는 더욱 더 조심해주면 좋겠네요.\n\r\njuimm41@gmail.com, 01041124243",
+      "detected_items": 4,
+      "mode": "modular"
+    },
+    {
+      "time": "2025-09-22 20:12:44",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "65071763de28dbbf6658",
+        "prompt": "안녕하세요 전명환씨, 저는 이번 회의 담당자입니다.\r\n흔쾌히 응해주셔서 감사합니다.\r\n추후 회의 일정은 아래의 이메일로 보내드리겠습니다.\r\n감사합니다.\r\n\r\n오준석 대리\r\njunseok124@gmail.com, 010-2481-2488"
+      },
+      "output": {
+        "pseudonymized_text": "안녕하세요 정무명씨, 저는 이번 회의 담당자입니다.\r\n흔쾌히 응해주셔서 감사합니다.\r\n추후 회의 일정은 아래의 이메일로 보내드리겠습니다.\r\n감사합니다.\r\n\r\n홍가명 대리\r\nuser003@gmail.com, 010-0000-0006",
+        "detection": {
+          "items": [
+            {
+              "type": "이메일",
+              "value": "junseok124@gmail.com",
+              "source": "normalizers-이메일",
+              "confidence": 0.95
+            },
+            {
+              "type": "전화번호",
+              "value": "010-2481-2488",
+              "source": "normalizers-전화번호",
+              "confidence": 0.95
+            },
+            {
+              "type": "이름",
+              "value": "전명환",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "이름",
+              "value": "오준석",
+              "source": "NER-보완",
+              "confidence": 0.9999994039535522
+            },
+            {
+              "type": "전화번호",
+              "value": "010- 2481 - 2488",
+              "source": "NER-보완",
+              "confidence": 0.9999935626983643
+            }
+          ],
+          "count": 5,
+          "contains_pii": true
+        },
+        "processing_time": 0.08637332916259766
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "이메일",
+            "value": "junseok124@gmail.com",
+            "token": "user003@gmail.com",
+            "source": "normalizers-이메일",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "전화번호",
+            "value": "010-2481-2488",
+            "token": "010-0000-0006",
+            "source": "normalizers-전화번호",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "전명환",
+            "token": "정무명",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "오준석",
+            "token": "홍가명",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "전화번호",
+            "value": "010- 2481 - 2488",
+            "token": "010-0000-0007",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 5,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-22T20:12:44.845591",
+      "type": "pseudonymize",
+      "request_id": "65071763de28dbbf6658",
+      "original_text": "안녕하세요 전명환씨, 저는 이번 회의 담당자입니다.\r\n흔쾌히 응해주셔서 감사합니다.\r\n추후 회의 일정은 아래의 이메일로 보내드리겠습니다.\r\n감사합니다.\r\n\r\n오준석 대리\r\njunseok124@gmail.com, 010-2481-2488",
+      "detected_items": 5,
+      "mode": "modular"
+    },
+    {
+      "time": "2025-09-22 20:13:05",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "5d14609c70c050bc6636",
+        "prompt": "안녕하세요 전명환씨, 저는 이번 회의 담당자입니다.\r\n흔쾌히 응해주셔서 감사합니다.\r\n추후 회의 일정은 아래의 이메일로 보내드리겠습니다.\r\n감사합니다.\r\n\r\n오준석 대리\r\njunseok124@gmail.com, 010-2481-2488"
+      },
+      "output": {
+        "pseudonymized_text": "안녕하세요 조무명씨, 저는 이번 회의 담당자입니다.\r\n흔쾌히 응해주셔서 감사합니다.\r\n추후 회의 일정은 아래의 이메일로 보내드리겠습니다.\r\n감사합니다.\r\n\r\n윤가명 대리\r\nuser004@naver.com, 010-0000-0008",
+        "detection": {
+          "items": [
+            {
+              "type": "이메일",
+              "value": "junseok124@gmail.com",
+              "source": "normalizers-이메일",
+              "confidence": 0.95
+            },
+            {
+              "type": "전화번호",
+              "value": "010-2481-2488",
+              "source": "normalizers-전화번호",
+              "confidence": 0.95
+            },
+            {
+              "type": "이름",
+              "value": "전명환",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "이름",
+              "value": "오준석",
+              "source": "NER-보완",
+              "confidence": 0.9999994039535522
+            },
+            {
+              "type": "전화번호",
+              "value": "010- 2481 - 2488",
+              "source": "NER-보완",
+              "confidence": 0.9999935626983643
+            }
+          ],
+          "count": 5,
+          "contains_pii": true
+        },
+        "processing_time": 0.10226678848266602
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "이메일",
+            "value": "junseok124@gmail.com",
+            "token": "user004@naver.com",
+            "source": "normalizers-이메일",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "전화번호",
+            "value": "010-2481-2488",
+            "token": "010-0000-0008",
+            "source": "normalizers-전화번호",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "전명환",
+            "token": "조무명",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "오준석",
+            "token": "윤가명",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "전화번호",
+            "value": "010- 2481 - 2488",
+            "token": "010-0000-0009",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 5,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-22T20:13:05.018540",
+      "type": "pseudonymize",
+      "request_id": "5d14609c70c050bc6636",
+      "original_text": "안녕하세요 전명환씨, 저는 이번 회의 담당자입니다.\r\n흔쾌히 응해주셔서 감사합니다.\r\n추후 회의 일정은 아래의 이메일로 보내드리겠습니다.\r\n감사합니다.\r\n\r\n오준석 대리\r\njunseok124@gmail.com, 010-2481-2488",
+      "detected_items": 5,
       "mode": "modular"
     }
   ]

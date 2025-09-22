@@ -28,9 +28,3 @@
 1. **서버 연결 안됨**: 서버가 실행 중인지 확인
 2. **가명화 안됨**: 콘솔에서 오류 메시지 확인
 3. **설정 초기화**: 확장 옵션에서 "초기화" 버튼 클릭
-
-## 지원 서비스
-
-- ChatGPT (chat.openai.com)
-- Claude (claude.ai)
-- Bard/Gemini (Google AI)

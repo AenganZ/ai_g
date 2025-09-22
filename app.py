@@ -1,36 +1,34 @@
-# app.py - 모듈화된 Flask 서버 (이모티콘 제거, 실제 가명 치환)
+# app.py - 모듈화된 Flask 서버 (불필요한 import 정리)
 import os
 import json
 import time
 import asyncio
 from datetime import datetime
-from typing import Dict, Any
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
-# 모듈화된 pseudonymization 패키지 import (오류 시 종료)
+# 필요한 pseudonymization 함수들만 import
 from pseudonymization import (
     get_manager, 
     pseudonymize_text_with_fake,
-    is_manager_ready,
     get_data_pool_stats,
     initialize_pools
 )
 print("Pseudonymization 모듈 로드 성공")
 
-# ===== 설정 =====
+# 설정
 LOG_FILE = "pseudo-log.json"
 MAX_LOGS = 100
 
-# ===== Flask 설정 =====
+# Flask 설정
 app = Flask(__name__)
 CORS(app)
 
-# ===== 전역 변수 =====
+# 전역 변수
 manager_initialized = False
 
-# ===== 로깅 유틸리티 =====
+# 로깅 유틸리티
 def load_logs():
     try:
         if os.path.exists(LOG_FILE):
@@ -54,7 +52,7 @@ def add_log(entry):
         logs_data["logs"] = logs_data["logs"][-MAX_LOGS:]
     save_logs(logs_data)
 
-# ===== Flask 라우트 =====
+# Flask 라우트
 @app.route("/", methods=["GET", "OPTIONS"])
 def root():
     if request.method == "OPTIONS":
@@ -68,11 +66,9 @@ def root():
     global manager_initialized
     if not manager_initialized:
         try:
-            print("가명화매니저 초기화 중...")
             initialize_pools()
             manager = get_manager()
             manager_initialized = True
-            print("가명화매니저 초기화 완료")
         except Exception as e:
             print(f"매니저 초기화 실패: {e}")
             return jsonify({"error": f"매니저 초기화 실패: {e}"}), 500
@@ -119,40 +115,26 @@ def pseudonymize():
         
         start_time = time.time()
         
-        print(f"가명화 요청: {datetime.now().strftime('%H:%M:%S')}")
-        print(f"ID: {request_id}")
-        print(f"원본 텍스트: {text}")
-        
         if not manager_initialized:
-            # 매니저 초기화 시도
             try:
-                print("가명화매니저 초기화 중...")
                 initialize_pools()
                 manager = get_manager()
                 globals()["manager_initialized"] = True
-                print("가명화매니저 초기화 완료")
             except Exception as e:
                 print(f"매니저 초기화 실패: {e}")
                 response = jsonify({"error": f"매니저 초기화 실패: {e}"})
                 response.headers.add('Access-Control-Allow-Origin', '*')
                 return response, 500
         
-        print("가명화 모드로 처리 중...")
-        
-        # 비동기 가명화 처리 (asyncio.run 사용)
+        # 비동기 가명화 처리
         result = asyncio.run(pseudonymize_text_with_fake(text))
         
         pseudonymized_text = result.get("pseudonymized_text", text)
         detected_items = result.get("detected_items", 0)
         detection_details = result.get("detection", {})
+        mapping = result.get("mapping", [])
         
         processing_time = time.time() - start_time
-        
-        print(f"이전: {text}")
-        print(f"가명화: {pseudonymized_text}")
-        print(f"처리 시간: {processing_time:.3f}초")
-        print(f"완료 ({detected_items}개 항목 탐지)")
-        print("=" * 60)
         
         # 로그 저장 (브라우저 익스텐션 호환 형식)
         log_entry = {
@@ -168,7 +150,21 @@ def pseudonymize():
                 "detection": detection_details,
                 "processing_time": processing_time
             },
-            "items": detection_details.get("items", []),
+            "detection": {
+                "items": [
+                    {
+                        "type": item.get("type", ""),
+                        "value": item.get("value", ""),
+                        "token": item.get("token", ""),
+                        "source": item.get("source", ""),
+                        "start": 0,
+                        "end": 0
+                    }
+                    for item in mapping
+                ],
+                "count": detected_items,
+                "contains_pii": detected_items > 0
+            },
             "success": True,
             "timestamp": datetime.now().isoformat(),
             "type": "pseudonymize",
@@ -179,28 +175,21 @@ def pseudonymize():
         }
         add_log(log_entry)
         
+        # 브라우저 익스텐션 호환 응답 형식
         response_data = {
             "pseudonymized_text": pseudonymized_text,
+            "masked_prompt": pseudonymized_text,
             "detection": detection_details,
             "processing_time": processing_time,
             "success": True,
             "timestamp": datetime.now().isoformat(),
             "mode": "modular",
-            # 브라우저 익스텐션 호환을 위한 추가 필드들
-            "mapping": [
-                {
-                    "original": item.get("value", ""),
-                    "type": item.get("type", ""),
-                    "source": item.get("source", "")
-                }
-                for item in detection_details.get("items", [])
-            ],
+            "mapping": mapping,
             "id": request_id,
             "detected_count": detected_items
         }
         
         response = jsonify(response_data)
-        # 브라우저 익스텐션 호환을 위한 강화된 CORS 헤더
         response.headers.add('Access-Control-Allow-Origin', '*')
         response.headers.add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')

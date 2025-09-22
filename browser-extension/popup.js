@@ -9,6 +9,42 @@ function fmtTime(t) {
   return t || '';
 }
 
+function showStatus(message, isSuccess = true) {
+  const statusEl = $('statusMessage');
+  statusEl.textContent = message;
+  statusEl.className = `status ${isSuccess ? 'success' : 'error'}`;
+  statusEl.style.display = 'block';
+  
+  // 3초 후 자동 숨김
+  setTimeout(() => {
+    statusEl.style.display = 'none';
+  }, 3000);
+}
+
+function showConfirmDialog(message, onConfirm) {
+  const dialog = $('confirmDialog');
+  const backdrop = $('confirmBackdrop');
+  const confirmBtn = $('confirmDelete');
+  const cancelBtn = $('confirmCancel');
+  
+  dialog.style.display = 'block';
+  
+  const cleanup = () => {
+    dialog.style.display = 'none';
+    confirmBtn.onclick = null;
+    cancelBtn.onclick = null;
+    backdrop.onclick = null;
+  };
+  
+  confirmBtn.onclick = () => {
+    cleanup();
+    onConfirm();
+  };
+  
+  cancelBtn.onclick = cleanup;
+  backdrop.onclick = cleanup;
+}
+
 /** detection.items를 사용해 프롬프트 치환 미리보기 생성 (과치환 방지: 항목별 1회) */
 function buildMaskedPreview(original, items) {
   if (!original || !Array.isArray(items) || !items.length) return original || '';
@@ -136,7 +172,40 @@ async function load() {
   }
 }
 
+async function clearLogs() {
+  try {
+    const res = await fetch(API, { 
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (res.ok) {
+      showStatus('로그가 성공적으로 삭제되었습니다.', true);
+      // 로그 목록 새로고침
+      setTimeout(() => {
+        load();
+      }, 500);
+    } else {
+      const errorText = await res.text();
+      showStatus(`로그 삭제 실패: ${errorText}`, false);
+    }
+  } catch (e) {
+    showStatus(`로그 삭제 오류: ${e.message}`, false);
+    console.error('[popup] clear logs failed:', e);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  // 새로고침 버튼
   $('refresh').addEventListener('click', load);
+  
+  // 로그 삭제 버튼
+  $('clearLogs').addEventListener('click', () => {
+    showConfirmDialog('모든 로그를 삭제하시겠습니까?', clearLogs);
+  });
+  
+  // 초기 로드
   load();
 });
