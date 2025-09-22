@@ -1,205 +1,234 @@
-// popup.js - 단순화된 팝업
+// popup.js - 간단하고 안정적인 로그 UI
+
+const AENGANZ_API = 'http://127.0.0.1:5000/prompt_logs';
 
 const $ = (id) => document.getElementById(id);
 
-// 서버 상태 확인
-async function checkServerStatus() {
-  const statusEl = $('status');
-  const refreshBtn = $('refreshBtn');
+// ===== 유틸리티 함수 =====
+function formatTime(timestamp) {
+  if (!timestamp) return '';
   
   try {
-    statusEl.textContent = '서버 확인 중...';
-    statusEl.className = 'status checking';
-    
-    const response = await fetch('http://127.0.0.1:5000/health', {
-      method: 'GET',
-      signal: AbortSignal.timeout(3000)
+    const date = new Date(timestamp);
+    return date.toLocaleString('ko-KR', {
+      month: '2-digit',
+      day: '2-digit',  
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
     });
-    
-    if (response.ok) {
-      const data = await response.json();
-      statusEl.textContent = `✅ 서버 온라인 (모델: ${data.model_loaded ? '로드됨' : '정규식 모드'})`;
-      statusEl.className = 'status online';
-      
-      // 로그 로드
-      loadLogs();
-    } else {
-      throw new Error(`HTTP ${response.status}`);
-    }
-  } catch (error) {
-    statusEl.textContent = `❌ 서버 오프라인: ${error.message}`;
-    statusEl.className = 'status offline';
-    
-    $('logs').innerHTML = `
-      <div class="error">
-        <h3>서버 연결 실패</h3>
-        <p>Python 서버가 실행 중인지 확인하세요:</p>
-        <code>python app.py</code>
-        <p>또는</p>
-        <code>start.bat</code> (Windows) / <code>./start.sh</code> (macOS/Linux)
-      </div>
-    `;
+  } catch {
+    return timestamp;
   }
 }
 
-// 로그 로드
-async function loadLogs() {
-  const logsEl = $('logs');
+function truncateText(text, maxLength = 80) {
+  if (!text) return '';
+  return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+}
+
+// ===== 로그 렌더링 =====
+function renderLogs(logs) {
+  const container = $('reqList');
+  const timestamp = $('ts');
   
+  if (!container) return;
+
+  // 로딩 상태 해제
+  container.innerHTML = '';
+
+  if (!Array.isArray(logs) || logs.length === 0) {
+    container.innerHTML = `
+      <div class="muted">
+        <p>아직 가명화 로그가 없습니다.</p>
+        <p>ChatGPT나 Claude에서 메시지를 보내보세요.</p>
+      </div>
+    `;
+    if (timestamp) timestamp.textContent = '';
+    return;
+  }
+
+  // 최신 로그부터 표시
+  const sortedLogs = logs.slice().reverse();
+  let html = '';
+
+  sortedLogs.forEach((log, index) => {
+    const prompt = log?.input?.prompt || log?.originalText || '';
+    const time = log?.time || log?.timestamp || '';
+    const items = log?.output?.detection?.items || log?.detection?.items || [];
+    const containsPII = items.length > 0;
+
+    html += `
+      <details class="row">
+        <summary class="row-head">
+          <span class="pill ${containsPII ? 'warn' : 'ok'}">
+            ${containsPII ? 'PII' : 'NO-PII'}
+          </span>
+          <span class="prompt">${truncateText(prompt)}</span>
+          <span class="time">${formatTime(time)}</span>
+        </summary>
+
+        <div class="items">
+          ${items.length === 0 ? 
+            '<div class="muted">탐지된 개인정보 없음</div>' :
+            items.map((item, idx) => `
+              <div class="item">
+                <div class="grid">
+                  <div><b>#${idx + 1} 유형</b></div>
+                  <div>${item.type || '알 수 없음'}</div>
+                  <div><b>원본</b></div>
+                  <div class="mono">${item.value || ''}</div>
+                  <div><b>가명</b></div>
+                  <div class="mono">${item.token || ''}</div>
+                  <div><b>출처</b></div>
+                  <div>${item.source || 'Pattern'}</div>
+                </div>
+              </div>
+            `).join('')
+          }
+        </div>
+
+        ${items.length > 0 ? `
+          <div class="map">
+            ${items.map(item => `
+              <div class="map-row">
+                <span class="tag">${item.type || '-'}</span>
+                <span class="mono">${item.value || ''}</span>
+                <span class="arrow">→</span>
+                <span class="mono">${item.token || ''}</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+      </details>
+    `;
+  });
+
+  container.innerHTML = html;
+  
+  // 타임스탬프 업데이트
+  if (timestamp && logs.length > 0) {
+    const latestTime = logs[logs.length - 1]?.time || logs[logs.length - 1]?.timestamp;
+    timestamp.textContent = latestTime ? `마지막: ${formatTime(latestTime)}` : '';
+  }
+}
+
+// ===== 서버 로그 로드 =====
+async function loadServerLogs() {
   try {
-    logsEl.innerHTML = '<div class="loading">로그 로딩 중...</div>';
+    console.log('[Popup] 서버 로그 로드 시도');
     
-    const response = await fetch('http://127.0.0.1:5000/prompt_logs', {
+    const response = await fetch(AENGANZ_API, { 
       method: 'GET',
-      signal: AbortSignal.timeout(5000)
+      headers: { 'Accept': 'application/json' },
+      signal: AbortSignal.timeout(5000) // 5초 타임아웃
     });
     
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
     
-    const data = await response.json();
-    const logs = data.logs || [];
+    const text = await response.text();
+    const data = JSON.parse(text);
     
-    if (logs.length === 0) {
-      logsEl.innerHTML = `
-        <div class="empty">
-          <h3>📋 로그가 없습니다</h3>
-          <p>ChatGPT에서 개인정보가 포함된 메시지를 보내보세요.</p>
-          <div class="test-example">
-            <strong>테스트 예시:</strong><br>
-            "안녕하세요, 제 이름은 홍길동이고 연락처는 010-1234-5678입니다."
-          </div>
+    console.log('[Popup] 서버 로그 로드 성공:', data?.logs?.length || 0);
+    return data?.logs || [];
+    
+  } catch (error) {
+    console.warn('[Popup] 서버 로그 로드 실패:', error.message);
+    return [];
+  }
+}
+
+// ===== 익스텐션 로그 로드 =====
+async function loadExtensionLogs() {
+  try {
+    console.log('[Popup] 익스텐션 로그 로드 시도');
+    
+    const response = await chrome.runtime.sendMessage({ action: 'getLogs' });
+    console.log('[Popup] 익스텐션 로그 로드 성공:', response?.logs?.length || 0);
+    
+    return response?.logs || [];
+    
+  } catch (error) {
+    console.warn('[Popup] 익스텐션 로그 로드 실패:', error.message);
+    return [];
+  }
+}
+
+// ===== 통합 로그 로드 =====
+async function loadAllLogs() {
+  const container = $('reqList');
+  const timestamp = $('ts');
+  
+  if (container) {
+    container.innerHTML = `<div class="muted">로그 로드 중...</div>`;
+  }
+  if (timestamp) {
+    timestamp.textContent = '로딩 중...';
+  }
+
+  try {
+    // 병렬로 로그 로드
+    const [serverLogs, extensionLogs] = await Promise.all([
+      loadServerLogs(),
+      loadExtensionLogs()
+    ]);
+
+    // 로그 통합
+    const allLogs = [...serverLogs, ...extensionLogs];
+    
+    // 시간순 정렬 (오래된 것부터)
+    allLogs.sort((a, b) => {
+      const timeA = new Date(a.time || a.timestamp || 0);
+      const timeB = new Date(b.time || b.timestamp || 0);
+      return timeA - timeB;
+    });
+
+    console.log('[Popup] 통합 로그 수:', allLogs.length);
+    
+    // 렌더링
+    renderLogs(allLogs);
+
+    // 연결 상태 표시
+    if (timestamp) {
+      const serverStatus = serverLogs.length > 0 ? '🟢' : '🔴';
+      const extStatus = extensionLogs.length >= 0 ? '🟢' : '🔴';
+      timestamp.textContent = `서버 ${serverStatus} 익스텐션 ${extStatus}`;
+    }
+
+  } catch (error) {
+    console.error('[Popup] 로그 로드 총 실패:', error);
+    
+    if (container) {
+      container.innerHTML = `
+        <div class="muted">
+          <p>❌ 로그 로드 실패</p>
+          <p>서버 상태: http://127.0.0.1:5000</p>
+          <p>오류: ${error.message}</p>
         </div>
       `;
-      return;
     }
     
-    // 최신 로그부터 표시
-    const sortedLogs = logs.slice().reverse();
-    
-    let html = `<h3>📊 처리된 요청 (${logs.length}개)</h3>`;
-    
-    sortedLogs.forEach((log, index) => {
-      const input = log.input || {};
-      const detection = log.detection || {};
-      const items = detection.items || [];
-      const performance = log.performance || {};
-      
-      const prompt = input.prompt || '';
-      const time = log.time || '';
-      const itemCount = items.length;
-      const processingTime = performance.total_time_ms || 0;
-      
-      html += `
-        <div class="log-entry ${itemCount > 0 ? 'has-pii' : 'no-pii'}">
-          <div class="log-header">
-            <span class="badge ${itemCount > 0 ? 'pii' : 'clean'}">
-              ${itemCount > 0 ? `PII (${itemCount})` : 'CLEAN'}
-            </span>
-            <span class="time">${time}</span>
-            <span class="performance">${processingTime}ms</span>
-          </div>
-          
-          <div class="prompt">
-            ${prompt.length > 100 ? prompt.substring(0, 100) + '...' : prompt}
-          </div>
-          
-          ${itemCount > 0 ? `
-            <div class="detection-details">
-              <strong>🔍 탐지된 개인정보:</strong>
-              <ul>
-                ${items.map(item => `
-                  <li>
-                    <span class="type">${item.type}</span>: 
-                    <span class="value">${item.value}</span> → 
-                    <span class="token">${item.token}</span>
-                  </li>
-                `).join('')}
-              </ul>
-            </div>
-          ` : '<div class="no-detection">개인정보가 탐지되지 않았습니다.</div>'}
-        </div>
-      `;
-    });
-    
-    logsEl.innerHTML = html;
-    
-  } catch (error) {
-    logsEl.innerHTML = `
-      <div class="error">
-        <h3>로그 로드 실패</h3>
-        <p>오류: ${error.message}</p>
-      </div>
-    `;
+    if (timestamp) {
+      timestamp.textContent = '연결 실패';
+    }
   }
 }
 
-// 로그 삭제
-async function clearLogs() {
-  if (!confirm('모든 로그를 삭제하시겠습니까?')) {
-    return;
-  }
-  
-  try {
-    const response = await fetch('http://127.0.0.1:5000/prompt_logs', {
-      method: 'DELETE'
-    });
-    
-    if (response.ok) {
-      loadLogs();
-      alert('로그가 삭제되었습니다.');
-    } else {
-      throw new Error(`HTTP ${response.status}`);
-    }
-  } catch (error) {
-    alert('로그 삭제 실패: ' + error.message);
-  }
-}
-
-// 테스트 함수
-async function testConnection() {
-  const testBtn = $('testBtn');
-  const originalText = testBtn.textContent;
-  
-  try {
-    testBtn.textContent = '테스트 중...';
-    testBtn.disabled = true;
-    
-    // 테스트 요청
-    const response = await fetch('http://127.0.0.1:5000/pseudonymize', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        prompt: '테스트입니다. 제 이름은 김철수이고 연락처는 010-1234-5678입니다.',
-        id: 'popup_test_' + Date.now()
-      })
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      alert(`✅ 테스트 성공!\n탐지된 항목: ${data.mapping?.length || 0}개`);
-      loadLogs(); // 로그 새로고침
-    } else {
-      throw new Error(`HTTP ${response.status}`);
-    }
-  } catch (error) {
-    alert('❌테스트 실패: ' + error.message);
-  } finally {
-    testBtn.textContent = originalText;
-    testBtn.disabled = false;
-  }
-}
-
-// 이벤트 리스너
+// ===== 초기화 =====
 document.addEventListener('DOMContentLoaded', () => {
-  $('refreshBtn').addEventListener('click', checkServerStatus);
-  $('clearBtn').addEventListener('click', clearLogs);
-  $('testBtn').addEventListener('click', testConnection);
-  $('optionsBtn').addEventListener('click', () => {
-    chrome.runtime.openOptionsPage();
-  });
+  console.log('[Popup] 팝업 초기화');
+  
+  // 새로고침 버튼
+  const refreshBtn = $('refresh');
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', () => {
+      console.log('[Popup] 수동 새로고침');
+      loadAllLogs();
+    });
+  }
   
   // 초기 로드
-  checkServerStatus();
+  loadAllLogs();
 });

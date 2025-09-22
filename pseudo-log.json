@@ -133,6 +133,331 @@
       "original_text": "호혁씨, 지금 바로 대전시 동구 용운동으로 올수 있어요? 도착하면 010-4212-4328로 전화하고. hoho12@gmail.com으로 연락주세요",
       "detected_items": 4,
       "mode": "modular"
+    },
+    {
+      "time": "2025-09-22 13:14:21",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "debug_test_1758514461547",
+        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다."
+      },
+      "output": {
+        "pseudonymized_text": "김가명님 31세, 서울거주하시는 분이시죠? user001@example.com으로 메일 보내드렸습니다.",
+        "detection": {
+          "items": [
+            {
+              "type": "이메일",
+              "value": "contact@example.com",
+              "source": "정규식-이메일"
+            },
+            {
+              "type": "이름",
+              "value": "이영희",
+              "source": "실명목록"
+            },
+            {
+              "type": "주소",
+              "value": "대구",
+              "source": "패턴-기본주소"
+            },
+            {
+              "type": "나이",
+              "value": "25",
+              "source": "정규식-나이"
+            }
+          ],
+          "count": 4
+        },
+        "processing_time": 0.3771681785583496
+      },
+      "items": [
+        {
+          "type": "이메일",
+          "value": "contact@example.com",
+          "source": "정규식-이메일"
+        },
+        {
+          "type": "이름",
+          "value": "이영희",
+          "source": "실명목록"
+        },
+        {
+          "type": "주소",
+          "value": "대구",
+          "source": "패턴-기본주소"
+        },
+        {
+          "type": "나이",
+          "value": "25",
+          "source": "정규식-나이"
+        }
+      ],
+      "success": true,
+      "timestamp": "2025-09-22T13:14:21.929361",
+      "type": "pseudonymize",
+      "request_id": "debug_test_1758514461547",
+      "original_text": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
+      "detected_items": 4,
+      "mode": "modular"
+    },
+    {
+      "time": "2025-09-22 13:20:45",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "pseudo_1758514844921_7ljvcxxex",
+        "prompt": "호혁씨, 지금 바로 대전시 동구 용운동으로 올수 있어요? 도착하면 010-4212-4328로 전화하고. hoho12@gmail.com으로 연락주세요"
+      },
+      "output": {
+        "pseudonymized_text": "김가명씨, 지금 바로 서울올수 있어요? 도착하면 010-0000-0000로 전화하고. user001@example.com으로 연락주세요",
+        "detection": {
+          "items": [
+            {
+              "type": "이메일",
+              "value": "hoho12@gmail.com",
+              "source": "정규식-이메일"
+            },
+            {
+              "type": "전화번호",
+              "value": "010-4212-4328",
+              "source": "정규식-전화번호"
+            },
+            {
+              "type": "이름",
+              "value": "호혁",
+              "source": "패턴-이름"
+            },
+            {
+              "type": "주소",
+              "value": "대전",
+              "source": "패턴-기본주소"
+            }
+          ],
+          "count": 4
+        },
+        "processing_time": 0.39129114151000977
+      },
+      "items": [
+        {
+          "type": "이메일",
+          "value": "hoho12@gmail.com",
+          "source": "정규식-이메일"
+        },
+        {
+          "type": "전화번호",
+          "value": "010-4212-4328",
+          "source": "정규식-전화번호"
+        },
+        {
+          "type": "이름",
+          "value": "호혁",
+          "source": "패턴-이름"
+        },
+        {
+          "type": "주소",
+          "value": "대전",
+          "source": "패턴-기본주소"
+        }
+      ],
+      "success": true,
+      "timestamp": "2025-09-22T13:20:45.323322",
+      "type": "pseudonymize",
+      "request_id": "pseudo_1758514844921_7ljvcxxex",
+      "original_text": "호혁씨, 지금 바로 대전시 동구 용운동으로 올수 있어요? 도착하면 010-4212-4328로 전화하고. hoho12@gmail.com으로 연락주세요",
+      "detected_items": 4,
+      "mode": "modular"
+    },
+    {
+      "time": "2025-09-22 13:29:16",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "debug_test_1758515356254",
+        "prompt": "안녕하세요, 제 이름은 홍길동이고 연락처는 010-1234-5678입니다. 서울 강남구에 살고 있습니다."
+      },
+      "output": {
+        "pseudonymized_text": "안녕하세요, 제 이름은 김가명이고 연락처는 010-0000-0000입니다. 서울에 살고 있습니다.",
+        "detection": {
+          "items": [
+            {
+              "type": "전화번호",
+              "value": "010-1234-5678",
+              "source": "정규식-전화번호"
+            },
+            {
+              "type": "이름",
+              "value": "홍길동",
+              "source": "실명목록"
+            },
+            {
+              "type": "주소",
+              "value": "서울",
+              "source": "패턴-복합주소"
+            }
+          ],
+          "count": 3
+        },
+        "processing_time": 0.3814971446990967
+      },
+      "items": [
+        {
+          "type": "전화번호",
+          "value": "010-1234-5678",
+          "source": "정규식-전화번호"
+        },
+        {
+          "type": "이름",
+          "value": "홍길동",
+          "source": "실명목록"
+        },
+        {
+          "type": "주소",
+          "value": "서울",
+          "source": "패턴-복합주소"
+        }
+      ],
+      "success": true,
+      "timestamp": "2025-09-22T13:29:16.638772",
+      "type": "pseudonymize",
+      "request_id": "debug_test_1758515356254",
+      "original_text": "안녕하세요, 제 이름은 홍길동이고 연락처는 010-1234-5678입니다. 서울 강남구에 살고 있습니다.",
+      "detected_items": 3,
+      "mode": "modular"
+    },
+    {
+      "time": "2025-09-22 13:29:19",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "pseudo_1758515359182_86xsk7qcw",
+        "prompt": "호혁씨, 지금 바로 대전시 동구 용운동으로 올수 있어요? 도착하면 010-4212-4328로 전화하고. hoho12@gmail.com으로 연락주세요"
+      },
+      "output": {
+        "pseudonymized_text": "이가명씨, 지금 바로 부산올수 있어요? 도착하면 010-0000-0001로 전화하고. user001@example.com으로 연락주세요",
+        "detection": {
+          "items": [
+            {
+              "type": "이메일",
+              "value": "hoho12@gmail.com",
+              "source": "정규식-이메일"
+            },
+            {
+              "type": "전화번호",
+              "value": "010-4212-4328",
+              "source": "정규식-전화번호"
+            },
+            {
+              "type": "이름",
+              "value": "호혁",
+              "source": "패턴-이름"
+            },
+            {
+              "type": "주소",
+              "value": "대전",
+              "source": "패턴-기본주소"
+            }
+          ],
+          "count": 4
+        },
+        "processing_time": 0.3905515670776367
+      },
+      "items": [
+        {
+          "type": "이메일",
+          "value": "hoho12@gmail.com",
+          "source": "정규식-이메일"
+        },
+        {
+          "type": "전화번호",
+          "value": "010-4212-4328",
+          "source": "정규식-전화번호"
+        },
+        {
+          "type": "이름",
+          "value": "호혁",
+          "source": "패턴-이름"
+        },
+        {
+          "type": "주소",
+          "value": "대전",
+          "source": "패턴-기본주소"
+        }
+      ],
+      "success": true,
+      "timestamp": "2025-09-22T13:29:19.583828",
+      "type": "pseudonymize",
+      "request_id": "pseudo_1758515359182_86xsk7qcw",
+      "original_text": "호혁씨, 지금 바로 대전시 동구 용운동으로 올수 있어요? 도착하면 010-4212-4328로 전화하고. hoho12@gmail.com으로 연락주세요",
+      "detected_items": 4,
+      "mode": "modular"
+    },
+    {
+      "time": "2025-09-22 13:43:45",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "req_1758516225",
+        "prompt": "호혁씨, 지금 바로 대전시 동구 용운동으로 올수 있어요? 도착하면 010-4212-4328로 전화하고. hoho12@gmail.com으로 연락주세요"
+      },
+      "output": {
+        "pseudonymized_text": "김가명씨, 지금 바로 서울올수 있어요? 도착하면 010-0000-0000로 전화하고. user001@example.com으로 연락주세요",
+        "detection": {
+          "items": [
+            {
+              "type": "이메일",
+              "value": "hoho12@gmail.com",
+              "source": "정규식-이메일"
+            },
+            {
+              "type": "전화번호",
+              "value": "010-4212-4328",
+              "source": "정규식-전화번호"
+            },
+            {
+              "type": "이름",
+              "value": "호혁",
+              "source": "패턴-이름"
+            },
+            {
+              "type": "주소",
+              "value": "대전",
+              "source": "패턴-기본주소"
+            }
+          ],
+          "count": 4
+        },
+        "processing_time": 0.3985731601715088
+      },
+      "items": [
+        {
+          "type": "이메일",
+          "value": "hoho12@gmail.com",
+          "source": "정규식-이메일"
+        },
+        {
+          "type": "전화번호",
+          "value": "010-4212-4328",
+          "source": "정규식-전화번호"
+        },
+        {
+          "type": "이름",
+          "value": "호혁",
+          "source": "패턴-이름"
+        },
+        {
+          "type": "주소",
+          "value": "대전",
+          "source": "패턴-기본주소"
+        }
+      ],
+      "success": true,
+      "timestamp": "2025-09-22T13:43:45.548365",
+      "type": "pseudonymize",
+      "request_id": "req_1758516225",
+      "original_text": "호혁씨, 지금 바로 대전시 동구 용운동으로 올수 있어요? 도착하면 010-4212-4328로 전화하고. hoho12@gmail.com으로 연락주세요",
+      "detected_items": 4,
+      "mode": "modular"
     }
   ]
 }

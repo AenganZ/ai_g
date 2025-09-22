@@ -1,129 +1,80 @@
-// content.js - CSP 우회를 위한 메시지 브리지
-console.log('[PII Content] Loading...');
+// content.js - 안정적인 메시지 전달 (사용자 UI 절대 건드리지 않음)
 
 (function() {
-  try {
-    // injected.js 스크립트 주입
-    const script = document.createElement('script');
-    script.src = chrome.runtime.getURL('injected.js');
-    script.onload = () => {
-      script.remove();
-      console.log('[PII Content] ✅ Injected script loaded');
-    };
-    script.onerror = () => {
-      console.error('[PII Content] ❌ Failed to load injected script');
-      script.remove();
-    };
-    
-    const target = document.head || document.documentElement;
-    if (target) {
-      target.appendChild(script);
-      console.log('[PII Content] 📝 Script injected to', target.tagName);
-    } else {
-      document.addEventListener('DOMContentLoaded', () => {
-        (document.head || document.documentElement).appendChild(script);
-        console.log('[PII Content] 📝 Script injected after DOM ready');
-      });
-    }
-  } catch (error) {
-    console.error('[PII Content] ❌ Injection failed:', error);
-  }
-})();
+  'use strict';
 
-// Injected script와 Background script 간의 메시지 브리지
-window.addEventListener('message', async (event) => {
-  // 보안: 같은 출처만 허용
-  if (event.source !== window) return;
-  
-  const data = event.data;
-  
-  // 가명화 요청 처리
-  if (data.type === 'PII_PSEUDONYMIZE_REQUEST') {
-    console.log('[PII Content] 📨 Received pseudonymization request:', data.requestId);
-    
+  console.log('[AenganZ Content] 초기화:', window.location.href);
+
+  // ===== injected.js 주입 =====
+  function injectProxyScript() {
     try {
-      // Background script에 요청 전달
-      const response = await chrome.runtime.sendMessage({
-        type: 'PSEUDONYMIZE',
-        requestId: data.requestId,
-        prompt: data.prompt,
-        timestamp: data.timestamp
-      });
+      const script = document.createElement('script');
+      script.src = chrome.runtime.getURL('injected.js');
       
-      console.log('[PII Content] 📨 Background script response:', response);
+      script.onload = () => {
+        script.remove();
+        console.log('[AenganZ Content] 프록시 스크립트 주입 완료');
+      };
       
-      // Injected script에 응답 전달
-      window.postMessage({
-        type: 'PII_PSEUDONYMIZE_RESPONSE',
-        requestId: data.requestId,
-        success: response.success,
-        result: response.result,
-        error: response.error
-      }, '*');
+      script.onerror = (error) => {
+        console.error('[AenganZ Content] 프록시 스크립트 주입 실패:', error);
+      };
+
+      (document.head || document.documentElement).appendChild(script);
       
     } catch (error) {
-      console.error('[PII Content] ❌ Failed to communicate with background script:', error);
-      
-      // 에러 응답 전달
-      window.postMessage({
-        type: 'PII_PSEUDONYMIZE_RESPONSE',
-        requestId: data.requestId,
-        success: false,
-        error: error.message || 'Communication failed'
-      }, '*');
+      console.error('[AenganZ Content] 스크립트 주입 오류:', error);
     }
   }
-});
 
-// Background script 연결 상태 확인
-chrome.runtime.onConnect.addListener((port) => {
-  if (port.name === 'pii-pseudonymizer') {
-    console.log('[PII Content] 🔗 Connected to background script');
-    
-    port.onMessage.addListener((message) => {
-      if (message.type === 'STATUS_CHECK') {
-        port.postMessage({ 
-          type: 'STATUS_RESPONSE', 
-          active: true, 
-          url: window.location.href 
-        });
-      }
-    });
-    
-    port.onDisconnect.addListener(() => {
-      console.log('[PII Content] 🔌 Disconnected from background script');
-    });
+  // ===== 메시지 릴레이 (injected.js ↔ background.js) =====
+  window.addEventListener('message', async (event) => {
+    // 보안 체크
+    if (event.source !== window) return;
+
+    const data = event.data;
+    if (!data || data.type !== 'PII_PROXY_FETCH') return;
+
+    const { msgId } = data;
+    console.log('[AenganZ Content] 프록시 요청 수신:', msgId);
+
+    try {
+      // background.js로 요청 전달
+      const response = await chrome.runtime.sendMessage({ 
+        kind: 'PII_PROXY_FETCH', 
+        payload: data 
+      });
+
+      console.log('[AenganZ Content] 백그라운드 응답 수신:', response?.ok);
+
+      // injected.js로 응답 전달
+      window.postMessage({ 
+        type: 'PII_PROXY_FETCH_RESULT', 
+        msgId: msgId, 
+        ...response 
+      }, '*');
+
+    } catch (error) {
+      console.error('[AenganZ Content] 메시지 릴레이 오류:', error);
+      
+      // 오류 응답 전달
+      window.postMessage({ 
+        type: 'PII_PROXY_FETCH_RESULT', 
+        msgId: msgId, 
+        ok: false,
+        error: error.message,
+        passthrough: true
+      }, '*');
+    }
+  });
+
+  // ===== 즉시 주입 또는 DOM 준비 후 주입 =====
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', injectProxyScript);
+  } else {
+    injectProxyScript();
   }
-});
 
-// 페이지 로드 완료 시 초기화 신호 전송
-document.addEventListener('DOMContentLoaded', () => {
-  try {
-    chrome.runtime.sendMessage({ 
-      type: 'PAGE_LOADED', 
-      url: window.location.href,
-      timestamp: Date.now()
-    }).catch(error => {
-      console.debug('[PII Content] Failed to send page loaded message:', error);
-    });
-  } catch (error) {
-    console.debug('[PII Content] Page load notification failed:', error);
-  }
-});
+  console.log('[AenganZ Content] 메시지 릴레이 준비 완료');
 
-// 확장 프로그램 상태 체크
-function checkExtensionStatus() {
-  try {
-    return chrome.runtime && chrome.runtime.id;
-  } catch {
-    return false;
-  }
-}
-
-console.log('[PII Content] ✅ Content script initialized');
-
-if (!checkExtensionStatus()) {
-  console.warn('[PII Content] Extension runtime not available');
-} else {
-  console.log('[PII Content] Extension runtime available');
-}
+})();

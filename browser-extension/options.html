@@ -1,484 +1,492 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8">
-  <title>GenAI Pseudonymizer 옵션</title>
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px;
-      background: #f5f5f5;
-      color: #333;
-    }
-    
-    .container {
-      background: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    
-    h1 {
-      color: #2c3e50;
-      margin-bottom: 30px;
-      border-bottom: 2px solid #3498db;
-      padding-bottom: 10px;
-    }
-    
-    .section {
-      margin-bottom: 30px;
-      padding: 20px;
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      background: #fafafa;
-    }
-    
-    .section h3 {
-      margin-top: 0;
-      color: #34495e;
-      font-size: 18px;
-    }
-    
-    .form-group {
-      margin-bottom: 15px;
-    }
-    
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: 500;
-      color: #555;
-    }
-    
-    input[type="text"], input[type="number"] {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      font-size: 14px;
-      box-sizing: border-box;
-    }
-    
-    input[type="checkbox"] {
-      transform: scale(1.2);
-      margin-right: 8px;
-    }
-    
-    .checkbox-group {
-      display: flex;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-    
-    .help-text {
-      font-size: 12px;
-      color: #777;
-      margin-top: 5px;
-    }
-    
-    .button-group {
-      display: flex;
-      gap: 10px;
-      margin-top: 30px;
-      flex-wrap: wrap;
-    }
-    
-    button {
-      padding: 12px 24px;
-      border: none;
-      border-radius: 6px;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.3s;
-      min-width: 120px;
-    }
-    
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    
-    .btn-primary {
-      background: #3498db;
-      color: white;
-    }
-    
-    .btn-primary:hover:not(:disabled) {
-      background: #2980b9;
-    }
-    
-    .btn-secondary {
-      background: #95a5a6;
-      color: white;
-    }
-    
-    .btn-secondary:hover:not(:disabled) {
-      background: #7f8c8d;
-    }
-    
-    .btn-danger {
-      background: #e74c3c;
-      color: white;
-    }
-    
-    .btn-danger:hover:not(:disabled) {
-      background: #c0392b;
-    }
-    
-    .status {
-      margin-top: 20px;
-      padding: 10px;
-      border-radius: 6px;
-      display: none;
-    }
-    
-    .status.success {
-      background: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
-    }
-    
-    .status.error {
-      background: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-    }
-    
-    .server-status {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    
-    .status-indicator {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: #dc3545;
-    }
-    
-    .status-indicator.online {
-      background: #28a745;
-    }
-    
-    .advanced {
-      border-left: 4px solid #f39c12;
-      background: #fef9e7;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AenganZ 가명화 설정</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success: #16a34a;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --border: #e5e7eb;
+            --bg-light: #f9fafb;
+            --text-secondary: #6b7280;
+        }
 
-    .debug-info {
-      background: #f8f9fa;
-      border: 1px solid #dee2e6;
-      border-radius: 6px;
-      padding: 10px;
-      margin-top: 10px;
-      font-family: monospace;
-      font-size: 12px;
-      white-space: pre-wrap;
-    }
-  </style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #fff;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .section {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #374151;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #374151;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="url"],
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .status {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .status.success {
+            background: #dcfce7;
+            color: var(--success);
+            border: 1px solid #bbf7d0;
+        }
+
+        .status.error {
+            background: #fef2f2;
+            color: var(--danger);
+            border: 1px solid #fecaca;
+        }
+
+        .status.warning {
+            background: #fffbeb;
+            color: var(--warning);
+            border: 1px solid #fed7aa;
+        }
+
+        .info-box {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .info-box h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .info-box ul {
+            padding-left: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        .actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .server-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-dot.online {
+            background: var(--success);
+        }
+
+        .status-dot.offline {
+            background: var(--danger);
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .actions {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>GenAI Pseudonymizer 설정</h1>
-    
-    <!-- 기본 설정 -->
-    <div class="section">
-      <h3>기본 설정</h3>
-      
-      <div class="form-group">
-        <div class="checkbox-group">
-          <input type="checkbox" id="enabled" checked>
-          <label for="enabled">가명화 기능 활성화 (기본값: 켜짐)</label>
-        </div>
-        <div class="help-text">체크 해제 시 모든 요청이 가명화 없이 통과됩니다.</div>
-      </div>
-      
-      <div class="form-group">
-        <div class="checkbox-group">
-          <input type="checkbox" id="fallbackOnError" checked>
-          <label for="fallbackOnError">오류 시 원본 요청 실행</label>
-        </div>
-        <div class="help-text">가명화 실패 시 원본 요청을 그대로 전송합니다.</div>
-      </div>
-      
-      <div class="form-group">
-        <div class="checkbox-group">
-          <input type="checkbox" id="debugMode">
-          <label for="debugMode">디버그 모드</label>
-        </div>
-        <div class="help-text">콘솔에 상세한 로그를 출력합니다.</div>
-      </div>
+    <div class="header">
+        <h1>AenganZ 가명화 설정</h1>
+        <p>개인정보 가명화 확장 프로그램 설정을 관리합니다.</p>
     </div>
-    
+
+    <div id="status-message"></div>
+
+    <!-- 서버 연결 상태 -->
+    <div class="section">
+        <h2>서버 연결 상태</h2>
+        <div class="server-status">
+            <div id="server-status-dot" class="status-dot offline"></div>
+            <span id="server-status-text">연결 확인 중...</span>
+        </div>
+        <button class="btn btn-primary" id="check-connection">연결 상태 확인</button>
+    </div>
+
     <!-- 서버 설정 -->
     <div class="section">
-      <h3>로컬 서버 설정</h3>
-      
-      <div class="form-group">
-        <label for="serverUrl">서버 URL</label>
-        <input type="text" id="serverUrl" value="http://127.0.0.1:5000">
-        <div class="help-text">로컬 가명화 서버 주소</div>
-      </div>
-      
-      <div class="server-status">
-        <div class="status-indicator" id="serverStatusIndicator"></div>
-        <span id="serverStatusText">서버 상태 확인 중...</span>
-      </div>
+        <h2>가명화 서버 설정</h2>
+        <div class="form-group">
+            <label for="server-url">서버 URL</label>
+            <input type="url" id="server-url" value="http://127.0.0.1:5000" 
+                   placeholder="http://127.0.0.1:5000">
+        </div>
+        <div class="form-group">
+            <label for="timeout">요청 타임아웃 (초)</label>
+            <input type="number" id="timeout" value="30" min="5" max="120">
+        </div>
     </div>
-    
+
+    <!-- 가명화 옵션 -->
+    <div class="section">
+        <h2>가명화 옵션</h2>
+        <div class="checkbox-group">
+            <input type="checkbox" id="enable-names" checked>
+            <label for="enable-names">이름 가명화</label>
+        </div>
+        <div class="checkbox-group">
+            <input type="checkbox" id="enable-phones" checked>
+            <label for="enable-phones">전화번호 가명화</label>
+        </div>
+        <div class="checkbox-group">
+            <input type="checkbox" id="enable-emails" checked>
+            <label for="enable-emails">이메일 가명화</label>
+        </div>
+        <div class="checkbox-group">
+            <input type="checkbox" id="enable-addresses" checked>
+            <label for="enable-addresses">주소 가명화</label>
+        </div>
+        <div class="checkbox-group">
+            <input type="checkbox" id="enable-debug" false>
+            <label for="enable-debug">디버그 로그 활성화</label>
+        </div>
+    </div>
+
+    <!-- 지원 사이트 -->
+    <div class="section">
+        <h2>지원 사이트</h2>
+        <div class="checkbox-group">
+            <input type="checkbox" id="support-chatgpt" checked>
+            <label for="support-chatgpt">ChatGPT (chat.openai.com)</label>
+        </div>
+        <div class="checkbox-group">
+            <input type="checkbox" id="support-claude" checked>
+            <label for="support-claude">Claude (claude.ai)</label>
+        </div>
+        <div class="checkbox-group">
+            <input type="checkbox" id="support-openai-api" checked>
+            <label for="support-openai-api">OpenAI API (api.openai.com)</label>
+        </div>
+    </div>
+
     <!-- 고급 설정 -->
-    <div class="section advanced">
-      <h3>고급 설정</h3>
-      
-      <div class="form-group">
-        <label for="maxRetries">최대 재시도 횟수</label>
-        <input type="number" id="maxRetries" min="0" max="5" value="2">
-        <div class="help-text">가명화 실패 시 재시도할 횟수</div>
-      </div>
-      
-      <div class="form-group">
-        <label for="timeout">요청 타임아웃 (초)</label>
-        <input type="number" id="timeout" min="5" max="120" value="15">
-        <div class="help-text">가명화 서버 응답 대기 시간</div>
-      </div>
+    <div class="section">
+        <h2>고급 설정</h2>
+        <div class="form-group">
+            <label for="log-retention">로그 보관 일수</label>
+            <select id="log-retention">
+                <option value="1">1일</option>
+                <option value="7" selected>7일</option>
+                <option value="30">30일</option>
+                <option value="0">무제한</option>
+            </select>
+        </div>
+        <div class="checkbox-group">
+            <input type="checkbox" id="auto-clear-mapping">
+            <label for="auto-clear-mapping">응답 후 매핑 자동 삭제</label>
+        </div>
     </div>
-    
-    <!-- 버튼 그룹 -->
-    <div class="button-group">
-      <button onclick="saveConfig()" class="btn-primary">설정 저장</button>
-      <button onclick="resetConfig()" class="btn-secondary">기본값 복원</button>
-      <button onclick="testConnection()" class="btn-secondary">연결 테스트</button>
-      <button onclick="testModel()" class="btn-secondary">모델 테스트</button>
-      <button onclick="clearLogs()" class="btn-danger">로그 삭제</button>
+
+    <!-- 액션 버튼 -->
+    <div class="actions">
+        <button class="btn btn-primary" id="save-settings">설정 저장</button>
+        <button class="btn btn-danger" id="clear-logs">로그 전체 삭제</button>
     </div>
-    
-    <!-- 상태 메시지 -->
-    <div id="status" class="status"></div>
-    
-    <!-- 디버그 정보 -->
-    <div id="debugInfo" class="debug-info" style="display: none;"></div>
-  </div>
 
-  <script>
-    console.log('Options page script started');
-    
-    // 기본값 정의
-    const DEFAULT_CONFIG = {
-      enabled: true,        // 기본적으로 활성화!!!
-      serverUrl: 'http://127.0.0.1:5000',
-      timeout: 15000,       // 밀리초
-      maxRetries: 2,
-      fallbackOnError: true,
-      debugMode: false
-    };
+    <div class="info-box">
+        <h3>사용 안내</h3>
+        <ul>
+            <li>설정 변경 후 반드시 '설정 저장' 버튼을 클릭해주세요.</li>
+            <li>서버 URL 변경 시 가명화 서버가 해당 주소에서 실행 중인지 확인하세요.</li>
+            <li>지원 사이트를 비활성화하면 해당 사이트에서 가명화가 동작하지 않습니다.</li>
+            <li>디버그 로그는 문제 해결 시에만 활성화하는 것을 권장합니다.</li>
+        </ul>
+    </div>
 
-    // 설정 로드
-    async function loadConfig() {
-      console.log('Loading config...');
-      try {
-        const stored = await chrome.storage.local.get(Object.keys(DEFAULT_CONFIG));
-        console.log('Stored config:', stored);
+    <script>
+        // 설정 키 상수
+        const SETTINGS_KEY = 'aenganz_settings';
         
-        // 각 필드에 값 설정
-        document.getElementById('enabled').checked = stored.enabled ?? DEFAULT_CONFIG.enabled;
-        document.getElementById('fallbackOnError').checked = stored.fallbackOnError ?? DEFAULT_CONFIG.fallbackOnError;
-        document.getElementById('debugMode').checked = stored.debugMode ?? DEFAULT_CONFIG.debugMode;
-        document.getElementById('serverUrl').value = stored.serverUrl ?? DEFAULT_CONFIG.serverUrl;
-        document.getElementById('maxRetries').value = stored.maxRetries ?? DEFAULT_CONFIG.maxRetries;
-        document.getElementById('timeout').value = Math.floor((stored.timeout ?? DEFAULT_CONFIG.timeout) / 1000);
-        
-        showStatus('설정이 로드되었습니다.', 'success');
-        updateDebugInfo('Config loaded successfully');
-      } catch (error) {
-        console.error('Failed to load config:', error);
-        showStatus('설정 로드 실패: ' + error.message, 'error');
-        updateDebugInfo('Config load failed: ' + error.message);
-      }
-    }
-
-    // 설정 저장
-    async function saveConfig() {
-      console.log('Saving config...');
-      try {
-        const config = {
-          enabled: document.getElementById('enabled').checked,
-          fallbackOnError: document.getElementById('fallbackOnError').checked,
-          debugMode: document.getElementById('debugMode').checked,
-          serverUrl: document.getElementById('serverUrl').value,
-          maxRetries: parseInt(document.getElementById('maxRetries').value),
-          timeout: parseInt(document.getElementById('timeout').value) * 1000  // 초를 밀리초로
+        // 기본 설정
+        const DEFAULT_SETTINGS = {
+            serverUrl: 'http://127.0.0.1:5000',
+            timeout: 30,
+            enableNames: true,
+            enablePhones: true,
+            enableEmails: true,
+            enableAddresses: true,
+            enableDebug: false,
+            supportChatGPT: true,
+            supportClaude: true,
+            supportOpenAIAPI: true,
+            logRetention: 7,
+            autoClearMapping: true
         };
-        
-        console.log('Saving config:', config);
-        await chrome.storage.local.set(config);
-        showStatus('설정이 저장되었습니다.', 'success');
-        updateDebugInfo('Config saved: ' + JSON.stringify(config, null, 2));
-        
-        // 백그라운드 스크립트에 알림
-        try {
-          await chrome.runtime.sendMessage({ type: 'UPDATE_CONFIG', config });
-          console.log('Notified background script');
-        } catch (e) {
-          console.warn('Failed to notify background script:', e);
+
+        // DOM 요소들
+        const elements = {
+            serverUrl: document.getElementById('server-url'),
+            timeout: document.getElementById('timeout'),
+            enableNames: document.getElementById('enable-names'),
+            enablePhones: document.getElementById('enable-phones'),
+            enableEmails: document.getElementById('enable-emails'),
+            enableAddresses: document.getElementById('enable-addresses'),
+            enableDebug: document.getElementById('enable-debug'),
+            supportChatGPT: document.getElementById('support-chatgpt'),
+            supportClaude: document.getElementById('support-claude'),
+            supportOpenAIAPI: document.getElementById('support-openai-api'),
+            logRetention: document.getElementById('log-retention'),
+            autoClearMapping: document.getElementById('auto-clear-mapping'),
+            statusMessage: document.getElementById('status-message'),
+            serverStatusDot: document.getElementById('server-status-dot'),
+            serverStatusText: document.getElementById('server-status-text'),
+            checkConnection: document.getElementById('check-connection'),
+            saveSettings: document.getElementById('save-settings'),
+            clearLogs: document.getElementById('clear-logs')
+        };
+
+        // 설정 로드
+        async function loadSettings() {
+            try {
+                const result = await chrome.storage.sync.get(SETTINGS_KEY);
+                const settings = { ...DEFAULT_SETTINGS, ...(result[SETTINGS_KEY] || {}) };
+                
+                elements.serverUrl.value = settings.serverUrl;
+                elements.timeout.value = settings.timeout;
+                elements.enableNames.checked = settings.enableNames;
+                elements.enablePhones.checked = settings.enablePhones;
+                elements.enableEmails.checked = settings.enableEmails;
+                elements.enableAddresses.checked = settings.enableAddresses;
+                elements.enableDebug.checked = settings.enableDebug;
+                elements.supportChatGPT.checked = settings.supportChatGPT;
+                elements.supportClaude.checked = settings.supportClaude;
+                elements.supportOpenAIAPI.checked = settings.supportOpenAIAPI;
+                elements.logRetention.value = settings.logRetention;
+                elements.autoClearMapping.checked = settings.autoClearMapping;
+                
+                console.log('[Options] 설정 로드 완료:', settings);
+            } catch (error) {
+                console.error('[Options] 설정 로드 실패:', error);
+                showStatus('설정 로드에 실패했습니다.', 'error');
+            }
         }
-        
-      } catch (error) {
-        console.error('Failed to save config:', error);
-        showStatus('설정 저장 실패: ' + error.message, 'error');
-        updateDebugInfo('Config save failed: ' + error.message);
-      }
-    }
 
-    // 기본값 복원
-    function resetConfig() {
-      if (!confirm('모든 설정을 기본값으로 복원하시겠습니까?')) {
-        return;
-      }
-      
-      console.log('Resetting config to defaults');
-      document.getElementById('enabled').checked = DEFAULT_CONFIG.enabled;
-      document.getElementById('fallbackOnError').checked = DEFAULT_CONFIG.fallbackOnError;
-      document.getElementById('debugMode').checked = DEFAULT_CONFIG.debugMode;
-      document.getElementById('serverUrl').value = DEFAULT_CONFIG.serverUrl;
-      document.getElementById('maxRetries').value = DEFAULT_CONFIG.maxRetries;
-      document.getElementById('timeout').value = Math.floor(DEFAULT_CONFIG.timeout / 1000);
-      
-      showStatus('기본값으로 복원되었습니다.', 'success');
-      updateDebugInfo('Config reset to defaults');
-    }
+        // 설정 저장
+        async function saveSettings() {
+            try {
+                const settings = {
+                    serverUrl: elements.serverUrl.value.trim(),
+                    timeout: parseInt(elements.timeout.value) || 30,
+                    enableNames: elements.enableNames.checked,
+                    enablePhones: elements.enablePhones.checked,
+                    enableEmails: elements.enableEmails.checked,
+                    enableAddresses: elements.enableAddresses.checked,
+                    enableDebug: elements.enableDebug.checked,
+                    supportChatGPT: elements.supportChatGPT.checked,
+                    supportClaude: elements.supportClaude.checked,
+                    supportOpenAIAPI: elements.supportOpenAIAPI.checked,
+                    logRetention: parseInt(elements.logRetention.value) || 7,
+                    autoClearMapping: elements.autoClearMapping.checked
+                };
 
-    // 서버 연결 테스트
-    async function testConnection() {
-      console.log('Testing connection...');
-      const serverUrl = document.getElementById('serverUrl').value;
-      
-      try {
-        updateServerStatus(false, '연결 테스트 중...');
-        
-        const response = await fetch(serverUrl + '/health', {
-          method: 'GET',
-          signal: AbortSignal.timeout(5000)
+                await chrome.storage.sync.set({ [SETTINGS_KEY]: settings });
+                
+                console.log('[Options] 설정 저장 완료:', settings);
+                showStatus('설정이 저장되었습니다.', 'success');
+                
+                // 백그라운드 스크립트에 설정 변경 알림
+                chrome.runtime.sendMessage({ action: 'settingsUpdated', settings });
+                
+            } catch (error) {
+                console.error('[Options] 설정 저장 실패:', error);
+                showStatus('설정 저장에 실패했습니다.', 'error');
+            }
+        }
+
+        // 서버 연결 확인
+        async function checkServerConnection() {
+            const serverUrl = elements.serverUrl.value.trim();
+            
+            try {
+                elements.serverStatusText.textContent = '연결 확인 중...';
+                elements.serverStatusDot.className = 'status-dot offline';
+                
+                const response = await fetch(`${serverUrl}/prompt_logs`, {
+                    method: 'GET',
+                    signal: AbortSignal.timeout(5000)
+                });
+                
+                if (response.ok) {
+                    elements.serverStatusText.textContent = '서버 연결 정상';
+                    elements.serverStatusDot.className = 'status-dot online';
+                    showStatus('서버 연결이 정상입니다.', 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+            } catch (error) {
+                elements.serverStatusText.textContent = `연결 실패: ${error.message}`;
+                elements.serverStatusDot.className = 'status-dot offline';
+                showStatus(`서버 연결에 실패했습니다: ${error.message}`, 'error');
+            }
+        }
+
+        // 로그 삭제
+        async function clearAllLogs() {
+            if (!confirm('모든 로그를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+                return;
+            }
+            
+            try {
+                await chrome.runtime.sendMessage({ action: 'clearLogs' });
+                showStatus('로그가 삭제되었습니다.', 'success');
+            } catch (error) {
+                console.error('[Options] 로그 삭제 실패:', error);
+                showStatus('로그 삭제에 실패했습니다.', 'error');
+            }
+        }
+
+        // 상태 메시지 표시
+        function showStatus(message, type) {
+            elements.statusMessage.innerHTML = `<div class="status ${type}">${message}</div>`;
+            setTimeout(() => {
+                elements.statusMessage.innerHTML = '';
+            }, 3000);
+        }
+
+        // 이벤트 리스너 등록
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSettings();
+            checkServerConnection();
+            
+            elements.checkConnection.addEventListener('click', checkServerConnection);
+            elements.saveSettings.addEventListener('click', saveSettings);
+            elements.clearLogs.addEventListener('click', clearAllLogs);
+            
+            console.log('[Options] 초기화 완료');
         });
-        
-        if (response.ok) {
-          const data = await response.json();
-          updateServerStatus(true, '연결 성공');
-          showStatus('서버 연결이 정상입니다.', 'success');
-          updateDebugInfo('Connection test successful: ' + JSON.stringify(data, null, 2));
-        } else {
-          throw new Error('HTTP ' + response.status);
-        }
-      } catch (error) {
-        console.error('Connection test failed:', error);
-        updateServerStatus(false, '연결 실패: ' + error.message);
-        showStatus('서버 연결 실패: ' + error.message, 'error');
-        updateDebugInfo('Connection test failed: ' + error.message);
-      }
-    }
-
-    // 모델 테스트
-    async function testModel() {
-      console.log('Testing model...');
-      const serverUrl = document.getElementById('serverUrl').value;
-      
-      try {
-        const testText = '안녕하세요, 제 이름은 김철수이고 연락처는 010-1234-5678입니다.';
-        
-        const response = await fetch(serverUrl + '/pseudonymize', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            prompt: testText,
-            id: 'options_test_' + Date.now()
-          })
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          const detectedItems = data.detection?.items?.length || 0;
-          showStatus(`모델 테스트 성공! ${detectedItems}개 항목 탐지됨`, 'success');
-          updateDebugInfo('Model test successful. Detected items: ' + detectedItems + '\n' + JSON.stringify(data.detection, null, 2));
-        } else {
-          throw new Error(`HTTP ${response.status}`);
-        }
-      } catch (error) {
-        console.error('Model test failed:', error);
-        showStatus('모델 테스트 실패: ' + error.message, 'error');
-        updateDebugInfo('Model test failed: ' + error.message);
-      }
-    }
-
-    // 로그 삭제
-    async function clearLogs() {
-      if (!confirm('모든 로그를 삭제하시겠습니까?')) {
-        return;
-      }
-      
-      try {
-        const serverUrl = document.getElementById('serverUrl').value;
-        const response = await fetch(serverUrl + '/prompt_logs', { 
-          method: 'DELETE' 
-        });
-        
-        if (response.ok) {
-          showStatus('로그가 삭제되었습니다.', 'success');
-          updateDebugInfo('Logs cleared successfully');
-        } else {
-          throw new Error('서버 응답 오류: ' + response.status);
-        }
-      } catch (error) {
-        console.error('Failed to clear logs:', error);
-        showStatus('로그 삭제 실패: ' + error.message, 'error');
-        updateDebugInfo('Log clear failed: ' + error.message);
-      }
-    }
-
-    // 서버 상태 업데이트
-    function updateServerStatus(online, message) {
-      document.getElementById('serverStatusIndicator').classList.toggle('online', online);
-      document.getElementById('serverStatusText').textContent = message;
-    }
-
-    // 상태 메시지 표시
-    function showStatus(message, type) {
-      const statusDiv = document.getElementById('status');
-      statusDiv.textContent = message;
-      statusDiv.className = `status ${type}`;
-      statusDiv.style.display = 'block';
-      
-      setTimeout(() => {
-        statusDiv.style.display = 'none';
-      }, 3000);
-    }
-
-    // 디버그 정보 업데이트
-    function updateDebugInfo(info) {
-      const debugDiv = document.getElementById('debugInfo');
-      const timestamp = new Date().toLocaleTimeString();
-      debugDiv.textContent += `[${timestamp}] ${info}\n`;
-      debugDiv.style.display = 'block';
-      debugDiv.scrollTop = debugDiv.scrollHeight;
-    }
-
-    // 페이지 로드 시 초기화
-    window.addEventListener('load', () => {
-      console.log('Window loaded, initializing...');
-      loadConfig();
-      setTimeout(testConnection, 1000);
-    });
-    
-    // DOM 로드 시에도 초기화 (이중 보장)
-    document.addEventListener('DOMContentLoaded', () => {
-      console.log('DOM loaded, initializing...');
-      loadConfig();
-    });
-    
-    console.log('Options page script finished loading');
-  </script>
+    </script>
 </body>
 </html>
