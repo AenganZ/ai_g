@@ -458,6 +458,271 @@
       "original_text": "호혁씨, 지금 바로 대전시 동구 용운동으로 올수 있어요? 도착하면 010-4212-4328로 전화하고. hoho12@gmail.com으로 연락주세요",
       "detected_items": 4,
       "mode": "modular"
+    },
+    {
+      "time": "2025-09-22 17:39:17",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "debug_test_1758530356753",
+        "prompt": "안녕하세요, 제 이름은 홍길동이고 연락처는 010-1234-5678입니다. 서울 강남구에 살고 있습니다."
+      },
+      "output": {
+        "pseudonymized_text": "안녕하세요, 제 이름은 김가명이고 연락처는 010-0000-0000입니다. 서울에 살고 있습니다.",
+        "detection": {
+          "items": [
+            {
+              "type": "전화번호",
+              "value": "010-1234-5678",
+              "source": "정규식-전화번호"
+            },
+            {
+              "type": "이름",
+              "value": "홍길동",
+              "source": "실명목록"
+            },
+            {
+              "type": "주소",
+              "value": "서울",
+              "source": "패턴-복합주소"
+            }
+          ],
+          "count": 3
+        },
+        "processing_time": 0.3685891628265381
+      },
+      "items": [
+        {
+          "type": "전화번호",
+          "value": "010-1234-5678",
+          "source": "정규식-전화번호"
+        },
+        {
+          "type": "이름",
+          "value": "홍길동",
+          "source": "실명목록"
+        },
+        {
+          "type": "주소",
+          "value": "서울",
+          "source": "패턴-복합주소"
+        }
+      ],
+      "success": true,
+      "timestamp": "2025-09-22T17:39:17.125848",
+      "type": "pseudonymize",
+      "request_id": "debug_test_1758530356753",
+      "original_text": "안녕하세요, 제 이름은 홍길동이고 연락처는 010-1234-5678입니다. 서울 강남구에 살고 있습니다.",
+      "detected_items": 3,
+      "mode": "modular"
+    },
+    {
+      "time": "2025-09-22 17:39:29",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "50879b40f1cf9372e88e",
+        "prompt": "동욱아, 우리 내일 점심 뭐 먹기로 했었지?? 010-2918-2381로 전화줘."
+      },
+      "output": {
+        "pseudonymized_text": "동욱아, 우리 내일 점심 뭐 먹기로 했었지?? 010-0000-0001로 전화줘.",
+        "detection": {
+          "items": [
+            {
+              "type": "전화번호",
+              "value": "010-2918-2381",
+              "source": "정규식-전화번호"
+            }
+          ],
+          "count": 1
+        },
+        "processing_time": 0.3853745460510254
+      },
+      "items": [
+        {
+          "type": "전화번호",
+          "value": "010-2918-2381",
+          "source": "정규식-전화번호"
+        }
+      ],
+      "success": true,
+      "timestamp": "2025-09-22T17:39:29.928453",
+      "type": "pseudonymize",
+      "request_id": "50879b40f1cf9372e88e",
+      "original_text": "동욱아, 우리 내일 점심 뭐 먹기로 했었지?? 010-2918-2381로 전화줘.",
+      "detected_items": 1,
+      "mode": "modular"
+    },
+    {
+      "time": "2025-09-22 17:40:55",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "4fb2c501f1c4461c7515",
+        "prompt": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요."
+      },
+      "output": {
+        "pseudonymized_text": "이가명 고객님, 부산예약이 확인되었습니다. 문의사항은 010-0000-0002로 연락 주세요.",
+        "detection": {
+          "items": [
+            {
+              "type": "전화번호",
+              "value": "010-9876-5432",
+              "source": "정규식-전화번호"
+            },
+            {
+              "type": "이름",
+              "value": "김철수",
+              "source": "실명목록"
+            },
+            {
+              "type": "주소",
+              "value": "부산",
+              "source": "패턴-기본주소"
+            }
+          ],
+          "count": 3
+        },
+        "processing_time": 0.38117194175720215
+      },
+      "items": [
+        {
+          "type": "전화번호",
+          "value": "010-9876-5432",
+          "source": "정규식-전화번호"
+        },
+        {
+          "type": "이름",
+          "value": "김철수",
+          "source": "실명목록"
+        },
+        {
+          "type": "주소",
+          "value": "부산",
+          "source": "패턴-기본주소"
+        }
+      ],
+      "success": true,
+      "timestamp": "2025-09-22T17:40:55.629007",
+      "type": "pseudonymize",
+      "request_id": "4fb2c501f1c4461c7515",
+      "original_text": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요.",
+      "detected_items": 3,
+      "mode": "modular"
+    },
+    {
+      "time": "2025-09-22 17:42:10",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "5df6c09f9ec372e5c65d",
+        "prompt": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요."
+      },
+      "output": {
+        "pseudonymized_text": "김가명 고객님, 서울예약이 확인되었습니다. 문의사항은 010-0000-0000로 연락 주세요.",
+        "detection": {
+          "items": [
+            {
+              "type": "전화번호",
+              "value": "010-9876-5432",
+              "source": "정규식-전화번호"
+            },
+            {
+              "type": "이름",
+              "value": "김철수",
+              "source": "실명목록"
+            },
+            {
+              "type": "주소",
+              "value": "부산",
+              "source": "패턴-기본주소"
+            }
+          ],
+          "count": 3
+        },
+        "processing_time": 0.3929755687713623
+      },
+      "items": [
+        {
+          "type": "전화번호",
+          "value": "010-9876-5432",
+          "source": "정규식-전화번호"
+        },
+        {
+          "type": "이름",
+          "value": "김철수",
+          "source": "실명목록"
+        },
+        {
+          "type": "주소",
+          "value": "부산",
+          "source": "패턴-기본주소"
+        }
+      ],
+      "success": true,
+      "timestamp": "2025-09-22T17:42:10.780550",
+      "type": "pseudonymize",
+      "request_id": "5df6c09f9ec372e5c65d",
+      "original_text": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요.",
+      "detected_items": 3,
+      "mode": "modular"
+    },
+    {
+      "time": "2025-09-22 17:42:26",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "aeb26f171940cdb1cece",
+        "prompt": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요."
+      },
+      "output": {
+        "pseudonymized_text": "이가명 고객님, 부산예약이 확인되었습니다. 문의사항은 010-0000-0001로 연락 주세요.",
+        "detection": {
+          "items": [
+            {
+              "type": "전화번호",
+              "value": "010-9876-5432",
+              "source": "정규식-전화번호"
+            },
+            {
+              "type": "이름",
+              "value": "김철수",
+              "source": "실명목록"
+            },
+            {
+              "type": "주소",
+              "value": "부산",
+              "source": "패턴-기본주소"
+            }
+          ],
+          "count": 3
+        },
+        "processing_time": 0.3788788318634033
+      },
+      "items": [
+        {
+          "type": "전화번호",
+          "value": "010-9876-5432",
+          "source": "정규식-전화번호"
+        },
+        {
+          "type": "이름",
+          "value": "김철수",
+          "source": "실명목록"
+        },
+        {
+          "type": "주소",
+          "value": "부산",
+          "source": "패턴-기본주소"
+        }
+      ],
+      "success": true,
+      "timestamp": "2025-09-22T17:42:26.798774",
+      "type": "pseudonymize",
+      "request_id": "aeb26f171940cdb1cece",
+      "original_text": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요.",
+      "detected_items": 3,
+      "mode": "modular"
     }
   ]
 }

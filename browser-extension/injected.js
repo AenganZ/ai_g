@@ -1,157 +1,137 @@
-// injected.js - 사용자 UI는 절대 건드리지 않고 백그라운드에서만 처리
+(() => {
+  // ---- 1) 허용/차단 엔드포인트 정의 ----
+  const ALLOW = [
+    /https:\/\/chatgpt\.com\/backend-(anon|api)\/.*\/conversation/,
+    /https:\/\/chat\.openai\.com\/backend-(anon|api)\/.*\/conversation/
+  ];
+  const BLOCK = [
+    /\/auth\//, /\/login/, /\/session/, /csrf/, /turnstile/i, /sentinel/i,
+    /check/, /account/, /device/, /verify/, /callback/
+  ];
 
-(function() {
-  'use strict';
-
-  if (window.aenganzInjected) {
-    console.log('[AenganZ] 이미 주입됨, 중복 방지');
-    return;
-  }
-  window.aenganzInjected = true;
-
-  console.log('[AenganZ] 백그라운드 프록시 시작 (사용자 UI 보존)');
-
-  // ===== 원본 함수 백업 =====
   const _fetch = window.fetch;
 
-  // ===== 요청 추출 함수 =====
-  function extractRequestInfo(input, init = {}) {
-    let url, method, headers, body;
+  const urlMatch = (u, arr) => arr.some(rx => rx.test(u));
+
+  // Request 또는 init에서 URL/메서드/헤더/본문을 통합 추출
+  async function extractRequest(input, init = {}) {
+    let url, method, headers = {}, bodyText = '';
 
     if (typeof input === 'string') {
       url = input;
-    } else if (input instanceof URL) {
-      url = input.href;
-    } else if (input instanceof Request) {
-      url = input.url;
-      method = input.method;
-      headers = Object.fromEntries(input.headers.entries());
-      body = input.body;
+      method = (init.method || 'GET').toUpperCase();
+      // init.headers -> 객체/배열/Headers 모두 처리
+      if (init.headers) headers = Object.fromEntries(new Headers(init.headers).entries());
+      if (init.body) bodyText = await bodyToText(init.body);
     } else {
-      url = String(input);
-    }
+      // input이 Request인 경우
+      const req = input;
+      url = req.url;
+      method = (init.method || req.method || 'GET').toUpperCase();
 
-    method = method || init.method || 'GET';
-    headers = { ...headers, ...init.headers };
-    body = body || init.body;
+      // 기본: 원본 Request 헤더
+      headers = Object.fromEntries(req.headers.entries());
 
-    return { url, method, headers, body };
-  }
-
-  // ===== 인터셉트 판단 =====
-  function shouldIntercept(url, method, body) {
-    if (method !== 'POST') return false;
-    if (!body) return false;
-
-    try {
-      const urlObj = new URL(url);
-      const bodyText = String(body);
-      
-      // OpenAI API
-      if (urlObj.hostname.includes('api.openai.com')) {
-        return bodyText.includes('messages') && bodyText.includes('content');
+      // init.headers가 있으면 merge(덮어쓰기 우선)
+      if (init.headers) {
+        const override = Object.fromEntries(new Headers(init.headers).entries());
+        headers = { ...headers, ...override };
       }
-      
-      // ChatGPT 웹앱 
-      if (urlObj.hostname.includes('chat.openai.com') || urlObj.hostname.includes('chatgpt.com')) {
-        if (urlObj.pathname.includes('/backend-api/conversation')) {
-          return bodyText.includes('messages') && bodyText.includes('user');
+
+      // 본문: init.body 우선, 없으면 Request.clone().text()
+      if (init.body) {
+        bodyText = await bodyToText(init.body);
+      } else {
+        try {
+          // 이미 소모된 readable이어도 clone().text()로 복구
+          bodyText = await req.clone().text();
+        } catch {
+          bodyText = '';
         }
       }
-      
-      // Claude/Anthropic
-      if (urlObj.hostname.includes('anthropic.com') || urlObj.hostname.includes('claude.ai')) {
-        return bodyText.includes('messages') && bodyText.includes('user');
-      }
+    }
 
-      return false;
-    } catch (e) {
+    return { url, method, headers, bodyText };
+  }
+
+  async function bodyToText(body) {
+    if (!body) return '';
+    if (typeof body === 'string') return body;
+    if (body instanceof Blob) return await body.text();
+    if (body instanceof ArrayBuffer) return new TextDecoder().decode(body);
+    // ReadableStream / FormData / URLSearchParams 등은 ChatGPT 프롬프트에서는 안 씀
+    // 필요시 여기서 추가 처리
+    return '';
+  }
+
+  function shouldIntercept(url, method, bodyText) {
+    // 1) URL 필터
+    if (!urlMatch(url, ALLOW)){
+      console.warn("URL Not Matched 1.\n")
+      return false;  
+    }
+    if (urlMatch(url, BLOCK)){
+        console.warn("URL Not Matched 2.\n")
+        return false;
+    }
+
+    // 2) 메서드
+    if (method !== 'POST') return false;
+
+    // 3) 바디 검사: ChatGPT 대화 형식(action:"next", messages[])
+    if (!bodyText) return false;
+    try {
+      const b = JSON.parse(bodyText);
+      return !!(b && b.action === 'next' && Array.isArray(b.messages) &&
+                b.messages.some(m => m?.author?.role === 'user'));
+    } catch {
       return false;
     }
   }
 
-  // ===== Fetch 후킹 (사용자 UI 절대 건드리지 않음) =====
+  // ---- 2) fetch 후킹 ----
   window.fetch = async function(input, init = {}) {
-    const { url, method, headers, body } = extractRequestInfo(input, init);
-
-    // 인터셉트 대상이 아니면 원본 그대로 전달
-    if (!shouldIntercept(url, method, body)) {
-      return _fetch(input, init);
-    }
-
-    console.log('[AenganZ] API 요청 가로챔 (사용자 UI는 그대로 유지)');
-    console.log('[AenganZ] URL:', url.substring(0, 50));
-    console.log('[AenganZ] Body 일부:', String(body).substring(0, 100) + '...');
-
     try {
-      // 백그라운드로 프록시 요청 (사용자는 모름)
+      const { url, method, headers, bodyText } = await extractRequest(input, init);
+
+      if (!shouldIntercept(url, method, bodyText)) {
+        // 로그인/세션/기타 트래픽은 그대로 통과
+        console.debug('[PII] intercept', url, method, bodyText.slice(0,120));
+        return _fetch(input, init);
+      }
+
+      // 프롬프트 호출만 확장으로 전달
       const msgId = crypto.randomUUID();
-      
-      // content script로 메시지 전송
       window.postMessage({
         type: 'PII_PROXY_FETCH',
         msgId,
         url,
         method,
-        headers: headers || {},
-        bodyText: String(body)
+        headers,
+        bodyText
       }, '*');
 
-      // 응답 대기 (백그라운드 처리)
-      const proxyResponse = await new Promise((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          window.removeEventListener('message', onMessage);
-          reject(new Error('프록시 타임아웃'));
-        }, 45000); // 45초 타임아웃
-
-        const onMessage = (e) => {
-          const data = e.data;
-          if (data && data.type === 'PII_PROXY_FETCH_RESULT' && data.msgId === msgId) {
-            clearTimeout(timeout);
-            window.removeEventListener('message', onMessage);
-            resolve(data);
+      const reply = await new Promise((resolve, reject) => {
+        const onMsg = (e) => {
+          const d = e.data;
+          if (d && d.type === 'PII_PROXY_FETCH_RESULT' && d.msgId === msgId) {
+            window.removeEventListener('message', onMsg);
+            resolve(d);
           }
         };
-
-        window.addEventListener('message', onMessage);
+        window.addEventListener('message', onMsg);
+        setTimeout(() => {
+          window.removeEventListener('message', onMsg);
+          reject(new Error('pseudonymizer timeout'));
+        }, 60000);
       });
 
-      // 프록시 처리 실패 시 원본 요청 실행
-      if (!proxyResponse.ok) {
-        console.warn('[AenganZ] 프록시 실패, 원본 요청 실행');
-        return _fetch(input, init);
-      }
+      if (!reply.ok) return _fetch(input, init);
+      return new Response(reply.bodyText, { status: reply.status, headers: reply.headers });
 
-      console.log('[AenganZ] 가명화 프록시 완료 (사용자는 모름)');
-      
-      // 프록시된 응답 반환 (사용자에게는 복원된 응답)
-      const response = new Response(proxyResponse.bodyText, { 
-        status: proxyResponse.status || 200, 
-        statusText: 'OK',
-        headers: new Headers(proxyResponse.headers || {})
-      });
-
-      // Response 객체 완전 복제 (원본과 동일하게)
-      Object.defineProperty(response, 'url', { value: url });
-      
-      return response;
-
-    } catch (error) {
-      console.warn('[AenganZ] 프록시 오류, 원본 요청 실행:', error.message);
-      // 모든 오류 시 원본 요청 그대로 실행
+    } catch (e) {
+      // 안전 폴백
       return _fetch(input, init);
     }
   };
-
-  // ===== fetch 함수 프로퍼티 복원 =====
-  Object.setPrototypeOf(window.fetch, _fetch);
-  for (const key in _fetch) {
-    if (_fetch.hasOwnProperty(key)) {
-      window.fetch[key] = _fetch[key];
-    }
-  }
-
-  console.log('[AenganZ] 백그라운드 프록시 설정 완료');
-  console.log('[AenganZ] 사용자 UI는 변경되지 않으며, API 요청만 가명화됩니다');
-
 })();

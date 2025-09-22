@@ -1,383 +1,213 @@
-// background.js - 완벽한 투명 프록시 (사용자는 원본만 봄)
-
-// ===== 설정 =====
-const AENGANZ_SERVER_URL = 'http://127.0.0.1:5000';
-const PSEUDONYMIZE_ENDPOINT = '/pseudonymize';
-const LOGS_ENDPOINT = '/prompt_logs';
-
-// ===== 전역 상태 =====
+// background.js - 응답 복원 기능 추가
 const STATE = {
-  activeMappings: new Map(), // requestId -> { pseudoToOriginal, originalTopseudo }
-  requestLogs: [],
-  maxLogs: 200
+  reqLogs: [],
+  maxLogs: 200,
+  mappingStore: new Map() // ID별 매핑 저장
 };
 
-// ===== 유틸리티 함수 =====
-function generateId() {
-  return `aenganz_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-}
-
-function safeHeaders(headers) {
-  const result = {};
-  if (headers && typeof headers === 'object') {
-    for (const [key, value] of Object.entries(headers)) {
-      if (typeof value === 'string' || typeof value === 'number') {
-        result[key] = String(value);
-      }
-    }
-  }
-  return result;
-}
-
-// ===== AenganZ 서버 통신 =====
-async function pseudonymizeText(originalText) {
-  try {
-    console.log('[Background] 가명화 요청:', originalText.substring(0, 50) + '...');
-    
-    const response = await fetch(`${AENGANZ_SERVER_URL}${PSEUDONYMIZE_ENDPOINT}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        prompt: originalText,
-        mode: 'enhanced'
-      }),
-      signal: AbortSignal.timeout(15000) // 15초 타임아웃
-    });
-
-    if (!response.ok) {
-      throw new Error(`서버 오류: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    console.log('[Background] 가명화 응답:', data);
-
-    // 매핑 생성 (양방향)
-    const items = data.detection?.items || [];
-    const pseudoToOriginal = {};
-    const originalTopseudo = {};
-    
-    items.forEach(item => {
-      if (item.token && item.value) {
-        pseudoToOriginal[item.token] = item.value;
-        originalTopseudo[item.value] = item.token;
-      }
-    });
-
-    return {
-      success: true,
-      pseudonymized: data.pseudonymized_text || originalText,
-      mappings: { pseudoToOriginal, originalToProxy: originalTopseudo },
-      detection: data.detection || {},
-      requestId: data.id || generateId()
-    };
-
-  } catch (error) {
-    console.error('[Background] 가명화 실패:', error);
-    return {
-      success: false,
-      pseudonymized: originalText, // 실패 시 원본 그대로
-      mappings: { pseudoToOriginal: {}, originalToProxy: {} },
-      detection: {},
-      error: error.message
-    };
-  }
-}
-
-// ===== 텍스트 복원 함수 =====
-function restoreText(text, pseudoToOriginalMap) {
-  if (!text || !pseudoToOriginalMap || Object.keys(pseudoToOriginalMap).length === 0) {
-    return text;
-  }
-
-  let restored = text;
-  
-  // 가명 → 원본 복원
-  for (const [pseudo, original] of Object.entries(pseudoToOriginalMap)) {
-    if (pseudo && original) {
-      // 정확한 단어 매칭으로 복원
-      const escapedPseudo = pseudo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const regex = new RegExp(`\\b${escapedPseudo}\\b`, 'g');
-      restored = restored.replace(regex, original);
-    }
-  }
-
-  console.log('[Background] 텍스트 복원 완료:', {
-    original: text.substring(0, 50) + '...',
-    restored: restored.substring(0, 50) + '...',
-    mappingCount: Object.keys(pseudoToOriginalMap).length
-  });
-
-  return restored;
-}
-
-// ===== 프롬프트 추출 함수 =====
-function extractPrompt(url, bodyText) {
-  try {
-    const body = JSON.parse(bodyText);
-    const urlObj = new URL(url);
-
-    // OpenAI API (/v1/chat/completions)
-    if (urlObj.hostname.includes('api.openai.com')) {
-      const messages = body.messages || [];
-      const userMessage = messages.filter(m => m.role === 'user').pop();
-      return userMessage?.content || '';
-    }
-
-    // ChatGPT 웹앱
-    if (urlObj.hostname.includes('chat.openai.com') || urlObj.hostname.includes('chatgpt.com')) {
-      const messages = body.messages || [];
-      const userMessage = messages.filter(m => m?.author?.role === 'user').pop();
-      
-      if (userMessage?.content) {
-        if (userMessage.content.content_type === 'text' && Array.isArray(userMessage.content.parts)) {
-          return userMessage.content.parts.join('\n');
-        }
-        if (typeof userMessage.content === 'string') {
-          return userMessage.content;
-        }
-      }
-      return '';
-    }
-
-    // Claude/Anthropic
-    if (urlObj.hostname.includes('anthropic.com') || urlObj.hostname.includes('claude.ai')) {
-      const messages = body.messages || [];
-      const userMessage = messages.filter(m => m.role === 'user').pop();
-      
-      if (Array.isArray(userMessage?.content)) {
-        return userMessage.content.map(c => c.text || '').join('\n');
-      }
-      if (typeof userMessage?.content === 'string') {
-        return userMessage.content;
-      }
-      return '';
-    }
-
-    return '';
-  } catch (error) {
-    console.error('[Background] 프롬프트 추출 실패:', error);
-    return '';
-  }
-}
-
-// ===== 요청 본문 수정 함수 =====
-function injectPseudoPrompt(url, originalBody, pseudoText) {
-  try {
-    const body = JSON.parse(originalBody);
-    const urlObj = new URL(url);
-
-    // OpenAI API
-    if (urlObj.hostname.includes('api.openai.com')) {
-      const messages = body.messages || [];
-      const lastUserIndex = messages.map(m => m.role).lastIndexOf('user');
-      if (lastUserIndex >= 0) {
-        messages[lastUserIndex].content = pseudoText;
-      }
-      return JSON.stringify(body);
-    }
-
-    // ChatGPT 웹앱
-    if (urlObj.hostname.includes('chat.openai.com') || urlObj.hostname.includes('chatgpt.com')) {
-      const messages = body.messages || [];
-      const userMessage = messages.filter(m => m?.author?.role === 'user').pop();
-      if (userMessage) {
-        userMessage.content = {
-          content_type: 'text',
-          parts: [pseudoText]
-        };
-      }
-      return JSON.stringify(body);
-    }
-
-    // Claude/Anthropic
-    if (urlObj.hostname.includes('anthropic.com') || urlObj.hostname.includes('claude.ai')) {
-      const messages = body.messages || [];
-      const userMessage = messages.filter(m => m.role === 'user').pop();
-      if (userMessage) {
-        userMessage.content = [{ type: 'text', text: pseudoText }];
-      }
-      return JSON.stringify(body);
-    }
-
-    return originalBody;
-  } catch (error) {
-    console.error('[Background] 요청 수정 실패:', error);
-    return originalBody;
-  }
-}
-
-// ===== 응답 처리 함수 =====
-function processAIResponse(responseText, pseudoToOriginalMap) {
-  if (!responseText || !pseudoToOriginalMap || Object.keys(pseudoToOriginalMap).length === 0) {
-    return responseText;
-  }
-
-  try {
-    // JSON 응답 처리
-    const responseJson = JSON.parse(responseText);
-    
-    // OpenAI API 응답
-    if (responseJson.choices?.[0]?.message?.content) {
-      responseJson.choices[0].message.content = restoreText(
-        responseJson.choices[0].message.content, 
-        pseudoToOriginalMap
-      );
-      return JSON.stringify(responseJson);
-    }
-    
-    // Claude API 응답
-    if (responseJson.content?.[0]?.text) {
-      responseJson.content[0].text = restoreText(
-        responseJson.content[0].text, 
-        pseudoToOriginalMap
-      );
-      return JSON.stringify(responseJson);
-    }
-
-    // ChatGPT 스트리밍 응답 (delta)
-    if (responseJson.choices?.[0]?.delta?.content) {
-      responseJson.choices[0].delta.content = restoreText(
-        responseJson.choices[0].delta.content,
-        pseudoToOriginalMap
-      );
-      return JSON.stringify(responseJson);
-    }
-
-    return responseText;
-    
-  } catch (parseError) {
-    // JSON이 아닌 경우 전체 텍스트에서 복원
-    return restoreText(responseText, pseudoToOriginalMap);
-  }
-}
-
-// ===== 메인 메시지 핸들러 =====
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (!message || message.kind !== 'PII_PROXY_FETCH') {
-    return false; // 다른 메시지는 무시
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (!msg || !msg.kind) return;
+  if (msg.kind !== 'PII_PROXY_FETCH' && msg.kind !== 'PII_PROXY_XHR') {
+    return sendResponse({ ok: false });
   }
 
   (async () => {
-    const startTime = Date.now();
-    const requestId = generateId();
-
-    console.log('[Background] 프록시 요청 처리 시작:', requestId);
+    const startedAt = new Date().toISOString();
+    const logEntry = {
+      id: cryptoRandomId(),
+      time: startedAt,
+      kind: msg.kind,
+      url: msg?.payload?.url || '',
+      method: (msg?.payload?.method || 'POST').toUpperCase(),
+      request: {
+        headers: safePlainObj(msg?.payload?.headers || {}),
+        rawBody: msg?.payload?.bodyText || ''
+      },
+      response: { status: null, headers: {}, bodyText: '' },
+      error: null
+    };
 
     try {
-      const { url, method, headers, bodyText } = message.payload || {};
+      const { url, method, headers, bodyText } = msg.payload || {};
 
-      // 1. 프롬프트 추출
-      const originalPrompt = extractPrompt(url, bodyText);
-      if (!originalPrompt || originalPrompt.length < 5) {
-        console.log('[Background] 프롬프트가 너무 짧거나 없음, 원본 전달');
-        return sendResponse({ ok: false, passthrough: true });
+      // 1) 본문 파싱 & 프롬프트 추출
+      let reqBody;
+      try { reqBody = bodyText ? JSON.parse(bodyText) : {}; } catch { reqBody = {}; }
+      const { joinedText, adapter } = extractTextForPseudonymization(url, reqBody);
+
+      // 2) 서버에 가명화 요청
+      const id20 = await makeId20(joinedText + '|' + startedAt);
+      const pseudoResponse = await postToLocalPseudonymize(joinedText || '', id20);
+      const masked_prompt = pseudoResponse.masked_prompt;
+      const mapping = pseudoResponse.mapping || {};
+
+      // 매핑 저장 (응답 복원용)
+      STATE.mappingStore.set(id20, mapping);
+      
+      // 3) 목적지로 전송할 본문 구성(가명화된 prompt 주입)
+      const modBody = adapter.injectPseudonymized(reqBody, masked_prompt);
+      const bodyOut = JSON.stringify(modBody);
+
+      // 4) 실제 목적지 호출
+      const res = await fetch(url, { method, headers, body: bodyOut });
+      let responseText = await res.text();
+
+      // 5) 응답 복원 - 가명화된 내용을 원본으로 되돌리기
+      if (mapping && Object.keys(mapping).length > 0) {
+        for (const [original, fake] of Object.entries(mapping)) {
+          // 가명화된 값이 응답에 있으면 원본으로 복원
+          const regex = new RegExp(escapeRegex(fake), 'g');
+          responseText = responseText.replace(regex, original);
+        }
+        console.log(`[PII] 응답 복원 완료: ${Object.keys(mapping).length}개 항목`);
       }
 
-      console.log('[Background] 원본 프롬프트:', originalPrompt.substring(0, 100) + '...');
+      // 매핑 정리 (메모리 절약)
+      STATE.mappingStore.delete(id20);
 
-      // 2. 가명화 처리
-      const pseudoResult = await pseudonymizeText(originalPrompt);
-      if (!pseudoResult.success) {
-        console.warn('[Background] 가명화 실패, 원본 전달');
-        return sendResponse({ ok: false, passthrough: true });
-      }
+      // 응답 기록
+      logEntry.response.status = res.status;
+      logEntry.response.headers = Object.fromEntries(res.headers.entries());
+      logEntry.response.bodyText = responseText;
+      logEntry.finalUrl = res.url || url;
+      logEntry.restored = Object.keys(mapping).length > 0;
 
-      // 3. 매핑 저장
-      STATE.activeMappings.set(requestId, pseudoResult.mappings);
+      pushLog(logEntry);
 
-      // 4. 가명화된 요청 본문 생성
-      const modifiedBody = injectPseudoPrompt(url, bodyText, pseudoResult.pseudonymized);
-
-      console.log('[Background] 가명화된 프롬프트:', pseudoResult.pseudonymized.substring(0, 100) + '...');
-
-      // 5. AI 서비스로 실제 요청 전송
-      const aiResponse = await fetch(url, {
-        method: method || 'POST',
-        headers: safeHeaders(headers),
-        body: modifiedBody,
-        signal: AbortSignal.timeout(60000) // 60초 타임아웃
-      });
-
-      // 6. AI 응답 처리
-      const aiResponseText = await aiResponse.text();
-      
-      // 7. 응답에서 가명 복원 (사용자에게는 원본으로 보임)
-      const restoredResponse = processAIResponse(
-        aiResponseText, 
-        pseudoResult.mappings.pseudoToOriginal
-      );
-
-      // 8. 매핑 정리 (보안상 즉시 삭제)
-      STATE.activeMappings.delete(requestId);
-
-      // 9. 로그 저장
-      const logEntry = {
-        id: requestId,
-        time: new Date().toISOString(),
-        url: url,
-        input: { prompt: originalPrompt },
-        output: { 
-          pseudonymized_text: pseudoResult.pseudonymized,
-          detection: pseudoResult.detection 
-        },
-        processing_time: Date.now() - startTime,
-        success: true,
-        restored: true
-      };
-      
-      STATE.requestLogs.push(logEntry);
-      if (STATE.requestLogs.length > STATE.maxLogs) {
-        STATE.requestLogs = STATE.requestLogs.slice(-STATE.maxLogs);
-      }
-
-      // 10. 성공 응답 반환
-      console.log('[Background] 프록시 처리 완료:', requestId, `${Date.now() - startTime}ms`);
-      
-      sendResponse({
+      return sendResponse({
         ok: true,
-        status: aiResponse.status,
-        headers: Object.fromEntries(aiResponse.headers.entries()),
-        bodyText: restoredResponse // 사용자에게는 복원된 응답
+        status: res.status,
+        headers: Object.fromEntries(res.headers.entries()),
+        bodyText: responseText // 복원된 응답 텍스트
       });
-
-    } catch (error) {
-      console.error('[Background] 프록시 처리 오류:', error);
-      sendResponse({ 
-        ok: false, 
-        error: error.message,
-        passthrough: true 
-      });
+    } catch (e) {
+      console.error('[PII] 오류:', e);
+      logEntry.error = String(e?.message || e);
+      pushLog(logEntry);
+      return sendResponse({ ok: false, error: logEntry.error });
     }
   })();
 
-  return true; // 비동기 응답
+  return true;
 });
 
-// ===== 팝업 지원 API =====
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === 'getLogs') {
-    sendResponse({ logs: STATE.requestLogs });
-    return true;
+// 정규식 특수문자 이스케이프
+function escapeRegex(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function pushLog(entry) {
+  try {
+    STATE.reqLogs.push(entry);
+    if (STATE.reqLogs.length > STATE.maxLogs) {
+      STATE.reqLogs = STATE.reqLogs.slice(-STATE.maxLogs);
+    }
+  } catch (e) {
+    console.warn('pushLog failed', e);
   }
-  
-  if (message.action === 'clearLogs') {
-    STATE.requestLogs = [];
-    STATE.activeMappings.clear();
-    sendResponse({ success: true });
-    return true;
+}
+
+function cryptoRandomId() {
+  if (crypto?.randomUUID) return crypto.randomUUID();
+  return 'id-' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
+
+function safePlainObj(o) {
+  try { return JSON.parse(JSON.stringify(o || {})); } catch { return {}; }
+}
+
+async function makeId20(input) {
+  try {
+    const enc = new TextEncoder().encode(input);
+    const buf = await crypto.subtle.digest('SHA-256', enc);
+    const hex = [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,'0')).join('');
+    return hex.slice(0, 20);
+  } catch {
+    return Math.random().toString(36).slice(2).padEnd(20,'0').slice(0,20);
+  }
+}
+
+// 서버로 프롬프트 전송 → 가명화 응답 수신
+async function postToLocalPseudonymize(prompt, id) {
+  const payload = { prompt: String(prompt || ''), id: String(id || '') };
+  const resp = await fetch('http://127.0.0.1:5000/pseudonymize', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  const text = await resp.text();
+  if (!resp.ok) throw new Error(`pseudonymize HTTP ${resp.status}: ${text.slice(0,200)}`);
+
+  let obj = {};
+  try { obj = JSON.parse(text); } catch { obj = {}; }
+  return {
+    masked_prompt: obj?.masked_prompt || obj?.pseudonymized_text || prompt,
+    mapping: obj?.mapping || {}
+  };
+}
+
+function extractTextForPseudonymization(url, body) {
+  const u = new URL(url);
+
+  // Anthropic v1/messages
+  if (u.hostname.includes('anthropic.com')) {
+    const msgs = body?.messages || [];
+    const joined = msgs.map(m => m.content?.map?.(c => c.text || '').join('') || '').join('\n');
+    return {
+      joinedText: joined || JSON.stringify(body),
+      adapter: {
+        injectPseudonymized: (origBody, sanitized) => {
+          const clone = structuredClone(origBody);
+          if (clone.messages?.length) {
+            const lastUser = [...clone.messages].reverse().find(m => m.role === 'user');
+            if (lastUser) lastUser.content = [{ type: 'text', text: sanitized }];
+          }
+          return clone;
+        }
+      }
+    };
   }
 
-  if (message.action === 'getStatus') {
-    sendResponse({ 
-      activeRequests: STATE.activeMappings.size,
-      totalLogs: STATE.requestLogs.length,
-      serverUrl: AENGANZ_SERVER_URL
-    });
-    return true;
-  }
-});
+  // ChatGPT 웹앱 내부 API
+  if (u.hostname.includes('chat.openai.com') || u.hostname.includes('chatgpt.com')) {
+    const msgs = body?.messages || [];
+    const joined = msgs
+      .filter(m => m?.author?.role === 'user')
+      .map(m => {
+        const c = m?.content;
+        if (!c) return '';
+        if (c.content_type === 'text' && Array.isArray(c.parts)) return c.parts.join('\n');
+        return typeof c === 'string' ? c : JSON.stringify(c);
+      })
+      .join('\n');
 
-console.log('[Background] AenganZ 투명 프록시 시작됨');
+    return {
+      joinedText: joined || JSON.stringify(body),
+      adapter: {
+        injectPseudonymized: (origBody, sanitized) => {
+          const clone = structuredClone(origBody);
+          const userMsg = (clone.messages || []).find(m => m?.author?.role === 'user');
+          if (userMsg) userMsg.content = { content_type: 'text', parts: [sanitized] };
+          return clone;
+        }
+      }
+    };
+  }
+
+  // OpenAI chat.completions 등 일반
+  const msgs = body?.messages || [];
+  const joined = msgs.map(m => m.content || '').join('\n');
+  return {
+    joinedText: joined || JSON.stringify(body),
+    adapter: {
+      injectPseudonymized: (origBody, sanitized) => {
+        const clone = structuredClone(origBody);
+        if (clone.messages?.length) {
+          const lastUserIdx = [...clone.messages].map(m=>m.role).lastIndexOf('user');
+          if (lastUserIdx >= 0) clone.messages[lastUserIdx].content = sanitized;
+        }
+        return clone;
+      }
+    }
+  };
+}

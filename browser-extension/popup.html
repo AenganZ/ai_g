@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>AenganZ 가명화 로그</title>
+  <title>프롬프트 로그</title>
   <style>
     :root{ --bd:#ddd; --muted:#666; --ok:#106b21; --warn:#7a1212; }
     body{min-width:420px;max-width:780px;padding:12px;font-family:sans-serif}
@@ -10,7 +10,6 @@
     .muted{color:var(--muted);font-size:12px}
     .toolbar{display:flex;gap:6px;align-items:center;margin:8px 0}
     .btn{padding:6px 10px;border:1px solid #ccc;border-radius:6px;background:#f7f7f7;cursor:pointer}
-    .btn:hover{background:#eee}
     .btn:active{transform:translateY(1px)}
     .list{border-top:1px solid var(--bd);margin-top:8px}
     .row{border-bottom:1px solid var(--bd);padding:8px 0}
@@ -23,30 +22,50 @@
     .prompt{font-family:ui-monospace,Consolas,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:520px}
     .time{color:var(--muted);font-size:12px;white-space:nowrap}
     .mono{font-family:ui-monospace,Consolas,monospace}
+    pre{white-space:pre-wrap;word-wrap:break-word;overflow-wrap:anywhere}
     .items{margin-top:8px}
     .item{border:1px solid var(--bd);border-radius:8px;padding:8px;margin:6px 0}
-    .grid{display:grid;grid-template-columns:80px 1fr;gap:6px;font-size:13px}
+    .grid{display:grid;grid-template-columns:120px 1fr;gap:6px}
     .map{margin-top:6px;padding:6px;background:#fafafa;border:1px dashed var(--bd);border-radius:6px}
-    .map-row{display:flex;gap:6px;align-items:center;font-size:13px;margin:3px 0}
+    .map-row{display:flex;gap:6px;align-items:center;font-size:13px}
     .tag{border:1px solid var(--bd);border-radius:6px;padding:0 6px;font-size:12px;background:#fff}
     .arrow{opacity:.6}
-    .status-indicator{margin-left:8px;font-size:10px}
+    .masked-wrap{margin-top:8px}
   </style>
 </head>
 <body>
   <div class="hdr">
-    <b>AenganZ 가명화 로그</b>
-    <small class="muted" id="ts">초기화 중...</small>
+    <b>프롬프트 로그</b>
+    <small class="muted" id="ts"></small>
   </div>
 
   <div class="toolbar">
-    <button class="btn" id="refresh">🔄 새로고침</button>
-    <span class="status-indicator" id="status">연결 확인 중...</span>
+    <button class="btn" id="refresh">새로고침</button>
   </div>
 
-  <div class="list" id="reqList">
-    <div class="muted">로그 로드 중...</div>
-  </div>
+  <div class="list" id="reqList"></div>
+
+  <template id="row-tpl">
+    <details class="row">
+      <summary class="row-head">
+        <span class="pill" data-badge></span>
+        <span class="prompt" data-prompt></span>
+        <span class="time" data-time></span>
+      </summary>
+
+      <!-- 탐지 상세 -->
+      <div class="items" data-detection></div>
+
+      <!-- 치환 매핑(무엇이 → 무엇으로) -->
+      <div class="map" data-mapping></div>
+
+      <!-- 가명화 미리보기 토글 -->
+      <div class="masked-wrap">
+        <button class="btn" data-toggle-masked>가명화된 문장 보기</button>
+        <pre class="mono" data-masked style="display:none;"></pre>
+      </div>
+    </details>
+  </template>
 
   <script src="popup.js"></script>
 </body>
