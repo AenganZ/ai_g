@@ -1,10 +1,12 @@
-// background.js - 응답 복원 기능 추가
+// background.js  (Proxy → 서버 가명화 → 목적지 전송)
+
+// ===== 전역 상태 (로컬 저장소는 popup에서 쓰지 않지만, 내부 디버그 용도로 최소화 유지 가능) =====
 const STATE = {
   reqLogs: [],
-  maxLogs: 200,
-  mappingStore: new Map() // ID별 매핑 저장
+  maxLogs: 200
 };
 
+// ===== 메시지 핸들러 (필요 최소) =====
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (!msg || !msg.kind) return;
   if (msg.kind !== 'PII_PROXY_FETCH' && msg.kind !== 'PII_PROXY_XHR') {
@@ -31,46 +33,26 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       const { url, method, headers, bodyText } = msg.payload || {};
 
       // 1) 본문 파싱 & 프롬프트 추출
-      let reqBody;
-      try { reqBody = bodyText ? JSON.parse(bodyText) : {}; } catch { reqBody = {}; }
+      let reqBody; try { reqBody = bodyText ? JSON.parse(bodyText) : {}; } catch { reqBody = {}; }
       const { joinedText, adapter } = extractTextForPseudonymization(url, reqBody);
 
-      // 2) 서버에 가명화 요청
+      // 2) 서버에 가명화 요청 → masked_prompt 수신
       const id20 = await makeId20(joinedText + '|' + startedAt);
-      const pseudoResponse = await postToLocalPseudonymize(joinedText || '', id20);
-      const masked_prompt = pseudoResponse.masked_prompt;
-      const mapping = pseudoResponse.mapping || {};
+      const masked_prompt = await postToLocalPseudonymize(joinedText || '', id20);
 
-      // 매핑 저장 (응답 복원용)
-      STATE.mappingStore.set(id20, mapping);
-      
       // 3) 목적지로 전송할 본문 구성(가명화된 prompt 주입)
       const modBody = adapter.injectPseudonymized(reqBody, masked_prompt);
       const bodyOut = JSON.stringify(modBody);
 
       // 4) 실제 목적지 호출
       const res = await fetch(url, { method, headers, body: bodyOut });
-      let responseText = await res.text();
-
-      // 5) 응답 복원 - 가명화된 내용을 원본으로 되돌리기
-      if (mapping && Object.keys(mapping).length > 0) {
-        for (const [original, fake] of Object.entries(mapping)) {
-          // 가명화된 값이 응답에 있으면 원본으로 복원
-          const regex = new RegExp(escapeRegex(fake), 'g');
-          responseText = responseText.replace(regex, original);
-        }
-        console.log(`[PII] 응답 복원 완료: ${Object.keys(mapping).length}개 항목`);
-      }
-
-      // 매핑 정리 (메모리 절약)
-      STATE.mappingStore.delete(id20);
+      const text = await res.text();
 
       // 응답 기록
       logEntry.response.status = res.status;
       logEntry.response.headers = Object.fromEntries(res.headers.entries());
-      logEntry.response.bodyText = responseText;
+      logEntry.response.bodyText = text;
       logEntry.finalUrl = res.url || url;
-      logEntry.restored = Object.keys(mapping).length > 0;
 
       pushLog(logEntry);
 
@@ -78,10 +60,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         ok: true,
         status: res.status,
         headers: Object.fromEntries(res.headers.entries()),
-        bodyText: responseText // 복원된 응답 텍스트
+        bodyText: text
       });
     } catch (e) {
-      console.error('[PII] 오류:', e);
+      console.error(e);
       logEntry.error = String(e?.message || e);
       pushLog(logEntry);
       return sendResponse({ ok: false, error: logEntry.error });
@@ -91,11 +73,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   return true;
 });
 
-// 정규식 특수문자 이스케이프
-function escapeRegex(string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
+// ===== 유틸 =====
 function pushLog(entry) {
   try {
     STATE.reqLogs.push(entry);
@@ -116,6 +94,7 @@ function safePlainObj(o) {
   try { return JSON.parse(JSON.stringify(o || {})); } catch { return {}; }
 }
 
+// 20자리 해시 ID 생성
 async function makeId20(input) {
   try {
     const enc = new TextEncoder().encode(input);
@@ -127,7 +106,7 @@ async function makeId20(input) {
   }
 }
 
-// 서버로 프롬프트 전송 → 가명화 응답 수신
+// 서버로 프롬프트 전송 → masked_prompt 수신
 async function postToLocalPseudonymize(prompt, id) {
   const payload = { prompt: String(prompt || ''), id: String(id || '') };
   const resp = await fetch('http://127.0.0.1:5000/pseudonymize', {
@@ -140,12 +119,13 @@ async function postToLocalPseudonymize(prompt, id) {
 
   let obj = {};
   try { obj = JSON.parse(text); } catch { obj = {}; }
-  return {
-    masked_prompt: obj?.masked_prompt || obj?.pseudonymized_text || prompt,
-    mapping: obj?.mapping || {}
-  };
+  const maskedPrompt = obj?.masked_prompt ?? payload.prompt;
+  return maskedPrompt;
 }
 
+/* ===========================
+   특정 벤더 바디 어댑터
+   =========================== */
 function extractTextForPseudonymization(url, body) {
   const u = new URL(url);
 
