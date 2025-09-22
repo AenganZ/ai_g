@@ -1,0 +1,37 @@
+# 웹 프레임워크 (Flask 기반)
+Flask>=2.3.0
+flask-cors>=4.0.0
+
+# WSGI 서버 (배포용, 선택적)
+gunicorn>=21.0.0
+
+# NER 모델 및 AI 처리 (선택적)
+transformers>=4.21.0
+torch>=1.12.0
+huggingface_hub[hf_xet]
+
+# 데이터 처리
+pandas>=1.5.0
+numpy>=1.21.0
+
+# JSON 및 파일 처리
+# json, os, re, asyncio, datetime 등은 Python 표준 라이브러리
+
+# 로깅 및 유틸리티
+# typing, concurrent.futures 등은 Python 표준 라이브러리
+
+# 테스트 및 개발용 (선택적)
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+
+# CSV 및 Excel 파일 처리 (선택적)
+openpyxl>=3.0.0
+xlrd>=2.0.0
+
+# HTTP 요청 처리 (프록시 기능용, 선택적)
+httpx>=0.24.0
+requests>=2.28.0
+
+# 메모리 최적화 (대용량 데이터 처리시, 선택적)
+psutil>=5.9.0
+
