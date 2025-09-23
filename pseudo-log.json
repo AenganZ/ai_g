@@ -1,20 +1,22 @@
 {
   "logs": [
     {
-      "time": "2025-09-22 19:39:18",
+      "time": "2025-09-23 18:23:35",
       "remote_addr": "127.0.0.1",
       "path": "/pseudonymize",
       "input": {
-        "id": "c710249f6a1f01ad14de",
-        "prompt": "제 주민번호는 039284-2938174입니다!"
+        "id": "3b67d0f8e04318d9d479",
+        "prompt": "{\"timestamp\":\"2025-09-23T09:23:26.396Z\",\"integrations\":{\"Segment.io\":true},\"event\":\"chatgpt_conversation_turn_turn_exchange_complete\",\"type\":\"track\",\"properties\":{\"turn_id\":\"f0739f5c-4ff4-4682-93b2-1ef50688b5ca\",\"trigger\":\"submit\",\"result\":\"success\",\"time_since_prompt_sent_ms\":\"10969.099999904633\",\"stream_update_event_count\":\"36\",\"model_message_update_count\":\"23\",\"time_since_last_event_ms\":\"4\",\"first_token_lat\":\"10944\",\"api_start_delay\":\"46\",\"completion_request_time_to_first_visible_message\":\"10897\",\"bytes_received\":\"10870\",\"stream_encoding\":\"v1\",\"stream_buffering\":true,\"model_slug\":\"gpt-5-instant\",\"last_message_model_slug\":\"gpt-5-instant\",\"tools_used\":\"\",\"system_hints\":\"\",\"attachments\":\"{\\\"files\\\":0,\\\"images\\\":0,\\\"total\\\":0}\",\"temporary_chat\":\"false\",\"server_ste_metadata\":\"{\\\"conduit_prewarmed\\\":true,\\\"fast_convo\\\":true,\\\"warmup_state\\\":\\\"warm\\\",\\\"is_first_turn\\\":null,\\\"model_slug\\\":null,\\\"did_auto_switch_to_reasoning\\\":false,\\\"auto_switcher_race_winner\\\":\\\"autoswitcher\\\",\\\"is_autoswitcher_enabled\\\":true,\\\"is_search\\\":null,\\\"message_id\\\":\\\"15ebbb0e-c912-40bd-93d1-ae6945e31888\\\",\\\"request_id\\\":\\\"9838fb8b5ad18b63-ICN\\\"}\",\"message_marker_latencies\":\"{\\\"user_visible_token\\\":{\\\"first_received\\\":10942.099999904633}}\",\"origin\":\"chat\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\"},\"context\":{\"page\":{\"path\":\"/\",\"referrer\":\"\",\"search\":\"\",\"title\":\"Email 발송 확인\",\"url\":\"https://chatgpt.com/\",\"hash\":\"\"},\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36\",\"userAgentData\":{\"brands\":[{\"brand\":\"Chromium\",\"version\":\"140\"},{\"brand\":\"Not=A?Brand\",\"version\":\"24\"},{\"brand\":\"Google Chrome\",\"version\":\"140\"}],\"mobile\":false,\"platform\":\"Windows\"},\"locale\":\"ko-KR\",\"library\":{\"name\":\"analytics.js\",\"version\":\"npm:next-1.73.0\"},\"timezone\":\"Asia/Seoul\",\"app_name\":\"chatgpt\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\",\"browser_locale\":\"ko-KR\",\"device_id\":\"eef92088-84e2-4562-80fa-1562351913ae\",\"auth_status\":\"logged_in\",\"user_traits\":{\"plan_type\":\"plus\",\"workspace_id\":null,\"workspace_type\":null}},\"messageId\":\"ajs-next-1758619406396-27d0afdb-46f8-4119-8fb2-17f83a2351a9\",\"userId\":\"user-pDy1yOHWEbcaHYA9Z9eaXCSf\",\"anonymousId\":\"e70e1fa8-2593-490e-8220-6dc95d633640\",\"writeKey\":\"oai\",\"sentAt\":\"2025-09-23T09:23:26.437Z\",\"_metadata\":{\"bundled\":[\"Segment.io\"],\"unbundled\":[],\"bundledIds\":[]}}"
       },
       "output": {
-        "pseudonymized_text": "제 주민번호는 039284-2938174입니다!",
+        "pseudonymized_text": "{\"timestamp\":\"2025-09-23T09:23:26.396Z\",\"integrations\":{\"Segment.io\":true},\"event\":\"chatgpt_conversation_turn_turn_exchange_complete\",\"type\":\"track\",\"properties\":{\"turn_id\":\"f0739f5c-4ff4-4682-93b2-1ef50688b5ca\",\"trigger\":\"submit\",\"result\":\"success\",\"time_since_prompt_sent_ms\":\"10969.099999904633\",\"stream_update_event_count\":\"36\",\"model_message_update_count\":\"23\",\"time_since_last_event_ms\":\"4\",\"first_token_lat\":\"10944\",\"api_start_delay\":\"46\",\"completion_request_time_to_first_visible_message\":\"10897\",\"bytes_received\":\"10870\",\"stream_encoding\":\"v1\",\"stream_buffering\":true,\"model_slug\":\"gpt-5-instant\",\"last_message_model_slug\":\"gpt-5-instant\",\"tools_used\":\"\",\"system_hints\":\"\",\"attachments\":\"{\\\"files\\\":0,\\\"images\\\":0,\\\"total\\\":0}\",\"temporary_chat\":\"false\",\"server_ste_metadata\":\"{\\\"conduit_prewarmed\\\":true,\\\"fast_convo\\\":true,\\\"warmup_state\\\":\\\"warm\\\",\\\"is_first_turn\\\":null,\\\"model_slug\\\":null,\\\"did_auto_switch_to_reasoning\\\":false,\\\"auto_switcher_race_winner\\\":\\\"autoswitcher\\\",\\\"is_autoswitcher_enabled\\\":true,\\\"is_search\\\":null,\\\"message_id\\\":\\\"15ebbb0e-c912-40bd-93d1-ae6945e31888\\\",\\\"request_id\\\":\\\"9838fb8b5ad18b63-ICN\\\"}\",\"message_marker_latencies\":\"{\\\"user_visible_token\\\":{\\\"first_received\\\":10942.099999904633}}\",\"origin\":\"chat\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\"},\"context\":{\"page\":{\"path\":\"/\",\"referrer\":\"\",\"search\":\"\",\"title\":\"Email 발송 확인\",\"url\":\"https://chatgpt.com/\",\"hash\":\"\"},\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36\",\"userAgentData\":{\"brands\":[{\"brand\":\"Chromium\",\"version\":\"140\"},{\"brand\":\"Not=A?Brand\",\"version\":\"24\"},{\"brand\":\"Google Chrome\",\"version\":\"140\"}],\"mobile\":false,\"platform\":\"Windows\"},\"locale\":\"ko-KR\",\"library\":{\"name\":\"analytics.js\",\"version\":\"npm:next-1.73.0\"},\"timezone\":\"Asia/Seoul\",\"app_name\":\"chatgpt\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\",\"browser_locale\":\"ko-KR\",\"device_id\":\"eef92088-84e2-4562-80fa-1562351913ae\",\"auth_status\":\"logged_in\",\"user_traits\":{\"plan_type\":\"plus\",\"workspace_id\":null,\"workspace_type\":null}},\"messageId\":\"ajs-next-1758619406396-27d0afdb-46f8-4119-8fb2-17f83a2351a9\",\"userId\":\"user-pDy1yOHWEbcaHYA9Z9eaXCSf\",\"anonymousId\":\"e70e1fa8-2593-490e-8220-6dc95d633640\",\"writeKey\":\"oai\",\"sentAt\":\"2025-09-23T09:23:26.437Z\",\"_metadata\":{\"bundled\":[\"Segment.io\"],\"unbundled\":[],\"bundledIds\":[]}}",
         "detection": {
           "items": [],
-          "count": 0
+          "count": 0,
+          "contains_pii": false
         },
-        "processing_time": 2.8495283126831055
+        "processing_time": 5.078040838241577,
+        "reverse_map": {}
       },
       "detection": {
         "items": [],
@@ -22,1253 +24,168 @@
         "contains_pii": false
       },
       "success": true,
-      "timestamp": "2025-09-22T19:39:18.986232",
+      "timestamp": "2025-09-23T18:23:35.686541",
       "type": "pseudonymize",
-      "request_id": "c710249f6a1f01ad14de",
-      "original_text": "제 주민번호는 039284-2938174입니다!",
+      "request_id": "3b67d0f8e04318d9d479",
+      "original_text": "{\"timestamp\":\"2025-09-23T09:23:26.396Z\",\"integrations\":{\"Segment.io\":true},\"event\":\"chatgpt_conversation_turn_turn_exchange_complete\",\"type\":\"track\",\"properties\":{\"turn_id\":\"f0739f5c-4ff4-4682-93b2-1ef50688b5ca\",\"trigger\":\"submit\",\"result\":\"success\",\"time_since_prompt_sent_ms\":\"10969.099999904633\",\"stream_update_event_count\":\"36\",\"model_message_update_count\":\"23\",\"time_since_last_event_ms\":\"4\",\"first_token_lat\":\"10944\",\"api_start_delay\":\"46\",\"completion_request_time_to_first_visible_message\":\"10897\",\"bytes_received\":\"10870\",\"stream_encoding\":\"v1\",\"stream_buffering\":true,\"model_slug\":\"gpt-5-instant\",\"last_message_model_slug\":\"gpt-5-instant\",\"tools_used\":\"\",\"system_hints\":\"\",\"attachments\":\"{\\\"files\\\":0,\\\"images\\\":0,\\\"total\\\":0}\",\"temporary_chat\":\"false\",\"server_ste_metadata\":\"{\\\"conduit_prewarmed\\\":true,\\\"fast_convo\\\":true,\\\"warmup_state\\\":\\\"warm\\\",\\\"is_first_turn\\\":null,\\\"model_slug\\\":null,\\\"did_auto_switch_to_reasoning\\\":false,\\\"auto_switcher_race_winner\\\":\\\"autoswitcher\\\",\\\"is_autoswitcher_enabled\\\":true,\\\"is_search\\\":null,\\\"message_id\\\":\\\"15ebbb0e-c912-40bd-93d1-ae6945e31888\\\",\\\"request_id\\\":\\\"9838fb8b5ad18b63-ICN\\\"}\",\"message_marker_latencies\":\"{\\\"user_visible_token\\\":{\\\"first_received\\\":10942.099999904633}}\",\"origin\":\"chat\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\"},\"context\":{\"page\":{\"path\":\"/\",\"referrer\":\"\",\"search\":\"\",\"title\":\"Email 발송 확인\",\"url\":\"https://chatgpt.com/\",\"hash\":\"\"},\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36\",\"userAgentData\":{\"brands\":[{\"brand\":\"Chromium\",\"version\":\"140\"},{\"brand\":\"Not=A?Brand\",\"version\":\"24\"},{\"brand\":\"Google Chrome\",\"version\":\"140\"}],\"mobile\":false,\"platform\":\"Windows\"},\"locale\":\"ko-KR\",\"library\":{\"name\":\"analytics.js\",\"version\":\"npm:next-1.73.0\"},\"timezone\":\"Asia/Seoul\",\"app_name\":\"chatgpt\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\",\"browser_locale\":\"ko-KR\",\"device_id\":\"eef92088-84e2-4562-80fa-1562351913ae\",\"auth_status\":\"logged_in\",\"user_traits\":{\"plan_type\":\"plus\",\"workspace_id\":null,\"workspace_type\":null}},\"messageId\":\"ajs-next-1758619406396-27d0afdb-46f8-4119-8fb2-17f83a2351a9\",\"userId\":\"user-pDy1yOHWEbcaHYA9Z9eaXCSf\",\"anonymousId\":\"e70e1fa8-2593-490e-8220-6dc95d633640\",\"writeKey\":\"oai\",\"sentAt\":\"2025-09-23T09:23:26.437Z\",\"_metadata\":{\"bundled\":[\"Segment.io\"],\"unbundled\":[],\"bundledIds\":[]}}",
+      "detected_items": 0,
+      "mode": "modular_enhanced",
+      "total_processing_time": 5.0800440311431885
+    },
+    {
+      "time": "2025-09-23 18:23:36",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "f87469bdbc44f962458a",
+        "prompt": "{\"timestamp\":\"2025-09-23T09:23:26.407Z\",\"integrations\":{\"Segment.io\":true},\"event\":\"ChatGPT Convo Stream: Stream Completed\",\"type\":\"track\",\"properties\":{\"conversationId\":\"68d266f8-13c4-832b-8a05-92d627fadd98\",\"resumeAttempts\":0,\"successfulResumeCount\":0,\"origin\":\"chat\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\"},\"context\":{\"page\":{\"path\":\"/\",\"referrer\":\"\",\"search\":\"\",\"title\":\"메일 전송 확인 방법\",\"url\":\"https://chatgpt.com/\",\"hash\":\"\"},\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36\",\"userAgentData\":{\"brands\":[{\"brand\":\"Chromium\",\"version\":\"140\"},{\"brand\":\"Not=A?Brand\",\"version\":\"24\"},{\"brand\":\"Google Chrome\",\"version\":\"140\"}],\"mobile\":false,\"platform\":\"Windows\"},\"locale\":\"ko-KR\",\"library\":{\"name\":\"analytics.js\",\"version\":\"npm:next-1.73.0\"},\"timezone\":\"Asia/Seoul\",\"app_name\":\"chatgpt\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\",\"browser_locale\":\"ko-KR\",\"device_id\":\"eef92088-84e2-4562-80fa-1562351913ae\",\"auth_status\":\"logged_in\",\"user_traits\":{\"plan_type\":\"plus\",\"workspace_id\":null,\"workspace_type\":null}},\"messageId\":\"ajs-next-1758619406407-afdb46f8-b119-4fb2-97f8-3a2351a91437\",\"userId\":\"user-pDy1yOHWEbcaHYA9Z9eaXCSf\",\"anonymousId\":\"e70e1fa8-2593-490e-8220-6dc95d633640\",\"writeKey\":\"oai\",\"sentAt\":\"2025-09-23T09:23:26.437Z\",\"_metadata\":{\"bundled\":[\"Segment.io\"],\"unbundled\":[],\"bundledIds\":[]}}"
+      },
+      "output": {
+        "pseudonymized_text": "{\"timestamp\":\"2025-09-23T09:23:26.407Z\",\"integrations\":{\"Segment.io\":true},\"event\":\"ChatGPT Convo Stream: Stream Completed\",\"type\":\"track\",\"properties\":{\"conversationId\":\"68d266f8-13c4-832b-8a05-92d627fadd98\",\"resumeAttempts\":0,\"successfulResumeCount\":0,\"origin\":\"chat\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\"},\"context\":{\"page\":{\"path\":\"/\",\"referrer\":\"\",\"search\":\"\",\"title\":\"메일 전송 확인 방법\",\"url\":\"https://chatgpt.com/\",\"hash\":\"\"},\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36\",\"userAgentData\":{\"brands\":[{\"brand\":\"Chromium\",\"version\":\"140\"},{\"brand\":\"Not=A?Brand\",\"version\":\"24\"},{\"brand\":\"Google Chrome\",\"version\":\"140\"}],\"mobile\":false,\"platform\":\"Windows\"},\"locale\":\"ko-KR\",\"library\":{\"name\":\"analytics.js\",\"version\":\"npm:next-1.73.0\"},\"timezone\":\"Asia/Seoul\",\"app_name\":\"chatgpt\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\",\"browser_locale\":\"ko-KR\",\"device_id\":\"eef92088-84e2-4562-80fa-1562351913ae\",\"auth_status\":\"logged_in\",\"user_traits\":{\"plan_type\":\"plus\",\"workspace_id\":null,\"workspace_type\":null}},\"messageId\":\"ajs-next-1758619406407-afdb46f8-b119-4fb2-97f8-3a2351a91437\",\"userId\":\"user-pDy1yOHWEbcaHYA9Z9eaXCSf\",\"anonymousId\":\"e70e1fa8-2593-490e-8220-6dc95d633640\",\"writeKey\":\"oai\",\"sentAt\":\"2025-09-23T09:23:26.437Z\",\"_metadata\":{\"bundled\":[\"Segment.io\"],\"unbundled\":[],\"bundledIds\":[]}}",
+        "detection": {
+          "items": [],
+          "count": 0,
+          "contains_pii": false
+        },
+        "processing_time": 4.35602068901062,
+        "reverse_map": {}
+      },
+      "detection": {
+        "items": [],
+        "count": 0,
+        "contains_pii": false
+      },
+      "success": true,
+      "timestamp": "2025-09-23T18:23:36.884257",
+      "type": "pseudonymize",
+      "request_id": "f87469bdbc44f962458a",
+      "original_text": "{\"timestamp\":\"2025-09-23T09:23:26.407Z\",\"integrations\":{\"Segment.io\":true},\"event\":\"ChatGPT Convo Stream: Stream Completed\",\"type\":\"track\",\"properties\":{\"conversationId\":\"68d266f8-13c4-832b-8a05-92d627fadd98\",\"resumeAttempts\":0,\"successfulResumeCount\":0,\"origin\":\"chat\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\"},\"context\":{\"page\":{\"path\":\"/\",\"referrer\":\"\",\"search\":\"\",\"title\":\"메일 전송 확인 방법\",\"url\":\"https://chatgpt.com/\",\"hash\":\"\"},\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36\",\"userAgentData\":{\"brands\":[{\"brand\":\"Chromium\",\"version\":\"140\"},{\"brand\":\"Not=A?Brand\",\"version\":\"24\"},{\"brand\":\"Google Chrome\",\"version\":\"140\"}],\"mobile\":false,\"platform\":\"Windows\"},\"locale\":\"ko-KR\",\"library\":{\"name\":\"analytics.js\",\"version\":\"npm:next-1.73.0\"},\"timezone\":\"Asia/Seoul\",\"app_name\":\"chatgpt\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\",\"browser_locale\":\"ko-KR\",\"device_id\":\"eef92088-84e2-4562-80fa-1562351913ae\",\"auth_status\":\"logged_in\",\"user_traits\":{\"plan_type\":\"plus\",\"workspace_id\":null,\"workspace_type\":null}},\"messageId\":\"ajs-next-1758619406407-afdb46f8-b119-4fb2-97f8-3a2351a91437\",\"userId\":\"user-pDy1yOHWEbcaHYA9Z9eaXCSf\",\"anonymousId\":\"e70e1fa8-2593-490e-8220-6dc95d633640\",\"writeKey\":\"oai\",\"sentAt\":\"2025-09-23T09:23:26.437Z\",\"_metadata\":{\"bundled\":[\"Segment.io\"],\"unbundled\":[],\"bundledIds\":[]}}",
+      "detected_items": 0,
+      "mode": "modular_enhanced",
+      "total_processing_time": 4.36778712272644
+    },
+    {
+      "time": "2025-09-23 18:23:37",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "ef22d28ed5d82b2f776b",
+        "prompt": "{\"timestamp\":\"2025-09-23T09:23:26.436Z\",\"integrations\":{\"Segment.io\":true},\"event\":\"Share Post: Share Button Shown\",\"type\":\"track\",\"properties\":{\"source\":\"turn_action\",\"attachment_type\":\"message_slice\",\"origin\":\"chat\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\"},\"context\":{\"page\":{\"path\":\"/\",\"referrer\":\"\",\"search\":\"\",\"title\":\"메일 전송 확인 방법\",\"url\":\"https://chatgpt.com/\",\"hash\":\"\"},\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36\",\"userAgentData\":{\"brands\":[{\"brand\":\"Chromium\",\"version\":\"140\"},{\"brand\":\"Not=A?Brand\",\"version\":\"24\"},{\"brand\":\"Google Chrome\",\"version\":\"140\"}],\"mobile\":false,\"platform\":\"Windows\"},\"locale\":\"ko-KR\",\"library\":{\"name\":\"analytics.js\",\"version\":\"npm:next-1.73.0\"},\"timezone\":\"Asia/Seoul\",\"app_name\":\"chatgpt\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\",\"browser_locale\":\"ko-KR\",\"device_id\":\"eef92088-84e2-4562-80fa-1562351913ae\",\"auth_status\":\"logged_in\",\"user_traits\":{\"plan_type\":\"plus\",\"workspace_id\":null,\"workspace_type\":null}},\"messageId\":\"ajs-next-1758619406436-46f8b119-4fb2-47f8-ba23-51a914379312\",\"userId\":\"user-pDy1yOHWEbcaHYA9Z9eaXCSf\",\"anonymousId\":\"e70e1fa8-2593-490e-8220-6dc95d633640\",\"writeKey\":\"oai\",\"sentAt\":\"2025-09-23T09:23:26.456Z\",\"_metadata\":{\"bundled\":[\"Segment.io\"],\"unbundled\":[],\"bundledIds\":[]}}"
+      },
+      "output": {
+        "pseudonymized_text": "{\"timestamp\":\"2025-09-23T09:23:26.436Z\",\"integrations\":{\"Segment.io\":true},\"event\":\"Share Post: Share Button Shown\",\"type\":\"track\",\"properties\":{\"source\":\"turn_action\",\"attachment_type\":\"message_slice\",\"origin\":\"chat\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\"},\"context\":{\"page\":{\"path\":\"/\",\"referrer\":\"\",\"search\":\"\",\"title\":\"메일 전송 확인 방법\",\"url\":\"https://chatgpt.com/\",\"hash\":\"\"},\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36\",\"userAgentData\":{\"brands\":[{\"brand\":\"Chromium\",\"version\":\"140\"},{\"brand\":\"Not=A?Brand\",\"version\":\"24\"},{\"brand\":\"Google Chrome\",\"version\":\"140\"}],\"mobile\":false,\"platform\":\"Windows\"},\"locale\":\"ko-KR\",\"library\":{\"name\":\"analytics.js\",\"version\":\"npm:next-1.73.0\"},\"timezone\":\"Asia/Seoul\",\"app_name\":\"chatgpt\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\",\"browser_locale\":\"ko-KR\",\"device_id\":\"eef92088-84e2-4562-80fa-1562351913ae\",\"auth_status\":\"logged_in\",\"user_traits\":{\"plan_type\":\"plus\",\"workspace_id\":null,\"workspace_type\":null}},\"messageId\":\"ajs-next-1758619406436-46f8b119-4fb2-47f8-ba23-51a914379312\",\"userId\":\"user-pDy1yOHWEbcaHYA9Z9eaXCSf\",\"anonymousId\":\"e70e1fa8-2593-490e-8220-6dc95d633640\",\"writeKey\":\"oai\",\"sentAt\":\"2025-09-23T09:23:26.456Z\",\"_metadata\":{\"bundled\":[\"Segment.io\"],\"unbundled\":[],\"bundledIds\":[]}}",
+        "detection": {
+          "items": [],
+          "count": 0,
+          "contains_pii": false
+        },
+        "processing_time": 4.525444030761719,
+        "reverse_map": {}
+      },
+      "detection": {
+        "items": [],
+        "count": 0,
+        "contains_pii": false
+      },
+      "success": true,
+      "timestamp": "2025-09-23T18:23:37.124765",
+      "type": "pseudonymize",
+      "request_id": "ef22d28ed5d82b2f776b",
+      "original_text": "{\"timestamp\":\"2025-09-23T09:23:26.436Z\",\"integrations\":{\"Segment.io\":true},\"event\":\"Share Post: Share Button Shown\",\"type\":\"track\",\"properties\":{\"source\":\"turn_action\",\"attachment_type\":\"message_slice\",\"origin\":\"chat\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\"},\"context\":{\"page\":{\"path\":\"/\",\"referrer\":\"\",\"search\":\"\",\"title\":\"메일 전송 확인 방법\",\"url\":\"https://chatgpt.com/\",\"hash\":\"\"},\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36\",\"userAgentData\":{\"brands\":[{\"brand\":\"Chromium\",\"version\":\"140\"},{\"brand\":\"Not=A?Brand\",\"version\":\"24\"},{\"brand\":\"Google Chrome\",\"version\":\"140\"}],\"mobile\":false,\"platform\":\"Windows\"},\"locale\":\"ko-KR\",\"library\":{\"name\":\"analytics.js\",\"version\":\"npm:next-1.73.0\"},\"timezone\":\"Asia/Seoul\",\"app_name\":\"chatgpt\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\",\"browser_locale\":\"ko-KR\",\"device_id\":\"eef92088-84e2-4562-80fa-1562351913ae\",\"auth_status\":\"logged_in\",\"user_traits\":{\"plan_type\":\"plus\",\"workspace_id\":null,\"workspace_type\":null}},\"messageId\":\"ajs-next-1758619406436-46f8b119-4fb2-47f8-ba23-51a914379312\",\"userId\":\"user-pDy1yOHWEbcaHYA9Z9eaXCSf\",\"anonymousId\":\"e70e1fa8-2593-490e-8220-6dc95d633640\",\"writeKey\":\"oai\",\"sentAt\":\"2025-09-23T09:23:26.456Z\",\"_metadata\":{\"bundled\":[\"Segment.io\"],\"unbundled\":[],\"bundledIds\":[]}}",
+      "detected_items": 0,
+      "mode": "modular_enhanced",
+      "total_processing_time": 4.526442766189575
+    },
+    {
+      "time": "2025-09-23 18:23:37",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "68606c7486766f18cbb3",
+        "prompt": "{\"timestamp\":\"2025-09-23T09:23:26.516Z\",\"integrations\":{\"Segment.io\":true},\"type\":\"page\",\"properties\":{\"path\":\"/c/68d266f8-13c4-832b-8a05-92d627fadd98\",\"referrer\":\"\",\"search\":\"\",\"title\":\"메일 전송 확인 방법\",\"url\":\"https://chatgpt.com/c/68d266f8-13c4-832b-8a05-92d627fadd98\",\"hash\":\"\"},\"context\":{\"page\":{\"path\":\"/c/68d266f8-13c4-832b-8a05-92d627fadd98\",\"referrer\":\"\",\"search\":\"\",\"title\":\"메일 전송 확인 방법\",\"url\":\"https://chatgpt.com/c/68d266f8-13c4-832b-8a05-92d627fadd98\",\"hash\":\"\"},\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36\",\"userAgentData\":{\"brands\":[{\"brand\":\"Chromium\",\"version\":\"140\"},{\"brand\":\"Not=A?Brand\",\"version\":\"24\"},{\"brand\":\"Google Chrome\",\"version\":\"140\"}],\"mobile\":false,\"platform\":\"Windows\"},\"locale\":\"ko-KR\",\"library\":{\"name\":\"analytics.js\",\"version\":\"npm:next-1.73.0\"},\"timezone\":\"Asia/Seoul\",\"app_name\":\"chatgpt\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\",\"browser_locale\":\"ko-KR\",\"device_id\":\"eef92088-84e2-4562-80fa-1562351913ae\",\"auth_status\":\"logged_in\",\"user_traits\":{\"plan_type\":\"plus\",\"workspace_id\":null,\"workspace_type\":null}},\"messageId\":\"ajs-next-1758619406516-b1194fb2-17f8-4a23-91a9-143793129a35\",\"userId\":\"user-pDy1yOHWEbcaHYA9Z9eaXCSf\",\"anonymousId\":\"e70e1fa8-2593-490e-8220-6dc95d633640\",\"writeKey\":\"oai\",\"sentAt\":\"2025-09-23T09:23:26.517Z\",\"_metadata\":{\"bundled\":[\"Segment.io\"],\"unbundled\":[],\"bundledIds\":[]}}"
+      },
+      "output": {
+        "pseudonymized_text": "{\"timestamp\":\"2025-09-23T09:23:26.516Z\",\"integrations\":{\"Segment.io\":true},\"type\":\"page\",\"properties\":{\"path\":\"/c/68d266f8-13c4-832b-8a05-92d627fadd98\",\"referrer\":\"\",\"search\":\"\",\"title\":\"메일 전송 확인 방법\",\"url\":\"https://chatgpt.com/c/68d266f8-13c4-832b-8a05-92d627fadd98\",\"hash\":\"\"},\"context\":{\"page\":{\"path\":\"/c/68d266f8-13c4-832b-8a05-92d627fadd98\",\"referrer\":\"\",\"search\":\"\",\"title\":\"메일 전송 확인 방법\",\"url\":\"https://chatgpt.com/c/68d266f8-13c4-832b-8a05-92d627fadd98\",\"hash\":\"\"},\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36\",\"userAgentData\":{\"brands\":[{\"brand\":\"Chromium\",\"version\":\"140\"},{\"brand\":\"Not=A?Brand\",\"version\":\"24\"},{\"brand\":\"Google Chrome\",\"version\":\"140\"}],\"mobile\":false,\"platform\":\"Windows\"},\"locale\":\"ko-KR\",\"library\":{\"name\":\"analytics.js\",\"version\":\"npm:next-1.73.0\"},\"timezone\":\"Asia/Seoul\",\"app_name\":\"chatgpt\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\",\"browser_locale\":\"ko-KR\",\"device_id\":\"eef92088-84e2-4562-80fa-1562351913ae\",\"auth_status\":\"logged_in\",\"user_traits\":{\"plan_type\":\"plus\",\"workspace_id\":null,\"workspace_type\":null}},\"messageId\":\"ajs-next-1758619406516-b1194fb2-17f8-4a23-91a9-143793129a35\",\"userId\":\"user-pDy1yOHWEbcaHYA9Z9eaXCSf\",\"anonymousId\":\"e70e1fa8-2593-490e-8220-6dc95d633640\",\"writeKey\":\"oai\",\"sentAt\":\"2025-09-23T09:23:26.517Z\",\"_metadata\":{\"bundled\":[\"Segment.io\"],\"unbundled\":[],\"bundledIds\":[]}}",
+        "detection": {
+          "items": [],
+          "count": 0,
+          "contains_pii": false
+        },
+        "processing_time": 4.185814380645752,
+        "reverse_map": {}
+      },
+      "detection": {
+        "items": [],
+        "count": 0,
+        "contains_pii": false
+      },
+      "success": true,
+      "timestamp": "2025-09-23T18:23:37.281887",
+      "type": "pseudonymize",
+      "request_id": "68606c7486766f18cbb3",
+      "original_text": "{\"timestamp\":\"2025-09-23T09:23:26.516Z\",\"integrations\":{\"Segment.io\":true},\"type\":\"page\",\"properties\":{\"path\":\"/c/68d266f8-13c4-832b-8a05-92d627fadd98\",\"referrer\":\"\",\"search\":\"\",\"title\":\"메일 전송 확인 방법\",\"url\":\"https://chatgpt.com/c/68d266f8-13c4-832b-8a05-92d627fadd98\",\"hash\":\"\"},\"context\":{\"page\":{\"path\":\"/c/68d266f8-13c4-832b-8a05-92d627fadd98\",\"referrer\":\"\",\"search\":\"\",\"title\":\"메일 전송 확인 방법\",\"url\":\"https://chatgpt.com/c/68d266f8-13c4-832b-8a05-92d627fadd98\",\"hash\":\"\"},\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36\",\"userAgentData\":{\"brands\":[{\"brand\":\"Chromium\",\"version\":\"140\"},{\"brand\":\"Not=A?Brand\",\"version\":\"24\"},{\"brand\":\"Google Chrome\",\"version\":\"140\"}],\"mobile\":false,\"platform\":\"Windows\"},\"locale\":\"ko-KR\",\"library\":{\"name\":\"analytics.js\",\"version\":\"npm:next-1.73.0\"},\"timezone\":\"Asia/Seoul\",\"app_name\":\"chatgpt\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\",\"browser_locale\":\"ko-KR\",\"device_id\":\"eef92088-84e2-4562-80fa-1562351913ae\",\"auth_status\":\"logged_in\",\"user_traits\":{\"plan_type\":\"plus\",\"workspace_id\":null,\"workspace_type\":null}},\"messageId\":\"ajs-next-1758619406516-b1194fb2-17f8-4a23-91a9-143793129a35\",\"userId\":\"user-pDy1yOHWEbcaHYA9Z9eaXCSf\",\"anonymousId\":\"e70e1fa8-2593-490e-8220-6dc95d633640\",\"writeKey\":\"oai\",\"sentAt\":\"2025-09-23T09:23:26.517Z\",\"_metadata\":{\"bundled\":[\"Segment.io\"],\"unbundled\":[],\"bundledIds\":[]}}",
+      "detected_items": 0,
+      "mode": "modular_enhanced",
+      "total_processing_time": 4.185814380645752
+    },
+    {
+      "time": "2025-09-23 18:24:27",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "ce350a3c54d40ba61a5c",
+        "prompt": "{\"counters\":[{\"namespace\":\"default\",\"metric\":\"chatgpt_web_interrupt_token_exists\",\"tags\":{\"has_conduit_token\":\"true\"},\"value\":1},{\"namespace\":\"default\",\"metric\":\"completion_request\",\"tags\":{},\"value\":1},{\"namespace\":\"default\",\"metric\":\"conduit_f_conversation_api.success\",\"tags\":{\"prepare_sent\":\"true\",\"prepare_succeeded\":\"false\",\"prepare_failed\":\"false\"},\"value\":1}],\"histograms\":[{\"namespace\":\"default\",\"metric\":\"chatgpt_web_interrupt_token_latency\",\"tags\":{},\"values\":[10825.099999904633]},{\"namespace\":\"default\",\"metric\":\"completion_request_time\",\"tags\":{},\"values\":[10949.200000047684]}],\"client_type\":\"web\"}"
+      },
+      "output": {
+        "pseudonymized_text": "{\"counters\":[{\"namespace\":\"default\",\"metric\":\"chatgpt_web_interrupt_token_exists\",\"tags\":{\"has_conduit_token\":\"true\"},\"value\":1},{\"namespace\":\"default\",\"metric\":\"completion_request\",\"tags\":{},\"value\":1},{\"namespace\":\"default\",\"metric\":\"conduit_f_conversation_api.success\",\"tags\":{\"prepare_sent\":\"true\",\"prepare_succeeded\":\"false\",\"prepare_failed\":\"false\"},\"value\":1}],\"histograms\":[{\"namespace\":\"default\",\"metric\":\"chatgpt_web_interrupt_token_latency\",\"tags\":{},\"values\":[10825.099999904633]},{\"namespace\":\"default\",\"metric\":\"completion_request_time\",\"tags\":{},\"values\":[10949.200000047684]}],\"client_type\":\"web\"}",
+        "detection": {
+          "items": [],
+          "count": 0,
+          "contains_pii": false
+        },
+        "processing_time": 31.618939638137817
+      },
+      "detection": {
+        "items": [],
+        "count": 0,
+        "contains_pii": false
+      },
+      "success": true,
+      "timestamp": "2025-09-23T18:24:27.869769",
+      "type": "pseudonymize",
+      "request_id": "ce350a3c54d40ba61a5c",
+      "original_text": "{\"counters\":[{\"namespace\":\"default\",\"metric\":\"chatgpt_web_interrupt_token_exists\",\"tags\":{\"has_conduit_token\":\"true\"},\"value\":1},{\"namespace\":\"default\",\"metric\":\"completion_request\",\"tags\":{},\"value\":1},{\"namespace\":\"default\",\"metric\":\"conduit_f_conversation_api.success\",\"tags\":{\"prepare_sent\":\"true\",\"prepare_succeeded\":\"false\",\"prepare_failed\":\"false\"},\"value\":1}],\"histograms\":[{\"namespace\":\"default\",\"metric\":\"chatgpt_web_interrupt_token_latency\",\"tags\":{},\"values\":[10825.099999904633]},{\"namespace\":\"default\",\"metric\":\"completion_request_time\",\"tags\":{},\"values\":[10949.200000047684]}],\"client_type\":\"web\"}",
       "detected_items": 0,
       "mode": "modular"
     },
     {
-      "time": "2025-09-22 19:44:39",
+      "time": "2025-09-23 18:24:28",
       "remote_addr": "127.0.0.1",
       "path": "/pseudonymize",
       "input": {
-        "id": "debug_test_1758537878750",
-        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다."
+        "id": "eaa8ecc2b57ff14acd1b",
+        "prompt": "{\"counters\":[{\"namespace\":\"default\",\"metric\":\"chatgpt_web_interrupt_token_exists\",\"tags\":{\"has_conduit_token\":\"true\"},\"value\":1},{\"namespace\":\"default\",\"metric\":\"completion_request\",\"tags\":{},\"value\":1},{\"namespace\":\"default\",\"metric\":\"conduit_f_conversation_api.success\",\"tags\":{\"prepare_sent\":\"true\",\"prepare_succeeded\":\"false\",\"prepare_failed\":\"false\"},\"value\":1}],\"histograms\":[{\"namespace\":\"default\",\"metric\":\"chatgpt_web_interrupt_token_latency\",\"tags\":{},\"values\":[10825.099999904633]},{\"namespace\":\"default\",\"metric\":\"completion_request_time\",\"tags\":{},\"values\":[10949.200000047684]}],\"client_type\":\"web\"}"
       },
       "output": {
-        "pseudonymized_text": "김가명님 21세, 서울거주하시는 분이시죠? user001@example.com으로 메일 보내드렸습니다.",
+        "pseudonymized_text": "{\"counters\":[{\"namespace\":\"default\",\"metric\":\"chatgpt_web_interrupt_token_exists\",\"tags\":{\"has_conduit_token\":\"true\"},\"value\":1},{\"namespace\":\"default\",\"metric\":\"completion_request\",\"tags\":{},\"value\":1},{\"namespace\":\"default\",\"metric\":\"conduit_f_conversation_api.success\",\"tags\":{\"prepare_sent\":\"true\",\"prepare_succeeded\":\"false\",\"prepare_failed\":\"false\"},\"value\":1}],\"histograms\":[{\"namespace\":\"default\",\"metric\":\"chatgpt_web_interrupt_token_latency\",\"tags\":{},\"values\":[10825.099999904633]},{\"namespace\":\"default\",\"metric\":\"completion_request_time\",\"tags\":{},\"values\":[10949.200000047684]}],\"client_type\":\"web\"}",
         "detection": {
-          "items": [
-            {
-              "type": "이메일",
-              "value": "contact@example.com",
-              "source": "정규식-이메일",
-              "confidence": 0.95
-            },
-            {
-              "type": "이름",
-              "value": "이영희",
-              "source": "AI-패턴분석",
-              "confidence": 0.85
-            },
-            {
-              "type": "주소",
-              "value": "대구",
-              "source": "패턴-복합주소",
-              "confidence": 0.98
-            },
-            {
-              "type": "나이",
-              "value": "25",
-              "source": "정규식-나이",
-              "confidence": 1.0
-            }
-          ],
-          "count": 4,
-          "contains_pii": true
+          "items": [],
+          "count": 0,
+          "contains_pii": false
         },
-        "processing_time": 0.5008547306060791
+        "processing_time": 1.8906402587890625
       },
       "detection": {
-        "items": [
-          {
-            "type": "이메일",
-            "value": "contact@example.com",
-            "token": "user001@example.com",
-            "source": "정규식-이메일",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "이름",
-            "value": "이영희",
-            "token": "김가명",
-            "source": "AI-패턴분석",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "주소",
-            "value": "대구",
-            "token": "서울",
-            "source": "패턴-복합주소",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "나이",
-            "value": "25",
-            "token": "21",
-            "source": "정규식-나이",
-            "start": 0,
-            "end": 0
-          }
-        ],
-        "count": 4,
-        "contains_pii": true
+        "items": [],
+        "count": 0,
+        "contains_pii": false
       },
       "success": true,
-      "timestamp": "2025-09-22T19:44:39.255931",
+      "timestamp": "2025-09-23T18:24:28.151477",
       "type": "pseudonymize",
-      "request_id": "debug_test_1758537878750",
-      "original_text": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
-      "detected_items": 4,
-      "mode": "modular"
-    },
-    {
-      "time": "2025-09-22 19:44:46",
-      "remote_addr": "127.0.0.1",
-      "path": "/pseudonymize",
-      "input": {
-        "id": "debug_test_1758537886002",
-        "prompt": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요."
-      },
-      "output": {
-        "pseudonymized_text": "이가명 고객님, 부산예약이 확인되었습니다. 문의사항은 010-0000-0000로 연락 주세요.",
-        "detection": {
-          "items": [
-            {
-              "type": "전화번호",
-              "value": "010-9876-5432",
-              "source": "정규식-전화번호",
-              "confidence": 0.9
-            },
-            {
-              "type": "이름",
-              "value": "김철수",
-              "source": "AI-패턴분석",
-              "confidence": 0.95
-            },
-            {
-              "type": "주소",
-              "value": "부산",
-              "source": "패턴-복합주소",
-              "confidence": 0.98
-            }
-          ],
-          "count": 3,
-          "contains_pii": true
-        },
-        "processing_time": 0.5084900856018066
-      },
-      "detection": {
-        "items": [
-          {
-            "type": "전화번호",
-            "value": "010-9876-5432",
-            "token": "010-0000-0000",
-            "source": "정규식-전화번호",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "이름",
-            "value": "김철수",
-            "token": "이가명",
-            "source": "AI-패턴분석",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "주소",
-            "value": "부산",
-            "token": "부산",
-            "source": "패턴-복합주소",
-            "start": 0,
-            "end": 0
-          }
-        ],
-        "count": 3,
-        "contains_pii": true
-      },
-      "success": true,
-      "timestamp": "2025-09-22T19:44:46.514967",
-      "type": "pseudonymize",
-      "request_id": "debug_test_1758537886002",
-      "original_text": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요.",
-      "detected_items": 3,
-      "mode": "modular"
-    },
-    {
-      "time": "2025-09-22 19:44:49",
-      "remote_addr": "127.0.0.1",
-      "path": "/pseudonymize",
-      "input": {
-        "id": "debug_test_1758537889153",
-        "prompt": "안녕하세요, 제 이름은 홍길동이고 연락처는 010-1234-5678입니다. 서울 강남구에 살고 있습니다."
-      },
-      "output": {
-        "pseudonymized_text": "안녕하세요, 제 이름은 박무명이고 연락처는 010-0000-0001입니다. 대구에 살고 있습니다.",
-        "detection": {
-          "items": [
-            {
-              "type": "전화번호",
-              "value": "010-1234-5678",
-              "source": "정규식-전화번호",
-              "confidence": 0.9
-            },
-            {
-              "type": "이름",
-              "value": "홍길동",
-              "source": "AI-패턴분석",
-              "confidence": 0.85
-            },
-            {
-              "type": "주소",
-              "value": "서울",
-              "source": "패턴-복합주소",
-              "confidence": 0.98
-            }
-          ],
-          "count": 3,
-          "contains_pii": true
-        },
-        "processing_time": 0.5071084499359131
-      },
-      "detection": {
-        "items": [
-          {
-            "type": "전화번호",
-            "value": "010-1234-5678",
-            "token": "010-0000-0001",
-            "source": "정규식-전화번호",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "이름",
-            "value": "홍길동",
-            "token": "박무명",
-            "source": "AI-패턴분석",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "주소",
-            "value": "서울",
-            "token": "대구",
-            "source": "패턴-복합주소",
-            "start": 0,
-            "end": 0
-          }
-        ],
-        "count": 3,
-        "contains_pii": true
-      },
-      "success": true,
-      "timestamp": "2025-09-22T19:44:49.665268",
-      "type": "pseudonymize",
-      "request_id": "debug_test_1758537889153",
-      "original_text": "안녕하세요, 제 이름은 홍길동이고 연락처는 010-1234-5678입니다. 서울 강남구에 살고 있습니다.",
-      "detected_items": 3,
-      "mode": "modular"
-    },
-    {
-      "time": "2025-09-22 19:46:18",
-      "remote_addr": "127.0.0.1",
-      "path": "/pseudonymize",
-      "input": {
-        "id": "681a78c54f76471bc231",
-        "prompt": "안녕하세요 명환씨, 김준석입니다. 추가적인 의견 있으시면 010-3124-2124로 전화주세요. junseok314@gmail.com"
-      },
-      "output": {
-        "pseudonymized_text": "안녕하세요 정무명, 최가명입니다. 추가적인 의견 있으시면 010-0000-0002로 전화주세요. user002@test.co.kr",
-        "detection": {
-          "items": [
-            {
-              "type": "이메일",
-              "value": "junseok314@gmail.com",
-              "source": "정규식-이메일",
-              "confidence": 0.95
-            },
-            {
-              "type": "전화번호",
-              "value": "010-3124-2124",
-              "source": "정규식-전화번호",
-              "confidence": 0.9
-            },
-            {
-              "type": "이름",
-              "value": "김준석",
-              "source": "AI-패턴분석",
-              "confidence": 0.95
-            },
-            {
-              "type": "이름",
-              "value": "명환씨",
-              "source": "AI-패턴분석",
-              "confidence": 1.0
-            },
-            {
-              "type": "이름",
-              "value": "명환",
-              "source": "AI-패턴분석",
-              "confidence": 1.0
-            }
-          ],
-          "count": 5,
-          "contains_pii": true
-        },
-        "processing_time": 0.5274167060852051
-      },
-      "detection": {
-        "items": [
-          {
-            "type": "이메일",
-            "value": "junseok314@gmail.com",
-            "token": "user002@test.co.kr",
-            "source": "정규식-이메일",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "전화번호",
-            "value": "010-3124-2124",
-            "token": "010-0000-0002",
-            "source": "정규식-전화번호",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "이름",
-            "value": "김준석",
-            "token": "최가명",
-            "source": "AI-패턴분석",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "이름",
-            "value": "명환씨",
-            "token": "정무명",
-            "source": "AI-패턴분석",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "이름",
-            "value": "명환",
-            "token": "홍가명",
-            "source": "AI-패턴분석",
-            "start": 0,
-            "end": 0
-          }
-        ],
-        "count": 5,
-        "contains_pii": true
-      },
-      "success": true,
-      "timestamp": "2025-09-22T19:46:18.986990",
-      "type": "pseudonymize",
-      "request_id": "681a78c54f76471bc231",
-      "original_text": "안녕하세요 명환씨, 김준석입니다. 추가적인 의견 있으시면 010-3124-2124로 전화주세요. junseok314@gmail.com",
-      "detected_items": 5,
-      "mode": "modular"
-    },
-    {
-      "time": "2025-09-22 19:51:27",
-      "remote_addr": "127.0.0.1",
-      "path": "/pseudonymize",
-      "input": {
-        "id": "debug_test_1758538285394",
-        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다."
-      },
-      "output": {
-        "pseudonymized_text": "김가명님 23세, 서울거주하시는 분이시죠? user001@example.com으로 메일 보내드렸습니다.",
-        "detection": {
-          "items": [
-            {
-              "type": "이메일",
-              "value": "contact@example.com",
-              "source": "정규식-이메일",
-              "confidence": 0.95
-            },
-            {
-              "type": "이름",
-              "value": "이영희",
-              "source": "정규식-이름패턴",
-              "confidence": 0.75
-            },
-            {
-              "type": "주소",
-              "value": "대구",
-              "source": "정규식-복합주소",
-              "confidence": 0.98
-            },
-            {
-              "type": "나이",
-              "value": "25",
-              "source": "정규식-나이",
-              "confidence": 1.0
-            }
-          ],
-          "count": 4,
-          "contains_pii": true
-        },
-        "processing_time": 2.477133274078369
-      },
-      "detection": {
-        "items": [
-          {
-            "type": "이메일",
-            "value": "contact@example.com",
-            "token": "user001@example.com",
-            "source": "정규식-이메일",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "이름",
-            "value": "이영희",
-            "token": "김가명",
-            "source": "정규식-이름패턴",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "주소",
-            "value": "대구",
-            "token": "서울",
-            "source": "정규식-복합주소",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "나이",
-            "value": "25",
-            "token": "23",
-            "source": "정규식-나이",
-            "start": 0,
-            "end": 0
-          }
-        ],
-        "count": 4,
-        "contains_pii": true
-      },
-      "success": true,
-      "timestamp": "2025-09-22T19:51:27.876932",
-      "type": "pseudonymize",
-      "request_id": "debug_test_1758538285394",
-      "original_text": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
-      "detected_items": 4,
-      "mode": "modular"
-    },
-    {
-      "time": "2025-09-22 19:53:55",
-      "remote_addr": "127.0.0.1",
-      "path": "/pseudonymize",
-      "input": {
-        "id": "debug_test_1758538433693",
-        "prompt": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요."
-      },
-      "output": {
-        "pseudonymized_text": "김가명 고객님, 서울예약이 확인되었습니다. 문의사항은 010-0000-0000로 연락 주세요.",
-        "detection": {
-          "items": [
-            {
-              "type": "전화번호",
-              "value": "010-9876-5432",
-              "source": "정규식-전화번호",
-              "confidence": 0.9
-            },
-            {
-              "type": "이름",
-              "value": "김철수",
-              "source": "정규식-이름패턴",
-              "confidence": 0.75
-            },
-            {
-              "type": "주소",
-              "value": "부산",
-              "source": "정규식-복합주소",
-              "confidence": 0.98
-            }
-          ],
-          "count": 3,
-          "contains_pii": true
-        },
-        "processing_time": 2.2073206901550293
-      },
-      "detection": {
-        "items": [
-          {
-            "type": "전화번호",
-            "value": "010-9876-5432",
-            "token": "010-0000-0000",
-            "source": "정규식-전화번호",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "이름",
-            "value": "김철수",
-            "token": "김가명",
-            "source": "정규식-이름패턴",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "주소",
-            "value": "부산",
-            "token": "서울",
-            "source": "정규식-복합주소",
-            "start": 0,
-            "end": 0
-          }
-        ],
-        "count": 3,
-        "contains_pii": true
-      },
-      "success": true,
-      "timestamp": "2025-09-22T19:53:55.904733",
-      "type": "pseudonymize",
-      "request_id": "debug_test_1758538433693",
-      "original_text": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요.",
-      "detected_items": 3,
-      "mode": "modular"
-    },
-    {
-      "time": "2025-09-22 20:03:06",
-      "remote_addr": "127.0.0.1",
-      "path": "/pseudonymize",
-      "input": {
-        "id": "debug_test_1758538984626",
-        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다."
-      },
-      "output": {
-        "pseudonymized_text": "이가명 24세, 서울거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
-        "detection": {
-          "items": [
-            {
-              "type": "이름",
-              "value": "이영희",
-              "source": "normalizers-이름패턴",
-              "confidence": 0.85
-            },
-            {
-              "type": "주소",
-              "value": "대구",
-              "source": "normalizers-주소",
-              "confidence": 0.95
-            },
-            {
-              "type": "나이",
-              "value": "25",
-              "source": "normalizers-나이",
-              "confidence": 1.0
-            },
-            {
-              "type": "이름",
-              "value": "이영희님",
-              "source": "NER-보완",
-              "confidence": 0.9999423027038574
-            },
-            {
-              "type": "주소",
-              "value": "중구",
-              "source": "NER-보완",
-              "confidence": 0.9999650716781616
-            }
-          ],
-          "count": 5,
-          "contains_pii": true
-        },
-        "processing_time": 1.7543723583221436
-      },
-      "detection": {
-        "items": [
-          {
-            "type": "이름",
-            "value": "이영희",
-            "token": "김가명",
-            "source": "normalizers-이름패턴",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "주소",
-            "value": "대구",
-            "token": "서울",
-            "source": "normalizers-주소",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "나이",
-            "value": "25",
-            "token": "24",
-            "source": "normalizers-나이",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "이름",
-            "value": "이영희님",
-            "token": "이가명",
-            "source": "NER-보완",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "주소",
-            "value": "중구",
-            "token": "중구",
-            "source": "NER-보완",
-            "start": 0,
-            "end": 0
-          }
-        ],
-        "count": 5,
-        "contains_pii": true
-      },
-      "success": true,
-      "timestamp": "2025-09-22T20:03:06.385742",
-      "type": "pseudonymize",
-      "request_id": "debug_test_1758538984626",
-      "original_text": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
-      "detected_items": 5,
-      "mode": "modular"
-    },
-    {
-      "time": "2025-09-22 20:05:36",
-      "remote_addr": "127.0.0.1",
-      "path": "/pseudonymize",
-      "input": {
-        "id": "c6fb380f439391d981e8",
-        "prompt": "안녕하세요 전명환씨, 저는 이번 회의 담당자입니다.\n흔쾌히 응해주셔서 감사합니다.\n추후 회의 일정은 아래의 이메일로 보내드리겠습니다.\n감사합니다.\n\n오준석 대리\njunseok124@gmail.com, 010-2481-2488"
-      },
-      "output": {
-        "pseudonymized_text": "안녕하세요 홍가명, 저는 박무명 회의 최가명입니다.\n흔쾌히 응해주셔서 감사합니다.\n추후 회의 일정은 아래의 이메일로 보내드리겠습니다.\n감사합니다.\n\n조무명 대리\nuser001@example.com, 010-0000-0000",
-        "detection": {
-          "items": [
-            {
-              "type": "이메일",
-              "value": "junseok124@gmail.com",
-              "source": "normalizers-이메일",
-              "confidence": 0.95
-            },
-            {
-              "type": "전화번호",
-              "value": "010-2481-2488",
-              "source": "normalizers-전화번호",
-              "confidence": 0.95
-            },
-            {
-              "type": "이름",
-              "value": "이번",
-              "source": "normalizers-이름패턴",
-              "confidence": 0.85
-            },
-            {
-              "type": "이름",
-              "value": "담당자",
-              "source": "normalizers-이름패턴",
-              "confidence": 0.85
-            },
-            {
-              "type": "이름",
-              "value": "전명환",
-              "source": "normalizers-이름패턴",
-              "confidence": 0.85
-            },
-            {
-              "type": "이름",
-              "value": "전명환씨",
-              "source": "normalizers-이름패턴",
-              "confidence": 0.85
-            },
-            {
-              "type": "이름",
-              "value": "오준석",
-              "source": "NER-보완",
-              "confidence": 0.9999994039535522
-            },
-            {
-              "type": "전화번호",
-              "value": "010- 2481 - 2488",
-              "source": "NER-보완",
-              "confidence": 0.9999935626983643
-            }
-          ],
-          "count": 8,
-          "contains_pii": true
-        },
-        "processing_time": 0.0954136848449707
-      },
-      "detection": {
-        "items": [
-          {
-            "type": "이메일",
-            "value": "junseok124@gmail.com",
-            "token": "user001@example.com",
-            "source": "normalizers-이메일",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "전화번호",
-            "value": "010-2481-2488",
-            "token": "010-0000-0000",
-            "source": "normalizers-전화번호",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "이름",
-            "value": "이번",
-            "token": "박무명",
-            "source": "normalizers-이름패턴",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "이름",
-            "value": "담당자",
-            "token": "최가명",
-            "source": "normalizers-이름패턴",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "이름",
-            "value": "전명환",
-            "token": "정무명",
-            "source": "normalizers-이름패턴",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "이름",
-            "value": "전명환씨",
-            "token": "홍가명",
-            "source": "normalizers-이름패턴",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "이름",
-            "value": "오준석",
-            "token": "조무명",
-            "source": "NER-보완",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "전화번호",
-            "value": "010- 2481 - 2488",
-            "token": "010-0000-0001",
-            "source": "NER-보완",
-            "start": 0,
-            "end": 0
-          }
-        ],
-        "count": 8,
-        "contains_pii": true
-      },
-      "success": true,
-      "timestamp": "2025-09-22T20:05:36.356789",
-      "type": "pseudonymize",
-      "request_id": "c6fb380f439391d981e8",
-      "original_text": "안녕하세요 전명환씨, 저는 이번 회의 담당자입니다.\n흔쾌히 응해주셔서 감사합니다.\n추후 회의 일정은 아래의 이메일로 보내드리겠습니다.\n감사합니다.\n\n오준석 대리\njunseok124@gmail.com, 010-2481-2488",
-      "detected_items": 8,
-      "mode": "modular"
-    },
-    {
-      "time": "2025-09-22 20:09:13",
-      "remote_addr": "127.0.0.1",
-      "path": "/pseudonymize",
-      "input": {
-        "id": "debug_test_1758539352125",
-        "prompt": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요."
-      },
-      "output": {
-        "pseudonymized_text": "김가명 고객님, 서울예약이 확인되었습니다. 문의사항은 010-0000-0000로 연락 주세요.",
-        "detection": {
-          "items": [
-            {
-              "type": "전화번호",
-              "value": "010-9876-5432",
-              "source": "normalizers-전화번호",
-              "confidence": 0.95
-            },
-            {
-              "type": "이름",
-              "value": "김철수",
-              "source": "normalizers-이름패턴",
-              "confidence": 0.85
-            },
-            {
-              "type": "주소",
-              "value": "부산",
-              "source": "normalizers-주소",
-              "confidence": 0.95
-            },
-            {
-              "type": "주소",
-              "value": "해운대구",
-              "source": "NER-보완",
-              "confidence": 0.9999997615814209
-            },
-            {
-              "type": "전화번호",
-              "value": "010- 9876 - 5432로",
-              "source": "NER-보완",
-              "confidence": 0.9999997615814209
-            }
-          ],
-          "count": 5,
-          "contains_pii": true
-        },
-        "processing_time": 1.6544125080108643
-      },
-      "detection": {
-        "items": [
-          {
-            "type": "전화번호",
-            "value": "010-9876-5432",
-            "token": "010-0000-0000",
-            "source": "normalizers-전화번호",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "이름",
-            "value": "김철수",
-            "token": "김가명",
-            "source": "normalizers-이름패턴",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "주소",
-            "value": "부산",
-            "token": "서울",
-            "source": "normalizers-주소",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "주소",
-            "value": "해운대구",
-            "token": "해운대구",
-            "source": "NER-보완",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "전화번호",
-            "value": "010- 9876 - 5432로",
-            "token": "010-0000-0001",
-            "source": "NER-보완",
-            "start": 0,
-            "end": 0
-          }
-        ],
-        "count": 5,
-        "contains_pii": true
-      },
-      "success": true,
-      "timestamp": "2025-09-22T20:09:13.784545",
-      "type": "pseudonymize",
-      "request_id": "debug_test_1758539352125",
-      "original_text": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요.",
-      "detected_items": 5,
-      "mode": "modular"
-    },
-    {
-      "time": "2025-09-22 20:10:30",
-      "remote_addr": "127.0.0.1",
-      "path": "/pseudonymize",
-      "input": {
-        "id": "78318251672755ec0f59",
-        "prompt": "안녕하세요 전명환씨, 저는 이번 회의 담당자입니다.\r\n흔쾌히 응해주셔서 감사합니다.\r\n추후 회의 일정은 아래의 이메일로 보내드리겠습니다.\r\n감사합니다.\r\n\r\n오준석 대리\r\njunseok124@gmail.com, 010-2481-2488"
-      },
-      "output": {
-        "pseudonymized_text": "안녕하세요 이가명씨, 저는 이번 회의 담당자입니다.\r\n흔쾌히 응해주셔서 감사합니다.\r\n추후 회의 일정은 아래의 이메일로 보내드리겠습니다.\r\n감사합니다.\r\n\r\n박무명 대리\r\nuser001@example.com, 010-0000-0002",
-        "detection": {
-          "items": [
-            {
-              "type": "이메일",
-              "value": "junseok124@gmail.com",
-              "source": "normalizers-이메일",
-              "confidence": 0.95
-            },
-            {
-              "type": "전화번호",
-              "value": "010-2481-2488",
-              "source": "normalizers-전화번호",
-              "confidence": 0.95
-            },
-            {
-              "type": "이름",
-              "value": "전명환",
-              "source": "normalizers-이름패턴",
-              "confidence": 0.85
-            },
-            {
-              "type": "이름",
-              "value": "오준석",
-              "source": "NER-보완",
-              "confidence": 0.9999994039535522
-            },
-            {
-              "type": "전화번호",
-              "value": "010- 2481 - 2488",
-              "source": "NER-보완",
-              "confidence": 0.9999935626983643
-            }
-          ],
-          "count": 5,
-          "contains_pii": true
-        },
-        "processing_time": 0.11247086524963379
-      },
-      "detection": {
-        "items": [
-          {
-            "type": "이메일",
-            "value": "junseok124@gmail.com",
-            "token": "user001@example.com",
-            "source": "normalizers-이메일",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "전화번호",
-            "value": "010-2481-2488",
-            "token": "010-0000-0002",
-            "source": "normalizers-전화번호",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "이름",
-            "value": "전명환",
-            "token": "이가명",
-            "source": "normalizers-이름패턴",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "이름",
-            "value": "오준석",
-            "token": "박무명",
-            "source": "NER-보완",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "전화번호",
-            "value": "010- 2481 - 2488",
-            "token": "010-0000-0003",
-            "source": "NER-보완",
-            "start": 0,
-            "end": 0
-          }
-        ],
-        "count": 5,
-        "contains_pii": true
-      },
-      "success": true,
-      "timestamp": "2025-09-22T20:10:30.500996",
-      "type": "pseudonymize",
-      "request_id": "78318251672755ec0f59",
-      "original_text": "안녕하세요 전명환씨, 저는 이번 회의 담당자입니다.\r\n흔쾌히 응해주셔서 감사합니다.\r\n추후 회의 일정은 아래의 이메일로 보내드리겠습니다.\r\n감사합니다.\r\n\r\n오준석 대리\r\njunseok124@gmail.com, 010-2481-2488",
-      "detected_items": 5,
-      "mode": "modular"
-    },
-    {
-      "time": "2025-09-22 20:11:38",
-      "remote_addr": "127.0.0.1",
-      "path": "/pseudonymize",
-      "input": {
-        "id": "9feada337878a8102c1e",
-        "prompt": "안녕하세요 전명환 학생, 학생 주임입니다. 앞으로는 더욱 더 조심해주면 좋겠네요.\n\r\njuimm41@gmail.com, 01041124243"
-      },
-      "output": {
-        "pseudonymized_text": "안녕하세요 최가명 학생, 학생 주임입니다. 앞으로는 더욱 더 조심해주면 좋겠네요.\n\r\nuser002@test.co.kr, 010-0000-0005",
-        "detection": {
-          "items": [
-            {
-              "type": "이메일",
-              "value": "juimm41@gmail.com",
-              "source": "normalizers-이메일",
-              "confidence": 0.95
-            },
-            {
-              "type": "전화번호",
-              "value": "010-4112-4243",
-              "source": "normalizers-전화번호",
-              "confidence": 0.95
-            },
-            {
-              "type": "이름",
-              "value": "전명환",
-              "source": "normalizers-이름패턴",
-              "confidence": 0.85
-            },
-            {
-              "type": "전화번호",
-              "value": "01041124243",
-              "source": "NER-보완",
-              "confidence": 0.9897814989089966
-            }
-          ],
-          "count": 4,
-          "contains_pii": true
-        },
-        "processing_time": 0.07720208168029785
-      },
-      "detection": {
-        "items": [
-          {
-            "type": "이메일",
-            "value": "juimm41@gmail.com",
-            "token": "user002@test.co.kr",
-            "source": "normalizers-이메일",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "전화번호",
-            "value": "010-4112-4243",
-            "token": "010-0000-0004",
-            "source": "normalizers-전화번호",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "이름",
-            "value": "전명환",
-            "token": "최가명",
-            "source": "normalizers-이름패턴",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "전화번호",
-            "value": "01041124243",
-            "token": "010-0000-0005",
-            "source": "NER-보완",
-            "start": 0,
-            "end": 0
-          }
-        ],
-        "count": 4,
-        "contains_pii": true
-      },
-      "success": true,
-      "timestamp": "2025-09-22T20:11:38.372711",
-      "type": "pseudonymize",
-      "request_id": "9feada337878a8102c1e",
-      "original_text": "안녕하세요 전명환 학생, 학생 주임입니다. 앞으로는 더욱 더 조심해주면 좋겠네요.\n\r\njuimm41@gmail.com, 01041124243",
-      "detected_items": 4,
-      "mode": "modular"
-    },
-    {
-      "time": "2025-09-22 20:12:44",
-      "remote_addr": "127.0.0.1",
-      "path": "/pseudonymize",
-      "input": {
-        "id": "65071763de28dbbf6658",
-        "prompt": "안녕하세요 전명환씨, 저는 이번 회의 담당자입니다.\r\n흔쾌히 응해주셔서 감사합니다.\r\n추후 회의 일정은 아래의 이메일로 보내드리겠습니다.\r\n감사합니다.\r\n\r\n오준석 대리\r\njunseok124@gmail.com, 010-2481-2488"
-      },
-      "output": {
-        "pseudonymized_text": "안녕하세요 정무명씨, 저는 이번 회의 담당자입니다.\r\n흔쾌히 응해주셔서 감사합니다.\r\n추후 회의 일정은 아래의 이메일로 보내드리겠습니다.\r\n감사합니다.\r\n\r\n홍가명 대리\r\nuser003@gmail.com, 010-0000-0006",
-        "detection": {
-          "items": [
-            {
-              "type": "이메일",
-              "value": "junseok124@gmail.com",
-              "source": "normalizers-이메일",
-              "confidence": 0.95
-            },
-            {
-              "type": "전화번호",
-              "value": "010-2481-2488",
-              "source": "normalizers-전화번호",
-              "confidence": 0.95
-            },
-            {
-              "type": "이름",
-              "value": "전명환",
-              "source": "normalizers-이름패턴",
-              "confidence": 0.85
-            },
-            {
-              "type": "이름",
-              "value": "오준석",
-              "source": "NER-보완",
-              "confidence": 0.9999994039535522
-            },
-            {
-              "type": "전화번호",
-              "value": "010- 2481 - 2488",
-              "source": "NER-보완",
-              "confidence": 0.9999935626983643
-            }
-          ],
-          "count": 5,
-          "contains_pii": true
-        },
-        "processing_time": 0.08637332916259766
-      },
-      "detection": {
-        "items": [
-          {
-            "type": "이메일",
-            "value": "junseok124@gmail.com",
-            "token": "user003@gmail.com",
-            "source": "normalizers-이메일",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "전화번호",
-            "value": "010-2481-2488",
-            "token": "010-0000-0006",
-            "source": "normalizers-전화번호",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "이름",
-            "value": "전명환",
-            "token": "정무명",
-            "source": "normalizers-이름패턴",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "이름",
-            "value": "오준석",
-            "token": "홍가명",
-            "source": "NER-보완",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "전화번호",
-            "value": "010- 2481 - 2488",
-            "token": "010-0000-0007",
-            "source": "NER-보완",
-            "start": 0,
-            "end": 0
-          }
-        ],
-        "count": 5,
-        "contains_pii": true
-      },
-      "success": true,
-      "timestamp": "2025-09-22T20:12:44.845591",
-      "type": "pseudonymize",
-      "request_id": "65071763de28dbbf6658",
-      "original_text": "안녕하세요 전명환씨, 저는 이번 회의 담당자입니다.\r\n흔쾌히 응해주셔서 감사합니다.\r\n추후 회의 일정은 아래의 이메일로 보내드리겠습니다.\r\n감사합니다.\r\n\r\n오준석 대리\r\njunseok124@gmail.com, 010-2481-2488",
-      "detected_items": 5,
-      "mode": "modular"
-    },
-    {
-      "time": "2025-09-22 20:13:05",
-      "remote_addr": "127.0.0.1",
-      "path": "/pseudonymize",
-      "input": {
-        "id": "5d14609c70c050bc6636",
-        "prompt": "안녕하세요 전명환씨, 저는 이번 회의 담당자입니다.\r\n흔쾌히 응해주셔서 감사합니다.\r\n추후 회의 일정은 아래의 이메일로 보내드리겠습니다.\r\n감사합니다.\r\n\r\n오준석 대리\r\njunseok124@gmail.com, 010-2481-2488"
-      },
-      "output": {
-        "pseudonymized_text": "안녕하세요 조무명씨, 저는 이번 회의 담당자입니다.\r\n흔쾌히 응해주셔서 감사합니다.\r\n추후 회의 일정은 아래의 이메일로 보내드리겠습니다.\r\n감사합니다.\r\n\r\n윤가명 대리\r\nuser004@naver.com, 010-0000-0008",
-        "detection": {
-          "items": [
-            {
-              "type": "이메일",
-              "value": "junseok124@gmail.com",
-              "source": "normalizers-이메일",
-              "confidence": 0.95
-            },
-            {
-              "type": "전화번호",
-              "value": "010-2481-2488",
-              "source": "normalizers-전화번호",
-              "confidence": 0.95
-            },
-            {
-              "type": "이름",
-              "value": "전명환",
-              "source": "normalizers-이름패턴",
-              "confidence": 0.85
-            },
-            {
-              "type": "이름",
-              "value": "오준석",
-              "source": "NER-보완",
-              "confidence": 0.9999994039535522
-            },
-            {
-              "type": "전화번호",
-              "value": "010- 2481 - 2488",
-              "source": "NER-보완",
-              "confidence": 0.9999935626983643
-            }
-          ],
-          "count": 5,
-          "contains_pii": true
-        },
-        "processing_time": 0.10226678848266602
-      },
-      "detection": {
-        "items": [
-          {
-            "type": "이메일",
-            "value": "junseok124@gmail.com",
-            "token": "user004@naver.com",
-            "source": "normalizers-이메일",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "전화번호",
-            "value": "010-2481-2488",
-            "token": "010-0000-0008",
-            "source": "normalizers-전화번호",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "이름",
-            "value": "전명환",
-            "token": "조무명",
-            "source": "normalizers-이름패턴",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "이름",
-            "value": "오준석",
-            "token": "윤가명",
-            "source": "NER-보완",
-            "start": 0,
-            "end": 0
-          },
-          {
-            "type": "전화번호",
-            "value": "010- 2481 - 2488",
-            "token": "010-0000-0009",
-            "source": "NER-보완",
-            "start": 0,
-            "end": 0
-          }
-        ],
-        "count": 5,
-        "contains_pii": true
-      },
-      "success": true,
-      "timestamp": "2025-09-22T20:13:05.018540",
-      "type": "pseudonymize",
-      "request_id": "5d14609c70c050bc6636",
-      "original_text": "안녕하세요 전명환씨, 저는 이번 회의 담당자입니다.\r\n흔쾌히 응해주셔서 감사합니다.\r\n추후 회의 일정은 아래의 이메일로 보내드리겠습니다.\r\n감사합니다.\r\n\r\n오준석 대리\r\njunseok124@gmail.com, 010-2481-2488",
-      "detected_items": 5,
+      "request_id": "eaa8ecc2b57ff14acd1b",
+      "original_text": "{\"counters\":[{\"namespace\":\"default\",\"metric\":\"chatgpt_web_interrupt_token_exists\",\"tags\":{\"has_conduit_token\":\"true\"},\"value\":1},{\"namespace\":\"default\",\"metric\":\"completion_request\",\"tags\":{},\"value\":1},{\"namespace\":\"default\",\"metric\":\"conduit_f_conversation_api.success\",\"tags\":{\"prepare_sent\":\"true\",\"prepare_succeeded\":\"false\",\"prepare_failed\":\"false\"},\"value\":1}],\"histograms\":[{\"namespace\":\"default\",\"metric\":\"chatgpt_web_interrupt_token_latency\",\"tags\":{},\"values\":[10825.099999904633]},{\"namespace\":\"default\",\"metric\":\"completion_request_time\",\"tags\":{},\"values\":[10949.200000047684]}],\"client_type\":\"web\"}",
+      "detected_items": 0,
       "mode": "modular"
     }
   ]
