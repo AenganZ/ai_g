@@ -2300,6 +2300,1061 @@
       "detected_items": 0,
       "mode": "file_based_restore",
       "total_processing_time": 0.061034440994262695
+    },
+    {
+      "time": "2025-09-23 19:46:10",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "request_id": "cdfbc3c3656f55618dc2",
+      "input": {
+        "id": "cdfbc3c3656f55618dc2",
+        "prompt": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요."
+      },
+      "output": {
+        "pseudonymized_text": "김가명 고객님, 서울 예약이 확인되었습니다. 문의사항은 010-0000-0000로 연락 주세요.",
+        "detection": {
+          "items": [
+            {
+              "type": "전화번호",
+              "value": "010-9876-5432",
+              "source": "normalizers-전화번호",
+              "confidence": 0.95
+            },
+            {
+              "type": "이름",
+              "value": "김철수",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "주소",
+              "value": "부산 해운대구",
+              "source": "normalizers-주소",
+              "confidence": 0.95
+            },
+            {
+              "type": "주소",
+              "value": "부산",
+              "source": "NER-보완",
+              "confidence": 0.9997935891151428
+            },
+            {
+              "type": "주소",
+              "value": "해운대구",
+              "source": "NER-보완",
+              "confidence": 0.9999997615814209
+            },
+            {
+              "type": "전화번호",
+              "value": "010- 9876 - 5432로",
+              "source": "NER-보완",
+              "confidence": 0.9999997615814209
+            }
+          ],
+          "count": 6,
+          "contains_pii": true
+        },
+        "processing_time": 1.550736904144287,
+        "reverse_map": {
+          "서울": "부산 해운대구",
+          "김가명": "김철수",
+          "010-0000-0000": "010-9876-5432"
+        }
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "전화번호",
+            "value": "010-9876-5432",
+            "token": "010-0000-0000",
+            "source": "normalizers-전화번호",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "김철수",
+            "token": "김가명",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "부산 해운대구",
+            "token": "서울",
+            "source": "normalizers-주소",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "부산",
+            "token": "부산",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "해운대구",
+            "token": "대구",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "전화번호",
+            "value": "010- 9876 - 5432로",
+            "token": "010-0000-0001",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 6,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-23T19:46:10.169496",
+      "type": "pseudonymize",
+      "original_text": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요.",
+      "detected_items": 6,
+      "mode": "file_based_restore",
+      "total_processing_time": 1.550736904144287
+    },
+    {
+      "time": "2025-09-23 19:46:37",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "request_id": "09fbb006b4245ee2ff7c",
+      "input": {
+        "id": "09fbb006b4245ee2ff7c",
+        "prompt": "내 이름이 뭐라고?"
+      },
+      "output": {
+        "pseudonymized_text": "내 이름이 뭐라고?",
+        "detection": {
+          "items": [],
+          "count": 0,
+          "contains_pii": false
+        },
+        "processing_time": 0.0632476806640625,
+        "reverse_map": {}
+      },
+      "detection": {
+        "items": [],
+        "count": 0,
+        "contains_pii": false
+      },
+      "success": true,
+      "timestamp": "2025-09-23T19:46:37.458835",
+      "type": "pseudonymize",
+      "original_text": "내 이름이 뭐라고?",
+      "detected_items": 0,
+      "mode": "file_based_restore",
+      "total_processing_time": 0.06424927711486816
+    },
+    {
+      "time": "2025-09-23 19:49:33",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "request_id": "857e90488cb5243a4a55",
+      "input": {
+        "id": "857e90488cb5243a4a55",
+        "prompt": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요."
+      },
+      "output": {
+        "pseudonymized_text": "이가명 고객님, 인천 예약이 확인되었습니다. 문의사항은 010-0000-0002로 연락 주세요.",
+        "detection": {
+          "items": [
+            {
+              "type": "전화번호",
+              "value": "010-9876-5432",
+              "source": "normalizers-전화번호",
+              "confidence": 0.95
+            },
+            {
+              "type": "이름",
+              "value": "김철수",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "주소",
+              "value": "부산 해운대구",
+              "source": "normalizers-주소",
+              "confidence": 0.95
+            },
+            {
+              "type": "주소",
+              "value": "부산",
+              "source": "NER-보완",
+              "confidence": 0.9997935891151428
+            },
+            {
+              "type": "주소",
+              "value": "해운대구",
+              "source": "NER-보완",
+              "confidence": 0.9999997615814209
+            },
+            {
+              "type": "전화번호",
+              "value": "010- 9876 - 5432로",
+              "source": "NER-보완",
+              "confidence": 0.9999997615814209
+            }
+          ],
+          "count": 6,
+          "contains_pii": true
+        },
+        "processing_time": 0.0689854621887207,
+        "reverse_map": {
+          "인천": "부산 해운대구",
+          "이가명": "김철수",
+          "010-0000-0002": "010-9876-5432"
+        }
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "전화번호",
+            "value": "010-9876-5432",
+            "token": "010-0000-0002",
+            "source": "normalizers-전화번호",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "김철수",
+            "token": "이가명",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "부산 해운대구",
+            "token": "인천",
+            "source": "normalizers-주소",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "부산",
+            "token": "광주",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "해운대구",
+            "token": "대전",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "전화번호",
+            "value": "010- 9876 - 5432로",
+            "token": "010-0000-0003",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 6,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-23T19:49:33.320559",
+      "type": "pseudonymize",
+      "original_text": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요.",
+      "detected_items": 6,
+      "mode": "file_based_restore",
+      "total_processing_time": 0.0689854621887207
+    },
+    {
+      "time": "2025-09-23 19:49:51",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "request_id": "3898afa598ff4f6be86e",
+      "input": {
+        "id": "3898afa598ff4f6be86e",
+        "prompt": "내 이름이 뭐라고?"
+      },
+      "output": {
+        "pseudonymized_text": "내 이름이 뭐라고?",
+        "detection": {
+          "items": [],
+          "count": 0,
+          "contains_pii": false
+        },
+        "processing_time": 0.07711434364318848,
+        "reverse_map": {}
+      },
+      "detection": {
+        "items": [],
+        "count": 0,
+        "contains_pii": false
+      },
+      "success": true,
+      "timestamp": "2025-09-23T19:49:51.769614",
+      "type": "pseudonymize",
+      "original_text": "내 이름이 뭐라고?",
+      "detected_items": 0,
+      "mode": "file_based_restore",
+      "total_processing_time": 0.07711434364318848
+    },
+    {
+      "time": "2025-09-23 19:50:06",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "request_id": "fe1773374a7d676b6e5b",
+      "input": {
+        "id": "fe1773374a7d676b6e5b",
+        "prompt": "너 뭐해"
+      },
+      "output": {
+        "pseudonymized_text": "너 뭐해",
+        "detection": {
+          "items": [],
+          "count": 0,
+          "contains_pii": false
+        },
+        "processing_time": 0.04295659065246582,
+        "reverse_map": {}
+      },
+      "detection": {
+        "items": [],
+        "count": 0,
+        "contains_pii": false
+      },
+      "success": true,
+      "timestamp": "2025-09-23T19:50:06.546179",
+      "type": "pseudonymize",
+      "original_text": "너 뭐해",
+      "detected_items": 0,
+      "mode": "file_based_restore",
+      "total_processing_time": 0.04394960403442383
+    },
+    {
+      "time": "2025-09-23 19:50:59",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "request_id": "debug_test_1758624659228",
+      "input": {
+        "id": "debug_test_1758624659228",
+        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다."
+      },
+      "output": {
+        "pseudonymized_text": "박무명님 25세, 울산 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
+        "detection": {
+          "items": [
+            {
+              "type": "이름",
+              "value": "이영희님",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "주소",
+              "value": "대구 중구",
+              "source": "normalizers-주소",
+              "confidence": 0.95
+            },
+            {
+              "type": "나이",
+              "value": "25",
+              "source": "normalizers-나이",
+              "confidence": 1.0
+            },
+            {
+              "type": "주소",
+              "value": "대구",
+              "source": "NER-보완",
+              "confidence": 0.9999872446060181
+            },
+            {
+              "type": "주소",
+              "value": "중구",
+              "source": "NER-보완",
+              "confidence": 0.9999650716781616
+            }
+          ],
+          "count": 5,
+          "contains_pii": true
+        },
+        "processing_time": 0.056162118911743164,
+        "reverse_map": {
+          "울산": "대구 중구",
+          "박무명": "이영희",
+          "박무명님": "이영희님"
+        }
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "이름",
+            "value": "이영희님",
+            "token": "박무명님",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구 중구",
+            "token": "울산",
+            "source": "normalizers-주소",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "나이",
+            "value": "25",
+            "token": "25",
+            "source": "normalizers-나이",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구",
+            "token": "세종",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "중구",
+            "token": "경기",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 5,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-23T19:50:59.290000",
+      "type": "pseudonymize",
+      "original_text": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
+      "detected_items": 5,
+      "mode": "file_based_restore",
+      "total_processing_time": 0.057169437408447266
+    },
+    {
+      "time": "2025-09-23 19:51:25",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "request_id": "debug_test_1758624685020",
+      "input": {
+        "id": "debug_test_1758624685020",
+        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다."
+      },
+      "output": {
+        "pseudonymized_text": "최가명님 30세, 강원 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
+        "detection": {
+          "items": [
+            {
+              "type": "이름",
+              "value": "이영희님",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "주소",
+              "value": "대구 중구",
+              "source": "normalizers-주소",
+              "confidence": 0.95
+            },
+            {
+              "type": "나이",
+              "value": "25",
+              "source": "normalizers-나이",
+              "confidence": 1.0
+            },
+            {
+              "type": "주소",
+              "value": "대구",
+              "source": "NER-보완",
+              "confidence": 0.9999872446060181
+            },
+            {
+              "type": "주소",
+              "value": "중구",
+              "source": "NER-보완",
+              "confidence": 0.9999650716781616
+            }
+          ],
+          "count": 5,
+          "contains_pii": true
+        },
+        "processing_time": 0.05933403968811035,
+        "reverse_map": {
+          "강원": "대구 중구",
+          "최가명": "이영희",
+          "최가명님": "이영희님",
+          "30": "25"
+        }
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "이름",
+            "value": "이영희님",
+            "token": "최가명님",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구 중구",
+            "token": "강원",
+            "source": "normalizers-주소",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "나이",
+            "value": "25",
+            "token": "30",
+            "source": "normalizers-나이",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구",
+            "token": "충북",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "중구",
+            "token": "충남",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 5,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-23T19:51:25.083405",
+      "type": "pseudonymize",
+      "original_text": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
+      "detected_items": 5,
+      "mode": "file_based_restore",
+      "total_processing_time": 0.05933403968811035
+    },
+    {
+      "time": "2025-09-23 19:56:57",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "request_id": "debug_test_1758625015952",
+      "input": {
+        "id": "debug_test_1758625015952",
+        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다."
+      },
+      "output": {
+        "pseudonymized_text": "김가명님 29세, 서울 거주하시는 분이시죠? user001@example.com으로 메일 보내드렸습니다.",
+        "detection": {
+          "items": [
+            {
+              "type": "이메일",
+              "value": "contact@example.com",
+              "source": "normalizers-이메일-패턴1",
+              "confidence": 0.95
+            },
+            {
+              "type": "이름",
+              "value": "이영희님",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "주소",
+              "value": "대구 중구",
+              "source": "normalizers-주소",
+              "confidence": 0.95
+            },
+            {
+              "type": "나이",
+              "value": "25",
+              "source": "normalizers-나이",
+              "confidence": 1.0
+            },
+            {
+              "type": "주소",
+              "value": "대구",
+              "source": "NER-보완",
+              "confidence": 0.9999872446060181
+            },
+            {
+              "type": "주소",
+              "value": "중구",
+              "source": "NER-보완",
+              "confidence": 0.9999650716781616
+            }
+          ],
+          "count": 6,
+          "contains_pii": true
+        },
+        "processing_time": 1.88814377784729,
+        "reverse_map": {
+          "서울": "대구 중구",
+          "김가명": "이영희",
+          "김가명님": "이영희님",
+          "user001@example.com": "contact@example.com",
+          "29": "25"
+        }
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "이메일",
+            "value": "contact@example.com",
+            "token": "user001@example.com",
+            "source": "normalizers-이메일-패턴1",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "이영희님",
+            "token": "김가명님",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구 중구",
+            "token": "서울",
+            "source": "normalizers-주소",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "나이",
+            "value": "25",
+            "token": "29",
+            "source": "normalizers-나이",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구",
+            "token": "부산",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "중구",
+            "token": "대구",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 6,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-23T19:56:57.844376",
+      "type": "pseudonymize",
+      "original_text": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
+      "detected_items": 6,
+      "mode": "file_based_restore",
+      "total_processing_time": 1.88814377784729
+    },
+    {
+      "time": "2025-09-23 19:58:15",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "request_id": "891948bd2a313cdf1218",
+      "input": {
+        "id": "891948bd2a313cdf1218",
+        "prompt": "안녕하세요, 저는 김수한이고, 수원 옆에있는 서울에 살고 있습니다. 제 전화번호는 010-2940-4928이고, 제 전화번호에 문자메시지 남겨주시면 무료 쿠폰 드리겠습니다. thank42@gmail.com"
+      },
+      "output": {
+        "pseudonymized_text": "안녕하세요, 저는 이가명고, 광주 옆에있는 인천에 살고 있습니다. 제 전화번호는 010-0000-0000이고, 제 전화번호에 문자메시지 남겨주시면 무료 쿠폰 드리겠습니다. user002@test.co.kr",
+        "detection": {
+          "items": [
+            {
+              "type": "이메일",
+              "value": "thank42@gmail.com",
+              "source": "normalizers-이메일-패턴1",
+              "confidence": 0.95
+            },
+            {
+              "type": "전화번호",
+              "value": "010-2940-4928",
+              "source": "normalizers-전화번호",
+              "confidence": 0.95
+            },
+            {
+              "type": "이름",
+              "value": "김수한이",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "주소",
+              "value": "서울",
+              "source": "normalizers-주소",
+              "confidence": 0.8
+            },
+            {
+              "type": "주소",
+              "value": "수원",
+              "source": "NER-보완",
+              "confidence": 0.9999489784240723
+            },
+            {
+              "type": "전화번호",
+              "value": "010- 2940 -",
+              "source": "NER-보완",
+              "confidence": 0.9999077320098877
+            }
+          ],
+          "count": 6,
+          "contains_pii": true
+        },
+        "processing_time": 0.0952599048614502,
+        "reverse_map": {
+          "인천": "서울",
+          "광주": "수원",
+          "이가명": "김수한이",
+          "user002@test.co.kr": "thank42@gmail.com",
+          "010-0000-0000": "010-2940-4928"
+        }
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "이메일",
+            "value": "thank42@gmail.com",
+            "token": "user002@test.co.kr",
+            "source": "normalizers-이메일-패턴1",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "전화번호",
+            "value": "010-2940-4928",
+            "token": "010-0000-0000",
+            "source": "normalizers-전화번호",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "김수한이",
+            "token": "이가명",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "서울",
+            "token": "인천",
+            "source": "normalizers-주소",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "수원",
+            "token": "광주",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "전화번호",
+            "value": "010- 2940 -",
+            "token": "010-0000-0001",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 6,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-23T19:58:15.342671",
+      "type": "pseudonymize",
+      "original_text": "안녕하세요, 저는 김수한이고, 수원 옆에있는 서울에 살고 있습니다. 제 전화번호는 010-2940-4928이고, 제 전화번호에 문자메시지 남겨주시면 무료 쿠폰 드리겠습니다. thank42@gmail.com",
+      "detected_items": 6,
+      "mode": "file_based_restore",
+      "total_processing_time": 0.09627914428710938
+    },
+    {
+      "time": "2025-09-23 19:58:35",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "request_id": "b15069c7e843d109077d",
+      "input": {
+        "id": "b15069c7e843d109077d",
+        "prompt": "내 이름이 뭐라고?"
+      },
+      "output": {
+        "pseudonymized_text": "내 이름이 뭐라고?",
+        "detection": {
+          "items": [],
+          "count": 0,
+          "contains_pii": false
+        },
+        "processing_time": 0.07256531715393066,
+        "reverse_map": {}
+      },
+      "detection": {
+        "items": [],
+        "count": 0,
+        "contains_pii": false
+      },
+      "success": true,
+      "timestamp": "2025-09-23T19:58:35.387098",
+      "type": "pseudonymize",
+      "original_text": "내 이름이 뭐라고?",
+      "detected_items": 0,
+      "mode": "file_based_restore",
+      "total_processing_time": 0.07457423210144043
+    },
+    {
+      "time": "2025-09-23 19:59:46",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "request_id": "9a30126693c3b6ff1737",
+      "input": {
+        "id": "9a30126693c3b6ff1737",
+        "prompt": "나 오수민인데, 세아야 010-2472-2178로 전화줘! 집으로와 대전 중구 태평동이야."
+      },
+      "output": {
+        "pseudonymized_text": "나 오수민인데, 세아야 010-0000-0002로 전화줘! 집으로와 울산 태평동이야.",
+        "detection": {
+          "items": [
+            {
+              "type": "전화번호",
+              "value": "010-2472-2178",
+              "source": "normalizers-전화번호",
+              "confidence": 0.95
+            },
+            {
+              "type": "주소",
+              "value": "대전 중구",
+              "source": "normalizers-주소",
+              "confidence": 0.95
+            },
+            {
+              "type": "전화번호",
+              "value": "010- 2472 - 2178로",
+              "source": "NER-보완",
+              "confidence": 0.9999983310699463
+            },
+            {
+              "type": "주소",
+              "value": "대전",
+              "source": "NER-보완",
+              "confidence": 0.9997101426124573
+            },
+            {
+              "type": "주소",
+              "value": "중구",
+              "source": "NER-보완",
+              "confidence": 0.9999858140945435
+            }
+          ],
+          "count": 5,
+          "contains_pii": true
+        },
+        "processing_time": 0.07411980628967285,
+        "reverse_map": {
+          "울산": "대전",
+          "010-0000-0002": "010-2472-2178"
+        }
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "전화번호",
+            "value": "010-2472-2178",
+            "token": "010-0000-0002",
+            "source": "normalizers-전화번호",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대전 중구",
+            "token": "대전",
+            "source": "normalizers-주소",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "전화번호",
+            "value": "010- 2472 - 2178로",
+            "token": "010-0000-0003",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대전",
+            "token": "울산",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "중구",
+            "token": "세종",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 5,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-23T19:59:46.316699",
+      "type": "pseudonymize",
+      "original_text": "나 오수민인데, 세아야 010-2472-2178로 전화줘! 집으로와 대전 중구 태평동이야.",
+      "detected_items": 5,
+      "mode": "file_based_restore",
+      "total_processing_time": 0.07411980628967285
+    },
+    {
+      "time": "2025-09-23 22:33:55",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "request_id": "b6654bcac5c02fe07b9e",
+      "input": {
+        "id": "b6654bcac5c02fe07b9e",
+        "prompt": "나 오수민인데, 세아야 01041241042로 전화줘! 집으로와 대전 태평동이야."
+      },
+      "output": {
+        "pseudonymized_text": "나 김가명인데, 세아야 01041241042로 전화줘! 집으로와 서울 태평동이야.",
+        "detection": {
+          "items": [
+            {
+              "type": "전화번호",
+              "value": "010-4124-1042",
+              "source": "normalizers-전화번호",
+              "confidence": 0.95
+            },
+            {
+              "type": "이름",
+              "value": "오수민",
+              "source": "normalizers-이름패턴-9",
+              "confidence": 0.85
+            },
+            {
+              "type": "주소",
+              "value": "대전",
+              "source": "NER-보완",
+              "confidence": 0.9998840093612671
+            }
+          ],
+          "count": 3,
+          "contains_pii": true
+        },
+        "processing_time": 1.7567782402038574,
+        "reverse_map": {
+          "서울": "대전",
+          "김가명": "오수민"
+        }
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "전화번호",
+            "value": "010-4124-1042",
+            "token": "010-0000-0000",
+            "source": "normalizers-전화번호",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "오수민",
+            "token": "김가명",
+            "source": "normalizers-이름패턴-9",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대전",
+            "token": "서울",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 3,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-23T22:33:55.142139",
+      "type": "pseudonymize",
+      "original_text": "나 오수민인데, 세아야 01041241042로 전화줘! 집으로와 대전 태평동이야.",
+      "detected_items": 3,
+      "mode": "file_based_restore",
+      "total_processing_time": 1.7577776908874512
+    },
+    {
+      "time": "2025-09-23 22:34:29",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "request_id": "75b79d131b7a3edd1a97",
+      "input": {
+        "id": "75b79d131b7a3edd1a97",
+        "prompt": "내 이름이 뭐게?"
+      },
+      "output": {
+        "pseudonymized_text": "내 이름이 뭐게?",
+        "detection": {
+          "items": [],
+          "count": 0,
+          "contains_pii": false
+        },
+        "processing_time": 0.06024503707885742,
+        "reverse_map": {}
+      },
+      "detection": {
+        "items": [],
+        "count": 0,
+        "contains_pii": false
+      },
+      "success": true,
+      "timestamp": "2025-09-23T22:34:29.727487",
+      "type": "pseudonymize",
+      "original_text": "내 이름이 뭐게?",
+      "detected_items": 0,
+      "mode": "file_based_restore",
+      "total_processing_time": 0.06024503707885742
     }
   ]
 }

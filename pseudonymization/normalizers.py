@@ -1,26 +1,47 @@
-# pseudonymization/normalizers.py - 탐지 + 정규화 통합 모듈 (조사 처리 강화)
+# pseudonymization/normalizers.py - 이름/주소 탐지 강화 버전
 import re
 import asyncio
 from typing import Optional, Dict, List, Any
 
-# 정규식 패턴들
-EMAIL_RX = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b")
+# ⭐ 강화된 이메일 정규식 패턴들
+EMAIL_PATTERNS = [
+    # 기본 패턴 (단어 경계 없음)
+    re.compile(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'),
+    # 한국어 텍스트 내 이메일 패턴
+    re.compile(r'[A-Za-z0-9][A-Za-z0-9._%+-]*@[A-Za-z0-9][A-Za-z0-9.-]*\.[A-Za-z]{2,}'),
+    # 공백으로 분리된 이메일 복원 패턴
+    re.compile(r'[A-Za-z0-9._%+-]+\s*@\s*[A-Za-z0-9.-]+\s*\.\s*[A-Za-z]{2,}'),
+]
+
 AGE_RX = re.compile(r"\b(\d{1,3})\s*(?:세|살)?\b")
 PHONE_NUM_ONLY = re.compile(r"\D+")
 PHONE_PATTERN = re.compile(r'010[-\s]?\d{4}[-\s]?\d{4}')
 
-# ⭐ 개선된 이름 탐지 패턴 (조사 처리 강화)
+# ⭐⭐⭐ 대폭 강화된 이름 탐지 패턴 ⭐⭐⭐
 NAME_PATTERNS = [
+    # 기존 패턴들
     re.compile(r'이름은\s*([가-힣]{2,4})(님|씨)?(?![가-힣])'),
     re.compile(r'저는\s*([가-힣]{2,4})(님|씨)?(?![가-힣])'),
     re.compile(r'([가-힣]{2,4})(님|씨)?\s*입니다'),
     re.compile(r'([가-힣]{2,4})(이에요|예요|이야|야)'),
     re.compile(r'([가-힣]{2,4})(님|씨)(?![가-힣])'),
     re.compile(r'안녕하세요,?\s*(?:저는\s*)?([가-힣]{2,4})(님|씨)?'),
-    re.compile(r'([가-힣]{2,4})(님|씨)?\s*고'),
-    re.compile(r'([가-힣]{2,4})(님|씨)?\s*라고\s*합니다'),
     re.compile(r'([가-힣]{2,4})(님|씨)?\s*고객'),
     re.compile(r'([가-힣]{2,4})(님|씨)?\s*회원'),
+    
+    # ⭐ 새로 추가된 강화 패턴들 ⭐
+    re.compile(r'나\s*([가-힣]{2,4})인데'),           # "나 오수민인데"
+    re.compile(r'([가-힣]{2,4})이고(?![가-힣])'),     # "김수한이고" (조사 "이고")
+    re.compile(r'([가-힣]{2,4})라고\s*(?:합니다|해요|불러)'),  # "김철수라고 합니다"
+    re.compile(r'([가-힣]{2,4})(?=\s*(?:이|가)\s*(?:말했다|했다|왔다|갔다|있다))'),  # "김철수가 왔다"
+    re.compile(r'([가-힣]{2,4})(?=\s*(?:은|는)\s*(?:학생|직장인|의사|선생))'),  # "김철수는 학생"
+    re.compile(r'([가-힣]{2,4})(?=\s*(?:을|를)\s*(?:만났다|봤다|찾아))'),      # "김철수를 만났다"
+    re.compile(r'([가-힣]{2,4})(?=\s*(?:에게|한테)\s*(?:말했다|줬다|전화))'),   # "김철수에게 전화"
+    re.compile(r'([가-힣]{2,4})\s*(?:씨|님)\s*(?:이|가)'),                   # "김철수씨가"
+    re.compile(r'제\s*이름은\s*([가-힣]{2,4})'),                            # "제 이름은 김철수"
+    re.compile(r'내\s*이름은\s*([가-힣]{2,4})'),                            # "내 이름은 김철수"
+    re.compile(r'([가-힣]{2,4})\s*(?:라는|이라는)\s*(?:이름|사람)'),            # "김철수라는 이름"
+    re.compile(r'([가-힣]{2,4})\s*(?:이라고|라고)\s*(?:하는데|해서)'),           # "김철수라고 해서"
 ]
 
 # NER 모델 import (선택적)
@@ -61,7 +82,7 @@ def smart_clean_korean_text(text: str, preserve_context: bool = True) -> str:
     return cleaned
 
 def is_valid_korean_name(name: str, include_honorifics: bool = True) -> bool:
-    """한국어 이름 유효성 검증 (존칭 포함 옵션)"""
+    """한국어 이름 유효성 검증 (존칭 포함 옵션) - 강화"""
     pools = get_pools()
     
     if not name or len(name) < 2 or len(name) > 5:  # 존칭 포함하면 최대 5글자
@@ -102,15 +123,22 @@ def is_valid_korean_name(name: str, include_honorifics: bool = True) -> bool:
         "이번", "다음", "저번", "처음", "마지막", "첫째", "둘째", "셋째",
         "오늘", "어제", "내일", "지금", "나중", "앞서", "이후", "이전",
         "그분", "이분", "저분", "누군가", "아무나", "모든", "각자", "서로",
-        "혼자", "함께", "같이", "따로", "별도", "개별", "공동", "전체"
+        "혼자", "함께", "같이", "따로", "별도", "개별", "공동", "전체",
+        # ⭐ 추가 제외 단어들
+        "뭐라", "세아", "태평", "동이"
     }
     
     if base_name in common_nouns:
         return False
     
-    # 지역명 제외
+    # 지역명 제외 (강화)
+    pools = get_pools()
     all_regions = set(pools.provinces + pools.cities + pools.roads)
     if base_name in all_regions:
+        return False
+    
+    # ⭐ 동명(洞名) 패턴 제외 (태평동, 신정동 등)
+    if base_name.endswith('동') and len(base_name) >= 3:
         return False
     
     # 한국어 성씨 확인 (선택적 강화)
@@ -129,18 +157,72 @@ def is_valid_korean_name(name: str, include_honorifics: bool = True) -> bool:
 # ===== PII 탐지 함수들 (강화됨) =====
 
 def detect_emails(text: str) -> List[Dict[str, Any]]:
-    """이메일 탐지"""
+    """⭐ 강화된 이메일 탐지"""
     items = []
-    for match in EMAIL_RX.finditer(text):
-        email = match.group()
-        items.append({
-            "type": "이메일",
-            "value": email,
-            "start": match.start(),
-            "end": match.end(),
-            "confidence": 0.95,
-            "source": "normalizers-이메일"
-        })
+    seen_emails = set()
+    
+    print(f"📧 강화된 이메일 탐지 시작: '{text}'")
+    
+    # 1단계: 여러 패턴으로 이메일 탐지
+    for i, pattern in enumerate(EMAIL_PATTERNS):
+        print(f"  패턴 {i+1} 시도: {pattern.pattern}")
+        for match in pattern.finditer(text):
+            raw_email = match.group()
+            
+            # 공백 제거하여 정규화
+            clean_email = re.sub(r'\s+', '', raw_email)
+            
+            print(f"    발견: '{raw_email}' → 정리: '{clean_email}'")
+            
+            # 기본 이메일 유효성 검사
+            if '@' in clean_email and '.' in clean_email.split('@')[1]:
+                email_parts = clean_email.split('@')
+                if len(email_parts) == 2 and len(email_parts[0]) > 0 and len(email_parts[1]) > 2:
+                    if clean_email not in seen_emails:
+                        seen_emails.add(clean_email)
+                        
+                        items.append({
+                            "type": "이메일",
+                            "value": clean_email.lower(),  # 소문자로 정규화
+                            "start": match.start(),
+                            "end": match.end(),
+                            "confidence": 0.95,
+                            "source": f"normalizers-이메일-패턴{i+1}",
+                            "original_match": raw_email
+                        })
+                        print(f"    ✅ 이메일 추가: '{clean_email.lower()}'")
+                    else:
+                        print(f"    🔄 중복 이메일: '{clean_email}'")
+            else:
+                print(f"    ❌ 유효하지 않은 이메일: '{clean_email}'")
+    
+    # 2단계: 특수 한국어 패턴 (이메일 키워드 포함)
+    email_context_patterns = [
+        r'([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})(?:으?로|에게|를|을)?\s*(?:메일|이메일|메시지|연락)',
+        r'(?:메일|이메일|연락)\s*(?:은|는|을|를)?\s*([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})',
+        r'([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})(?:으?로|에|를)\s*(?:보내|전송|발송)'
+    ]
+    
+    for i, pattern in enumerate(email_context_patterns):
+        print(f"  컨텍스트 패턴 {i+1} 시도...")
+        for match in re.finditer(pattern, text, re.IGNORECASE):
+            email = match.group(1).lower()
+            print(f"    컨텍스트 발견: '{email}'")
+            
+            if email not in seen_emails:
+                seen_emails.add(email)
+                items.append({
+                    "type": "이메일",
+                    "value": email,
+                    "start": match.start(1),
+                    "end": match.end(1),
+                    "confidence": 0.90,
+                    "source": f"normalizers-이메일-컨텍스트{i+1}",
+                    "original_match": match.group()
+                })
+                print(f"    ✅ 컨텍스트 이메일 추가: '{email}'")
+    
+    print(f"📧 강화된 이메일 탐지 완료: {len(items)}개")
     return items
 
 def detect_phones(text: str) -> List[Dict[str, Any]]:
@@ -201,23 +283,29 @@ def detect_ages(text: str) -> List[Dict[str, Any]]:
     return items
 
 def detect_names(text: str) -> List[Dict[str, Any]]:
-    """이름 탐지 (존칭 포함 강화)"""
+    """⭐⭐⭐ 대폭 강화된 이름 탐지 ⭐⭐⭐"""
     items = []
     detected_names = set()
     
-    print(f"🔍 강화된 이름 탐지 시작: '{text}'")
+    print(f"🔍 대폭 강화된 이름 탐지 시작: '{text}'")
     
-    # 1. 패턴 기반 탐지 (존칭 포함)
+    # 1. 패턴 기반 탐지 (대폭 확장됨)
     for i, pattern in enumerate(NAME_PATTERNS):
         for match in pattern.finditer(text):
             # 그룹 1: 이름, 그룹 2: 존칭 (옵션)
             base_name = match.group(1)
-            honorific = match.group(2) if match.lastindex > 1 and match.group(2) else ""
+            
+            # ⭐ 그룹 2가 있는 경우와 없는 경우 처리
+            try:
+                honorific = match.group(2) if match.lastindex > 1 and match.group(2) else ""
+            except IndexError:
+                honorific = ""
+            
             full_name = base_name + (honorific or "")
             
             print(f"  패턴 {i+1}: '{base_name}' + '{honorific}' = '{full_name}'")
             
-            # ⭐ 기본 이름으로 유효성 검사
+            # ⭐ 기본 이름으로 유효성 검사 (강화됨)
             if not is_valid_korean_name(base_name, include_honorifics=False):
                 print(f"    ❌ 유효하지 않은 기본 이름: '{base_name}'")
                 continue
@@ -241,13 +329,13 @@ def detect_names(text: str) -> List[Dict[str, Any]]:
                 "start": match.start(1),
                 "end": match.end(),
                 "confidence": 0.85,
-                "source": "normalizers-이름패턴",
+                "source": f"normalizers-이름패턴-{i+1}",
                 "has_honorific": bool(honorific),
                 "base_name": base_name,
                 "honorific": honorific
             })
             detected_names.add(base_name)  # 기본 이름으로 중복 체크
-            print(f"    ✅ 이름 탐지: '{final_name}' (기본: '{base_name}', 존칭: '{honorific}')")
+            print(f"    ✅ 이름 탐지: '{final_name}' (패턴 {i+1}: 기본 '{base_name}', 존칭 '{honorific}')")
     
     # 2. 실명 목록 기반 탐지 (존칭 포함)
     pools = get_pools()
@@ -284,16 +372,16 @@ def detect_names(text: str) -> List[Dict[str, Any]]:
             detected_names.add(real_name)
             print(f"  ✅ 실명 목록: '{full_name}' (기본: '{real_name}')")
     
-    print(f"🔍 강화된 이름 탐지 완료: {len(items)}개")
+    print(f"🔍 대폭 강화된 이름 탐지 완료: {len(items)}개")
     return items
 
 def detect_addresses(text: str) -> List[Dict[str, Any]]:
-    """주소 탐지 (조사 처리 강화)"""
+    """⭐ 주소 탐지 강화 (중복 제거 개선)"""
     items = []
     pools = get_pools()
     all_addresses = []
     
-    print(f"🏠 주소 탐지 시작: '{text}'")
+    print(f"🏠 강화된 주소 탐지 시작: '{text}'")
     
     # 1. 복합 주소 패턴 (조사 포함 버전)
     for province in pools.provinces:
@@ -318,12 +406,13 @@ def detect_addresses(text: str) -> List[Dict[str, Any]]:
                     "start": match.start(),
                     "end": match.end(),
                     "confidence": 0.95,
-                    "priority": 1,
-                    "has_particle": full_match != clean_match
+                    "priority": 1,  # ⭐ 복합 주소가 최우선
+                    "has_particle": full_match != clean_match,
+                    "is_complex": True  # ⭐ 복합 주소 플래그
                 })
     
-    # 2. 단일 주소 패턴
-    if not all_addresses:
+    # 2. 단일 주소 패턴 (복합 주소가 없을 때만)
+    if not all_addresses:  # ⭐ 복합 주소가 이미 있으면 단일 주소는 스킵
         for province in pools.provinces:
             pattern = rf'{re.escape(province)}(?:시|도)?(?:에서|에|로|으로)?'
             for match in re.finditer(pattern, text):
@@ -346,39 +435,80 @@ def detect_addresses(text: str) -> List[Dict[str, Any]]:
                         "end": match.end(),
                         "confidence": 0.80,
                         "priority": 2,
-                        "has_particle": full_match != clean_match
+                        "has_particle": full_match != clean_match,
+                        "is_complex": False
                     })
     
-    # 3. ⭐ 각 주소를 개별적으로 반환 (1:1 매핑을 위해)
+    # 3. ⭐ 주소 중복 제거 및 우선순위 처리
     all_addresses.sort(key=lambda x: (x["priority"], x["start"]))
-    for addr in all_addresses:
-        items.append({
-            "type": "주소",
-            "value": addr["value"],  # 정리된 주소
-            "start": addr["start"],
-            "end": addr["end"],
-            "confidence": addr["confidence"],
-            "source": "normalizers-주소",
-            "original_match": addr["original_match"],
-            "has_particle": addr["has_particle"]
-        })
-        print(f"  ✅ 주소: '{addr['value']}' (원본: '{addr['original_match']}')")
     
-    print(f"🏠 주소 탐지 완료: {len(items)}개")
+    # 복합 주소가 있으면 그 구성요소인 단일 주소들 제외
+    complex_addresses = [addr for addr in all_addresses if addr.get("is_complex", False)]
+    if complex_addresses:
+        print(f"  🔍 복합 주소 발견: {len(complex_addresses)}개 - 구성요소 제외 처리")
+        
+        # 복합 주소만 사용
+        for addr in complex_addresses:
+            items.append({
+                "type": "주소",
+                "value": addr["value"],  # 정리된 주소
+                "start": addr["start"],
+                "end": addr["end"],
+                "confidence": addr["confidence"],
+                "source": "normalizers-주소-복합",
+                "original_match": addr["original_match"],
+                "has_particle": addr["has_particle"]
+            })
+            print(f"  ✅ 복합 주소: '{addr['value']}' (원본: '{addr['original_match']}')")
+    else:
+        print(f"  🔍 복합 주소 없음 - 개별 주소 사용")
+        # 복합 주소가 없을 때만 개별 주소 사용
+        for addr in all_addresses:
+            items.append({
+                "type": "주소",
+                "value": addr["value"],  # 정리된 주소
+                "start": addr["start"],
+                "end": addr["end"],
+                "confidence": addr["confidence"],
+                "source": "normalizers-주소-개별",
+                "original_match": addr["original_match"],
+                "has_particle": addr["has_particle"]
+            })
+            print(f"  ✅ 개별 주소: '{addr['value']}' (원본: '{addr['original_match']}')")
+    
+    print(f"🏠 강화된 주소 탐지 완료: {len(items)}개")
     return items
 
 def detect_with_ner_supplement(text: str, existing_items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """NER 모델 보완 탐지 (존칭 처리 강화)"""
+    """NER 모델 보완 탐지 (중복 제거 강화)"""
     if not NER_AVAILABLE:
         return []
     
     try:
         existing_values = set()
+        existing_complex_addresses = set()
+        
         for item in existing_items:
             # 기본 이름과 존칭 포함 이름 모두 기록
-            base_value = item.get("base_name", item["value"])
-            existing_values.add(base_value)
-            existing_values.add(item["value"])
+            if item["type"] == "이름":
+                base_value = item.get("base_name", item["value"])
+                existing_values.add(base_value)
+                existing_values.add(item["value"])
+            else:
+                existing_values.add(item["value"])
+                
+            # ⭐ 복합 주소 구성요소 기록
+            if item["type"] == "주소" and item.get("source", "").endswith("-복합"):
+                # "대전 중구" → ["대전", "중구"] 추가
+                address_parts = item["value"].split()
+                existing_complex_addresses.update(address_parts)
+        
+        # ⭐ 복합 주소가 있으면 그 구성요소들도 제외
+        all_existing_values = existing_values.union(existing_complex_addresses)
+        
+        print(f"🔍 NER 보완: 기존 값들 제외 - {len(all_existing_values)}개")
+        for val in sorted(all_existing_values):
+            print(f"  제외: '{val}'")
         
         ner_entities = extract_entities_with_ner(text)
         
@@ -391,14 +521,18 @@ def detect_with_ner_supplement(text: str, existing_items: List[Dict[str, Any]]) 
             # ⭐ 스마트 정리 (컨텍스트 보존)
             clean_value = smart_clean_korean_text(raw_value, preserve_context=True)
             
-            if clean_value in existing_values or not clean_value:
+            # ⭐ 강화된 중복 체크
+            if clean_value in all_existing_values or not clean_value:
+                print(f"    NER 제외: '{clean_value}' (기존 항목과 중복)")
                 continue
             
             if confidence > 0.9:
                 if entity_type == "이름":
                     if not is_valid_korean_name(clean_value, include_honorifics=True):
+                        print(f"    NER 제외: '{clean_value}' (유효하지 않은 이름)")
                         continue
                     if not all('\uac00' <= char <= '\ud7af' or char in '씨님' for char in clean_value):
+                        print(f"    NER 제외: '{clean_value}' (한글이 아님)")
                         continue
                 
                 # 존칭 분리
@@ -419,7 +553,9 @@ def detect_with_ner_supplement(text: str, existing_items: List[Dict[str, Any]]) 
                     "base_name": base_name,
                     "honorific": honorific
                 })
+                print(f"    ✅ NER 보완: '{clean_value}' ({entity_type})")
         
+        print(f"🔍 NER 보완 완료: {len(supplementary_items)}개 추가")
         return supplementary_items
         
     except Exception as e:
@@ -427,25 +563,25 @@ def detect_with_ner_supplement(text: str, existing_items: List[Dict[str, Any]]) 
         return []
 
 async def detect_pii_all(text: str) -> List[Dict[str, Any]]:
-    """통합 PII 탐지 함수 (강화된 조사 처리)"""
-    print(f"\n🔍 === 강화된 PII 탐지 시작 ===")
+    """통합 PII 탐지 함수 (이름/주소 강화)"""
+    print(f"\n🔍 === 강화된 PII 탐지 시작 (이름/주소 강화) ===")
     print(f"📝 입력: '{text}'")
     
     all_items = []
     
-    # 1단계: normalizers 기반 주요 탐지
+    # 1단계: normalizers 기반 주요 탐지 
     all_items.extend(detect_emails(text))
     all_items.extend(detect_phones(text))
-    all_items.extend(detect_names(text))
-    all_items.extend(detect_addresses(text))
+    all_items.extend(detect_names(text))      # ⭐ 대폭 강화됨
+    all_items.extend(detect_addresses(text))  # ⭐ 중복 제거 강화됨
     all_items.extend(detect_ages(text))
     
-    # 2단계: NER 보완 (선택적)
+    # 2단계: NER 보완 (중복 제거 강화)
     if NER_AVAILABLE:
         ner_supplement = detect_with_ner_supplement(text, all_items)
         all_items.extend(ner_supplement)
     
-    # 3단계: ⭐ 중복 제거 (기본 이름 기준)
+    # 3단계: ⭐ 최종 중복 제거 (개선됨)
     seen_items = set()
     final_items = []
     
@@ -460,11 +596,11 @@ async def detect_pii_all(text: str) -> List[Dict[str, Any]]:
         if key not in seen_items:
             final_items.append(item)
             seen_items.add(key)
-            print(f"✅ 최종 항목: {item['type']} '{item['value']}'")
+            print(f"✅ 최종 항목: {item['type']} '{item['value']}' (출처: {item.get('source', 'unknown')})")
         else:
             print(f"🔄 중복 제거: {item['type']} '{item['value']}'")
     
-    print(f"🔍 === 강화된 PII 탐지 완료: {len(final_items)}개 ===\n")
+    print(f"🔍 === 강화된 PII 탐지 완료 (이름/주소 강화): {len(final_items)}개 ===\n")
     return final_items
 
 # ===== 기존 정규화 함수들 (유지) =====
@@ -545,16 +681,25 @@ def norm_address(val: Optional[str]) -> Optional[str]:
     return cleaned
 
 def cross_check(entity: Dict[str, Optional[str]]) -> Dict[str, Optional[str]]:
-    """엔티티 간 교차 검증"""
+    """엔티티 간 교차 검증 (⭐ 이메일 강화)"""
     addr = entity.get("address")
     email = entity.get("email")
-    if addr and "@" in addr:
-        m = EMAIL_RX.search(addr)
-        if m and not email:
-            entity["email"] = m.group(0).lower()
+    
+    # 주소 필드에서 이메일 추출 강화
+    if addr and ("@" in addr):
+        # 강화된 이메일 패턴으로 추출
+        for pattern in EMAIL_PATTERNS:
+            match = pattern.search(addr)
+            if match and not email:
+                found_email = match.group().strip().lower()
+                entity["email"] = found_email
+                entity["address"] = None
+                print(f"📧 교차검증: 주소에서 이메일 추출 '{found_email}'")
+                break
+        else:
+            # 패턴 매칭 실패 시 주소 필드 제거
             entity["address"] = None
-        elif not m:
-            entity["address"] = None
+    
     return entity
 
 # 호환성 함수들
