@@ -187,6 +187,2119 @@
       "original_text": "{\"counters\":[{\"namespace\":\"default\",\"metric\":\"chatgpt_web_interrupt_token_exists\",\"tags\":{\"has_conduit_token\":\"true\"},\"value\":1},{\"namespace\":\"default\",\"metric\":\"completion_request\",\"tags\":{},\"value\":1},{\"namespace\":\"default\",\"metric\":\"conduit_f_conversation_api.success\",\"tags\":{\"prepare_sent\":\"true\",\"prepare_succeeded\":\"false\",\"prepare_failed\":\"false\"},\"value\":1}],\"histograms\":[{\"namespace\":\"default\",\"metric\":\"chatgpt_web_interrupt_token_latency\",\"tags\":{},\"values\":[10825.099999904633]},{\"namespace\":\"default\",\"metric\":\"completion_request_time\",\"tags\":{},\"values\":[10949.200000047684]}],\"client_type\":\"web\"}",
       "detected_items": 0,
       "mode": "modular"
+    },
+    {
+      "time": "2025-09-23 18:31:07",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "c4cbd3bd7f68cd88b941",
+        "prompt": "{\"timestamp\":\"2025-09-23T09:31:05.472Z\",\"integrations\":{\"Segment.io\":true},\"event\":\"New Chat Button Clicked\",\"type\":\"track\",\"properties\":{\"location\":\"tiny_bar\",\"gizmo_id\":\"primary\",\"origin\":\"chat\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\"},\"context\":{\"page\":{\"path\":\"/c/68d266f8-13c4-832b-8a05-92d627fadd98\",\"referrer\":\"\",\"search\":\"\",\"title\":\"메일 전송 확인 방법\",\"url\":\"https://chatgpt.com/c/68d266f8-13c4-832b-8a05-92d627fadd98\",\"hash\":\"\"},\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36\",\"userAgentData\":{\"brands\":[{\"brand\":\"Chromium\",\"version\":\"140\"},{\"brand\":\"Not=A?Brand\",\"version\":\"24\"},{\"brand\":\"Google Chrome\",\"version\":\"140\"}],\"mobile\":false,\"platform\":\"Windows\"},\"locale\":\"ko-KR\",\"library\":{\"name\":\"analytics.js\",\"version\":\"npm:next-1.73.0\"},\"timezone\":\"Asia/Seoul\",\"app_name\":\"chatgpt\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\",\"browser_locale\":\"ko-KR\",\"device_id\":\"eef92088-84e2-4562-80fa-1562351913ae\",\"auth_status\":\"logged_in\",\"user_traits\":{\"plan_type\":\"plus\",\"workspace_id\":null,\"workspace_type\":null}},\"messageId\":\"ajs-next-1758619865472-4fb217f8-3a23-41a9-9437-93129a35ead1\",\"userId\":\"user-pDy1yOHWEbcaHYA9Z9eaXCSf\",\"anonymousId\":\"e70e1fa8-2593-490e-8220-6dc95d633640\",\"writeKey\":\"oai\",\"sentAt\":\"2025-09-23T09:31:05.479Z\",\"_metadata\":{\"bundled\":[\"Segment.io\"],\"unbundled\":[],\"bundledIds\":[]}}"
+      },
+      "output": {
+        "pseudonymized_text": "{\"timestamp\":\"2025-09-23T09:31:05.472Z\",\"integrations\":{\"Segment.io\":true},\"event\":\"New Chat Button Clicked\",\"type\":\"track\",\"properties\":{\"location\":\"tiny_bar\",\"gizmo_id\":\"primary\",\"origin\":\"chat\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\"},\"context\":{\"page\":{\"path\":\"/c/68d266f8-13c4-832b-8a05-92d627fadd98\",\"referrer\":\"\",\"search\":\"\",\"title\":\"메일 전송 확인 방법\",\"url\":\"https://chatgpt.com/c/68d266f8-13c4-832b-8a05-92d627fadd98\",\"hash\":\"\"},\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36\",\"userAgentData\":{\"brands\":[{\"brand\":\"Chromium\",\"version\":\"140\"},{\"brand\":\"Not=A?Brand\",\"version\":\"24\"},{\"brand\":\"Google Chrome\",\"version\":\"140\"}],\"mobile\":false,\"platform\":\"Windows\"},\"locale\":\"ko-KR\",\"library\":{\"name\":\"analytics.js\",\"version\":\"npm:next-1.73.0\"},\"timezone\":\"Asia/Seoul\",\"app_name\":\"chatgpt\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\",\"browser_locale\":\"ko-KR\",\"device_id\":\"eef92088-84e2-4562-80fa-1562351913ae\",\"auth_status\":\"logged_in\",\"user_traits\":{\"plan_type\":\"plus\",\"workspace_id\":null,\"workspace_type\":null}},\"messageId\":\"ajs-next-1758619865472-4fb217f8-3a23-41a9-9437-93129a35ead1\",\"userId\":\"user-pDy1yOHWEbcaHYA9Z9eaXCSf\",\"anonymousId\":\"e70e1fa8-2593-490e-8220-6dc95d633640\",\"writeKey\":\"oai\",\"sentAt\":\"2025-09-23T09:31:05.479Z\",\"_metadata\":{\"bundled\":[\"Segment.io\"],\"unbundled\":[],\"bundledIds\":[]}}",
+        "detection": {
+          "items": [],
+          "count": 0,
+          "contains_pii": false
+        },
+        "processing_time": 1.9217870235443115,
+        "reverse_map": {}
+      },
+      "detection": {
+        "items": [],
+        "count": 0,
+        "contains_pii": false
+      },
+      "success": true,
+      "timestamp": "2025-09-23T18:31:07.907423",
+      "type": "pseudonymize",
+      "request_id": "c4cbd3bd7f68cd88b941",
+      "original_text": "{\"timestamp\":\"2025-09-23T09:31:05.472Z\",\"integrations\":{\"Segment.io\":true},\"event\":\"New Chat Button Clicked\",\"type\":\"track\",\"properties\":{\"location\":\"tiny_bar\",\"gizmo_id\":\"primary\",\"origin\":\"chat\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\"},\"context\":{\"page\":{\"path\":\"/c/68d266f8-13c4-832b-8a05-92d627fadd98\",\"referrer\":\"\",\"search\":\"\",\"title\":\"메일 전송 확인 방법\",\"url\":\"https://chatgpt.com/c/68d266f8-13c4-832b-8a05-92d627fadd98\",\"hash\":\"\"},\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36\",\"userAgentData\":{\"brands\":[{\"brand\":\"Chromium\",\"version\":\"140\"},{\"brand\":\"Not=A?Brand\",\"version\":\"24\"},{\"brand\":\"Google Chrome\",\"version\":\"140\"}],\"mobile\":false,\"platform\":\"Windows\"},\"locale\":\"ko-KR\",\"library\":{\"name\":\"analytics.js\",\"version\":\"npm:next-1.73.0\"},\"timezone\":\"Asia/Seoul\",\"app_name\":\"chatgpt\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\",\"browser_locale\":\"ko-KR\",\"device_id\":\"eef92088-84e2-4562-80fa-1562351913ae\",\"auth_status\":\"logged_in\",\"user_traits\":{\"plan_type\":\"plus\",\"workspace_id\":null,\"workspace_type\":null}},\"messageId\":\"ajs-next-1758619865472-4fb217f8-3a23-41a9-9437-93129a35ead1\",\"userId\":\"user-pDy1yOHWEbcaHYA9Z9eaXCSf\",\"anonymousId\":\"e70e1fa8-2593-490e-8220-6dc95d633640\",\"writeKey\":\"oai\",\"sentAt\":\"2025-09-23T09:31:05.479Z\",\"_metadata\":{\"bundled\":[\"Segment.io\"],\"unbundled\":[],\"bundledIds\":[]}}",
+      "detected_items": 0,
+      "mode": "modular_enhanced",
+      "total_processing_time": 1.9241714477539062
+    },
+    {
+      "time": "2025-09-23 18:31:07",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "312a7174265e6377aa59",
+        "prompt": "{\"timestamp\":\"2025-09-23T09:31:05.472Z\",\"integrations\":{\"Segment.io\":true},\"event\":\"Sidebar Click Gizmo\",\"type\":\"track\",\"properties\":{\"gizmo_id\":\"primary\",\"origin\":\"chat\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\"},\"context\":{\"page\":{\"path\":\"/c/68d266f8-13c4-832b-8a05-92d627fadd98\",\"referrer\":\"\",\"search\":\"\",\"title\":\"메일 전송 확인 방법\",\"url\":\"https://chatgpt.com/c/68d266f8-13c4-832b-8a05-92d627fadd98\",\"hash\":\"\"},\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36\",\"userAgentData\":{\"brands\":[{\"brand\":\"Chromium\",\"version\":\"140\"},{\"brand\":\"Not=A?Brand\",\"version\":\"24\"},{\"brand\":\"Google Chrome\",\"version\":\"140\"}],\"mobile\":false,\"platform\":\"Windows\"},\"locale\":\"ko-KR\",\"library\":{\"name\":\"analytics.js\",\"version\":\"npm:next-1.73.0\"},\"timezone\":\"Asia/Seoul\",\"app_name\":\"chatgpt\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\",\"browser_locale\":\"ko-KR\",\"device_id\":\"eef92088-84e2-4562-80fa-1562351913ae\",\"auth_status\":\"logged_in\",\"user_traits\":{\"plan_type\":\"plus\",\"workspace_id\":null,\"workspace_type\":null}},\"messageId\":\"ajs-next-1758619865472-17f83a23-51a9-4437-9312-9a35ead18aeb\",\"userId\":\"user-pDy1yOHWEbcaHYA9Z9eaXCSf\",\"anonymousId\":\"e70e1fa8-2593-490e-8220-6dc95d633640\",\"writeKey\":\"oai\",\"sentAt\":\"2025-09-23T09:31:05.480Z\",\"_metadata\":{\"bundled\":[\"Segment.io\"],\"unbundled\":[],\"bundledIds\":[]}}"
+      },
+      "output": {
+        "pseudonymized_text": "{\"timestamp\":\"2025-09-23T09:31:05.472Z\",\"integrations\":{\"Segment.io\":true},\"event\":\"Sidebar Click Gizmo\",\"type\":\"track\",\"properties\":{\"gizmo_id\":\"primary\",\"origin\":\"chat\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\"},\"context\":{\"page\":{\"path\":\"/c/68d266f8-13c4-832b-8a05-92d627fadd98\",\"referrer\":\"\",\"search\":\"\",\"title\":\"메일 전송 확인 방법\",\"url\":\"https://chatgpt.com/c/68d266f8-13c4-832b-8a05-92d627fadd98\",\"hash\":\"\"},\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36\",\"userAgentData\":{\"brands\":[{\"brand\":\"Chromium\",\"version\":\"140\"},{\"brand\":\"Not=A?Brand\",\"version\":\"24\"},{\"brand\":\"Google Chrome\",\"version\":\"140\"}],\"mobile\":false,\"platform\":\"Windows\"},\"locale\":\"ko-KR\",\"library\":{\"name\":\"analytics.js\",\"version\":\"npm:next-1.73.0\"},\"timezone\":\"Asia/Seoul\",\"app_name\":\"chatgpt\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\",\"browser_locale\":\"ko-KR\",\"device_id\":\"eef92088-84e2-4562-80fa-1562351913ae\",\"auth_status\":\"logged_in\",\"user_traits\":{\"plan_type\":\"plus\",\"workspace_id\":null,\"workspace_type\":null}},\"messageId\":\"ajs-next-1758619865472-17f83a23-51a9-4437-9312-9a35ead18aeb\",\"userId\":\"user-pDy1yOHWEbcaHYA9Z9eaXCSf\",\"anonymousId\":\"e70e1fa8-2593-490e-8220-6dc95d633640\",\"writeKey\":\"oai\",\"sentAt\":\"2025-09-23T09:31:05.480Z\",\"_metadata\":{\"bundled\":[\"Segment.io\"],\"unbundled\":[],\"bundledIds\":[]}}",
+        "detection": {
+          "items": [],
+          "count": 0,
+          "contains_pii": false
+        },
+        "processing_time": 1.9930825233459473,
+        "reverse_map": {}
+      },
+      "detection": {
+        "items": [],
+        "count": 0,
+        "contains_pii": false
+      },
+      "success": true,
+      "timestamp": "2025-09-23T18:31:07.977749",
+      "type": "pseudonymize",
+      "request_id": "312a7174265e6377aa59",
+      "original_text": "{\"timestamp\":\"2025-09-23T09:31:05.472Z\",\"integrations\":{\"Segment.io\":true},\"event\":\"Sidebar Click Gizmo\",\"type\":\"track\",\"properties\":{\"gizmo_id\":\"primary\",\"origin\":\"chat\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\"},\"context\":{\"page\":{\"path\":\"/c/68d266f8-13c4-832b-8a05-92d627fadd98\",\"referrer\":\"\",\"search\":\"\",\"title\":\"메일 전송 확인 방법\",\"url\":\"https://chatgpt.com/c/68d266f8-13c4-832b-8a05-92d627fadd98\",\"hash\":\"\"},\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36\",\"userAgentData\":{\"brands\":[{\"brand\":\"Chromium\",\"version\":\"140\"},{\"brand\":\"Not=A?Brand\",\"version\":\"24\"},{\"brand\":\"Google Chrome\",\"version\":\"140\"}],\"mobile\":false,\"platform\":\"Windows\"},\"locale\":\"ko-KR\",\"library\":{\"name\":\"analytics.js\",\"version\":\"npm:next-1.73.0\"},\"timezone\":\"Asia/Seoul\",\"app_name\":\"chatgpt\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\",\"browser_locale\":\"ko-KR\",\"device_id\":\"eef92088-84e2-4562-80fa-1562351913ae\",\"auth_status\":\"logged_in\",\"user_traits\":{\"plan_type\":\"plus\",\"workspace_id\":null,\"workspace_type\":null}},\"messageId\":\"ajs-next-1758619865472-17f83a23-51a9-4437-9312-9a35ead18aeb\",\"userId\":\"user-pDy1yOHWEbcaHYA9Z9eaXCSf\",\"anonymousId\":\"e70e1fa8-2593-490e-8220-6dc95d633640\",\"writeKey\":\"oai\",\"sentAt\":\"2025-09-23T09:31:05.480Z\",\"_metadata\":{\"bundled\":[\"Segment.io\"],\"unbundled\":[],\"bundledIds\":[]}}",
+      "detected_items": 0,
+      "mode": "modular_enhanced",
+      "total_processing_time": 1.994119644165039
+    },
+    {
+      "time": "2025-09-23 18:31:10",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "b6319343d0382292187f",
+        "prompt": "{\"timestamp\":\"2025-09-23T09:31:05.647Z\",\"integrations\":{\"Segment.io\":true},\"type\":\"page\",\"properties\":{\"path\":\"/\",\"referrer\":\"\",\"search\":\"\",\"title\":\"ChatGPT\",\"url\":\"https://chatgpt.com/\",\"hash\":\"\"},\"context\":{\"page\":{\"path\":\"/\",\"referrer\":\"\",\"search\":\"\",\"title\":\"ChatGPT\",\"url\":\"https://chatgpt.com/\",\"hash\":\"\"},\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36\",\"userAgentData\":{\"brands\":[{\"brand\":\"Chromium\",\"version\":\"140\"},{\"brand\":\"Not=A?Brand\",\"version\":\"24\"},{\"brand\":\"Google Chrome\",\"version\":\"140\"}],\"mobile\":false,\"platform\":\"Windows\"},\"locale\":\"ko-KR\",\"library\":{\"name\":\"analytics.js\",\"version\":\"npm:next-1.73.0\"},\"timezone\":\"Asia/Seoul\",\"app_name\":\"chatgpt\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\",\"browser_locale\":\"ko-KR\",\"device_id\":\"eef92088-84e2-4562-80fa-1562351913ae\",\"auth_status\":\"logged_in\",\"user_traits\":{\"plan_type\":\"plus\",\"workspace_id\":null,\"workspace_type\":null}},\"messageId\":\"ajs-next-1758619865647-3a2351a9-1437-4312-9a35-ead18aeb6ccb\",\"userId\":\"user-pDy1yOHWEbcaHYA9Z9eaXCSf\",\"anonymousId\":\"e70e1fa8-2593-490e-8220-6dc95d633640\",\"writeKey\":\"oai\",\"sentAt\":\"2025-09-23T09:31:05.663Z\",\"_metadata\":{\"bundled\":[\"Segment.io\"],\"unbundled\":[],\"bundledIds\":[]}}"
+      },
+      "output": {
+        "pseudonymized_text": "{\"timestamp\":\"2025-09-23T09:31:05.647Z\",\"integrations\":{\"Segment.io\":true},\"type\":\"page\",\"properties\":{\"path\":\"/\",\"referrer\":\"\",\"search\":\"\",\"title\":\"ChatGPT\",\"url\":\"https://chatgpt.com/\",\"hash\":\"\"},\"context\":{\"page\":{\"path\":\"/\",\"referrer\":\"\",\"search\":\"\",\"title\":\"ChatGPT\",\"url\":\"https://chatgpt.com/\",\"hash\":\"\"},\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36\",\"userAgentData\":{\"brands\":[{\"brand\":\"Chromium\",\"version\":\"140\"},{\"brand\":\"Not=A?Brand\",\"version\":\"24\"},{\"brand\":\"Google Chrome\",\"version\":\"140\"}],\"mobile\":false,\"platform\":\"Windows\"},\"locale\":\"ko-KR\",\"library\":{\"name\":\"analytics.js\",\"version\":\"npm:next-1.73.0\"},\"timezone\":\"Asia/Seoul\",\"app_name\":\"chatgpt\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\",\"browser_locale\":\"ko-KR\",\"device_id\":\"eef92088-84e2-4562-80fa-1562351913ae\",\"auth_status\":\"logged_in\",\"user_traits\":{\"plan_type\":\"plus\",\"workspace_id\":null,\"workspace_type\":null}},\"messageId\":\"ajs-next-1758619865647-3a2351a9-1437-4312-9a35-ead18aeb6ccb\",\"userId\":\"user-pDy1yOHWEbcaHYA9Z9eaXCSf\",\"anonymousId\":\"e70e1fa8-2593-490e-8220-6dc95d633640\",\"writeKey\":\"oai\",\"sentAt\":\"2025-09-23T09:31:05.663Z\",\"_metadata\":{\"bundled\":[\"Segment.io\"],\"unbundled\":[],\"bundledIds\":[]}}",
+        "detection": {
+          "items": [],
+          "count": 0,
+          "contains_pii": false
+        },
+        "processing_time": 4.505328178405762,
+        "reverse_map": {}
+      },
+      "detection": {
+        "items": [],
+        "count": 0,
+        "contains_pii": false
+      },
+      "success": true,
+      "timestamp": "2025-09-23T18:31:10.490991",
+      "type": "pseudonymize",
+      "request_id": "b6319343d0382292187f",
+      "original_text": "{\"timestamp\":\"2025-09-23T09:31:05.647Z\",\"integrations\":{\"Segment.io\":true},\"type\":\"page\",\"properties\":{\"path\":\"/\",\"referrer\":\"\",\"search\":\"\",\"title\":\"ChatGPT\",\"url\":\"https://chatgpt.com/\",\"hash\":\"\"},\"context\":{\"page\":{\"path\":\"/\",\"referrer\":\"\",\"search\":\"\",\"title\":\"ChatGPT\",\"url\":\"https://chatgpt.com/\",\"hash\":\"\"},\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36\",\"userAgentData\":{\"brands\":[{\"brand\":\"Chromium\",\"version\":\"140\"},{\"brand\":\"Not=A?Brand\",\"version\":\"24\"},{\"brand\":\"Google Chrome\",\"version\":\"140\"}],\"mobile\":false,\"platform\":\"Windows\"},\"locale\":\"ko-KR\",\"library\":{\"name\":\"analytics.js\",\"version\":\"npm:next-1.73.0\"},\"timezone\":\"Asia/Seoul\",\"app_name\":\"chatgpt\",\"app_version\":\"6b22e59472a7b66c095377a4a62737e83f1849dd\",\"browser_locale\":\"ko-KR\",\"device_id\":\"eef92088-84e2-4562-80fa-1562351913ae\",\"auth_status\":\"logged_in\",\"user_traits\":{\"plan_type\":\"plus\",\"workspace_id\":null,\"workspace_type\":null}},\"messageId\":\"ajs-next-1758619865647-3a2351a9-1437-4312-9a35-ead18aeb6ccb\",\"userId\":\"user-pDy1yOHWEbcaHYA9Z9eaXCSf\",\"anonymousId\":\"e70e1fa8-2593-490e-8220-6dc95d633640\",\"writeKey\":\"oai\",\"sentAt\":\"2025-09-23T09:31:05.663Z\",\"_metadata\":{\"bundled\":[\"Segment.io\"],\"unbundled\":[],\"bundledIds\":[]}}",
+      "detected_items": 0,
+      "mode": "modular_enhanced",
+      "total_processing_time": 4.5063252449035645
+    },
+    {
+      "time": "2025-09-23 18:31:10",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "673d314b60cbffee2e58",
+        "prompt": "{\"gizmo_id\":null,\"requested_default_model\":\"gpt-5-instant\",\"conversation_id\":null,\"timezone_offset_min\":-540}"
+      },
+      "output": {
+        "pseudonymized_text": "{\"gizmo_id\":null,\"requested_default_model\":\"gpt-5-instant\",\"conversation_id\":null,\"timezone_offset_min\":-540}",
+        "detection": {
+          "items": [],
+          "count": 0,
+          "contains_pii": false
+        },
+        "processing_time": 4.533400058746338,
+        "reverse_map": {}
+      },
+      "detection": {
+        "items": [],
+        "count": 0,
+        "contains_pii": false
+      },
+      "success": true,
+      "timestamp": "2025-09-23T18:31:10.520441",
+      "type": "pseudonymize",
+      "request_id": "673d314b60cbffee2e58",
+      "original_text": "{\"gizmo_id\":null,\"requested_default_model\":\"gpt-5-instant\",\"conversation_id\":null,\"timezone_offset_min\":-540}",
+      "detected_items": 0,
+      "mode": "modular_enhanced",
+      "total_processing_time": 4.534778118133545
+    },
+    {
+      "time": "2025-09-23 18:31:25",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "fde0772135b5a273f452",
+        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다."
+      },
+      "output": {
+        "pseudonymized_text": "김가명님 24세, 서울 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
+        "detection": {
+          "items": [
+            {
+              "type": "이름",
+              "value": "이영희",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "주소",
+              "value": "대구 중구",
+              "source": "normalizers-주소",
+              "confidence": 0.95
+            },
+            {
+              "type": "나이",
+              "value": "25",
+              "source": "normalizers-나이",
+              "confidence": 1.0
+            }
+          ],
+          "count": 3,
+          "contains_pii": true
+        },
+        "processing_time": 0.09828519821166992,
+        "reverse_map": {
+          "서울": "대구 중구",
+          "김가명": "이영희",
+          "24": "25"
+        }
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "이름",
+            "value": "이영희",
+            "token": "김가명",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구 중구",
+            "token": "서울",
+            "source": "normalizers-주소",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "나이",
+            "value": "25",
+            "token": "24",
+            "source": "normalizers-나이",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 3,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-23T18:31:25.131445",
+      "type": "pseudonymize",
+      "request_id": "fde0772135b5a273f452",
+      "original_text": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
+      "detected_items": 3,
+      "mode": "modular_enhanced",
+      "total_processing_time": 0.10389375686645508
+    },
+    {
+      "time": "2025-09-23 18:31:46",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "9d354835e1bfaa0e90d5",
+        "prompt": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요."
+      },
+      "output": {
+        "pseudonymized_text": "이가명 고객님, 부산 예약이 확인되었습니다. 문의사항은 010-0000-0000로 연락 주세요.",
+        "detection": {
+          "items": [
+            {
+              "type": "전화번호",
+              "value": "010-9876-5432",
+              "source": "normalizers-전화번호",
+              "confidence": 0.95
+            },
+            {
+              "type": "이름",
+              "value": "김철수",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "주소",
+              "value": "부산 해운대구",
+              "source": "normalizers-주소",
+              "confidence": 0.95
+            }
+          ],
+          "count": 3,
+          "contains_pii": true
+        },
+        "processing_time": 0.0860137939453125,
+        "reverse_map": {
+          "부산": "부산 해운대구",
+          "010-0000-0000": "010-9876-5432",
+          "이가명": "김철수"
+        }
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "전화번호",
+            "value": "010-9876-5432",
+            "token": "010-0000-0000",
+            "source": "normalizers-전화번호",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "김철수",
+            "token": "이가명",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "부산 해운대구",
+            "token": "부산",
+            "source": "normalizers-주소",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 3,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-23T18:31:46.669727",
+      "type": "pseudonymize",
+      "request_id": "9d354835e1bfaa0e90d5",
+      "original_text": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요.",
+      "detected_items": 3,
+      "mode": "modular_enhanced",
+      "total_processing_time": 0.0860137939453125
+    },
+    {
+      "time": "2025-09-23 18:46:25",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "debug_test_1758620783969",
+        "prompt": "안녕하세요, 제 이름은 홍길동이고 연락처는 010-1234-5678입니다. 서울 강남구에 살고 있습니다."
+      },
+      "output": {
+        "pseudonymized_text": "안녕하세요, 제 이름은 김가명고 연락처는 010-0000-0000입니다. 서울에 살고 있습니다.",
+        "detection": {
+          "items": [
+            {
+              "type": "전화번호",
+              "value": "010-1234-5678",
+              "source": "normalizers-전화번호",
+              "confidence": 0.95
+            },
+            {
+              "type": "이름",
+              "value": "홍길동이",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "이름",
+              "value": "홍길동",
+              "source": "normalizers-실명목록",
+              "confidence": 0.9
+            },
+            {
+              "type": "주소",
+              "value": "서울 강남구",
+              "source": "normalizers-주소",
+              "confidence": 0.95
+            },
+            {
+              "type": "전화번호",
+              "value": "010- 1234 -",
+              "source": "NER-보완",
+              "confidence": 0.9997305870056152
+            },
+            {
+              "type": "주소",
+              "value": "강남구에",
+              "source": "NER-보완",
+              "confidence": 1.0
+            }
+          ],
+          "count": 6,
+          "contains_pii": true
+        },
+        "processing_time": 1.591057300567627,
+        "reverse_map": {
+          "서울": "서울 강남구",
+          "김가명": "홍길동이",
+          "010-0000-0000": "010-1234-5678"
+        }
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "전화번호",
+            "value": "010-1234-5678",
+            "token": "010-0000-0000",
+            "source": "normalizers-전화번호",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "홍길동이",
+            "token": "김가명",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "홍길동",
+            "token": "이가명",
+            "source": "normalizers-실명목록",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "서울 강남구",
+            "token": "서울",
+            "source": "normalizers-주소",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "전화번호",
+            "value": "010- 1234 -",
+            "token": "010-0000-0001",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "강남구에",
+            "token": "부산",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 6,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-23T18:46:25.570661",
+      "type": "pseudonymize",
+      "request_id": "debug_test_1758620783969",
+      "original_text": "안녕하세요, 제 이름은 홍길동이고 연락처는 010-1234-5678입니다. 서울 강남구에 살고 있습니다.",
+      "detected_items": 6,
+      "mode": "enhanced_reverse_restoration",
+      "total_processing_time": 1.59710693359375
+    },
+    {
+      "time": "2025-09-23 18:46:43",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "95373d22912ce08c252a",
+        "prompt": "안녕하세요, 제 이름은 홍길동이고 연락처는 010-1234-5678입니다. 서울 강남구에 살고 있습니다."
+      },
+      "output": {
+        "pseudonymized_text": "안녕하세요, 제 이름은 박무명고 연락처는 010-0000-0002입니다. 대구에 살고 있습니다.",
+        "detection": {
+          "items": [
+            {
+              "type": "전화번호",
+              "value": "010-1234-5678",
+              "source": "normalizers-전화번호",
+              "confidence": 0.95
+            },
+            {
+              "type": "이름",
+              "value": "홍길동이",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "이름",
+              "value": "홍길동",
+              "source": "normalizers-실명목록",
+              "confidence": 0.9
+            },
+            {
+              "type": "주소",
+              "value": "서울 강남구",
+              "source": "normalizers-주소",
+              "confidence": 0.95
+            },
+            {
+              "type": "전화번호",
+              "value": "010- 1234 -",
+              "source": "NER-보완",
+              "confidence": 0.9997305870056152
+            },
+            {
+              "type": "주소",
+              "value": "강남구에",
+              "source": "NER-보완",
+              "confidence": 1.0
+            }
+          ],
+          "count": 6,
+          "contains_pii": true
+        },
+        "processing_time": 0.062062978744506836,
+        "reverse_map": {
+          "대구": "서울 강남구",
+          "박무명": "홍길동이",
+          "010-0000-0002": "010-1234-5678"
+        }
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "전화번호",
+            "value": "010-1234-5678",
+            "token": "010-0000-0002",
+            "source": "normalizers-전화번호",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "홍길동이",
+            "token": "박무명",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "홍길동",
+            "token": "최가명",
+            "source": "normalizers-실명목록",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "서울 강남구",
+            "token": "대구",
+            "source": "normalizers-주소",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "전화번호",
+            "value": "010- 1234 -",
+            "token": "010-0000-0003",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "강남구에",
+            "token": "인천",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 6,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-23T18:46:43.774222",
+      "type": "pseudonymize",
+      "request_id": "95373d22912ce08c252a",
+      "original_text": "안녕하세요, 제 이름은 홍길동이고 연락처는 010-1234-5678입니다. 서울 강남구에 살고 있습니다.",
+      "detected_items": 6,
+      "mode": "enhanced_reverse_restoration",
+      "total_processing_time": 0.06359982490539551
+    },
+    {
+      "time": "2025-09-23 18:47:21",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "36cc5c839da1d75fc5e4",
+        "prompt": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요."
+      },
+      "output": {
+        "pseudonymized_text": "정무명 고객님, 광주 예약이 확인되었습니다. 문의사항은 010-0000-0004로 연락 주세요.",
+        "detection": {
+          "items": [
+            {
+              "type": "전화번호",
+              "value": "010-9876-5432",
+              "source": "normalizers-전화번호",
+              "confidence": 0.95
+            },
+            {
+              "type": "이름",
+              "value": "김철수",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "주소",
+              "value": "부산 해운대구",
+              "source": "normalizers-주소",
+              "confidence": 0.95
+            },
+            {
+              "type": "주소",
+              "value": "부산",
+              "source": "NER-보완",
+              "confidence": 0.9997935891151428
+            },
+            {
+              "type": "주소",
+              "value": "해운대구",
+              "source": "NER-보완",
+              "confidence": 0.9999997615814209
+            },
+            {
+              "type": "전화번호",
+              "value": "010- 9876 - 5432로",
+              "source": "NER-보완",
+              "confidence": 0.9999997615814209
+            }
+          ],
+          "count": 6,
+          "contains_pii": true
+        },
+        "processing_time": 0.11685609817504883,
+        "reverse_map": {
+          "광주": "부산 해운대구",
+          "정무명": "김철수",
+          "010-0000-0004": "010-9876-5432"
+        }
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "전화번호",
+            "value": "010-9876-5432",
+            "token": "010-0000-0004",
+            "source": "normalizers-전화번호",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "김철수",
+            "token": "정무명",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "부산 해운대구",
+            "token": "광주",
+            "source": "normalizers-주소",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "부산",
+            "token": "대전",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "해운대구",
+            "token": "울산",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "전화번호",
+            "value": "010- 9876 - 5432로",
+            "token": "010-0000-0005",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 6,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-23T18:47:21.365828",
+      "type": "pseudonymize",
+      "request_id": "36cc5c839da1d75fc5e4",
+      "original_text": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요.",
+      "detected_items": 6,
+      "mode": "enhanced_reverse_restoration",
+      "total_processing_time": 0.11685609817504883
+    },
+    {
+      "time": "2025-09-23 18:50:45",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "e7e83e413954bef8e435",
+        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? test@gmail.com으로 메일 보내드렸습니다."
+      },
+      "output": {
+        "pseudonymized_text": "홍가명 23세, 세종 거주하시는 분이시죠? test@gmail.com으로 메일 보내드렸습니다.",
+        "detection": {
+          "items": [
+            {
+              "type": "이름",
+              "value": "이영희님",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "주소",
+              "value": "대구 중구",
+              "source": "normalizers-주소",
+              "confidence": 0.95
+            },
+            {
+              "type": "나이",
+              "value": "25",
+              "source": "normalizers-나이",
+              "confidence": 1.0
+            },
+            {
+              "type": "주소",
+              "value": "대구",
+              "source": "NER-보완",
+              "confidence": 0.9999898672103882
+            },
+            {
+              "type": "주소",
+              "value": "중구",
+              "source": "NER-보완",
+              "confidence": 0.999946117401123
+            }
+          ],
+          "count": 5,
+          "contains_pii": true
+        },
+        "processing_time": 0.06469178199768066,
+        "reverse_map": {
+          "세종": "대구 중구",
+          "홍가명": "이영희님",
+          "23": "25"
+        }
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "이름",
+            "value": "이영희님",
+            "token": "홍가명",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구 중구",
+            "token": "세종",
+            "source": "normalizers-주소",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "나이",
+            "value": "25",
+            "token": "23",
+            "source": "normalizers-나이",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구",
+            "token": "경기",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "중구",
+            "token": "강원",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 5,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-23T18:50:45.174969",
+      "type": "pseudonymize",
+      "request_id": "e7e83e413954bef8e435",
+      "original_text": "이영희님 25세, 대구 중구 거주하시는 분이시죠? test@gmail.com으로 메일 보내드렸습니다.",
+      "detected_items": 5,
+      "mode": "enhanced_reverse_restoration",
+      "total_processing_time": 0.06569838523864746
+    },
+    {
+      "time": "2025-09-23 18:52:06",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "9edb787b05207f1014f6",
+        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? test@gmail.com으로 메일 보내드렸습니다."
+      },
+      "output": {
+        "pseudonymized_text": "조무명 24세, 충북 거주하시는 분이시죠? test@gmail.com으로 메일 보내드렸습니다.",
+        "detection": {
+          "items": [
+            {
+              "type": "이름",
+              "value": "이영희님",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "주소",
+              "value": "대구 중구",
+              "source": "normalizers-주소",
+              "confidence": 0.95
+            },
+            {
+              "type": "나이",
+              "value": "25",
+              "source": "normalizers-나이",
+              "confidence": 1.0
+            },
+            {
+              "type": "주소",
+              "value": "대구",
+              "source": "NER-보완",
+              "confidence": 0.9999898672103882
+            },
+            {
+              "type": "주소",
+              "value": "중구",
+              "source": "NER-보완",
+              "confidence": 0.999946117401123
+            }
+          ],
+          "count": 5,
+          "contains_pii": true
+        },
+        "processing_time": 0.07407808303833008,
+        "reverse_map": {
+          "충북": "대구 중구",
+          "조무명": "이영희님",
+          "24": "25"
+        }
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "이름",
+            "value": "이영희님",
+            "token": "조무명",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구 중구",
+            "token": "충북",
+            "source": "normalizers-주소",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "나이",
+            "value": "25",
+            "token": "24",
+            "source": "normalizers-나이",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구",
+            "token": "충남",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "중구",
+            "token": "전북",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 5,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-23T18:52:06.357945",
+      "type": "pseudonymize",
+      "request_id": "9edb787b05207f1014f6",
+      "original_text": "이영희님 25세, 대구 중구 거주하시는 분이시죠? test@gmail.com으로 메일 보내드렸습니다.",
+      "detected_items": 5,
+      "mode": "enhanced_reverse_restoration",
+      "total_processing_time": 0.07726097106933594
+    },
+    {
+      "time": "2025-09-23 18:55:30",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "edd4dd75230ded8b65fa",
+        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? test@gmail.com으로 메일 보내드렸습니다."
+      },
+      "output": {
+        "pseudonymized_text": "윤가명 27세, 전남 거주하시는 분이시죠? test@gmail.com으로 메일 보내드렸습니다.",
+        "detection": {
+          "items": [
+            {
+              "type": "이름",
+              "value": "이영희님",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "주소",
+              "value": "대구 중구",
+              "source": "normalizers-주소",
+              "confidence": 0.95
+            },
+            {
+              "type": "나이",
+              "value": "25",
+              "source": "normalizers-나이",
+              "confidence": 1.0
+            },
+            {
+              "type": "주소",
+              "value": "대구",
+              "source": "NER-보완",
+              "confidence": 0.9999898672103882
+            },
+            {
+              "type": "주소",
+              "value": "중구",
+              "source": "NER-보완",
+              "confidence": 0.999946117401123
+            }
+          ],
+          "count": 5,
+          "contains_pii": true
+        },
+        "processing_time": 0.06493330001831055,
+        "reverse_map": {
+          "전남": "대구 중구",
+          "윤가명": "이영희님",
+          "27": "25"
+        }
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "이름",
+            "value": "이영희님",
+            "token": "윤가명",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구 중구",
+            "token": "전남",
+            "source": "normalizers-주소",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "나이",
+            "value": "25",
+            "token": "27",
+            "source": "normalizers-나이",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구",
+            "token": "경북",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "중구",
+            "token": "경남",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 5,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-23T18:55:30.361376",
+      "type": "pseudonymize",
+      "request_id": "edd4dd75230ded8b65fa",
+      "original_text": "이영희님 25세, 대구 중구 거주하시는 분이시죠? test@gmail.com으로 메일 보내드렸습니다.",
+      "detected_items": 5,
+      "mode": "enhanced_reverse_restoration",
+      "total_processing_time": 0.06693625450134277
+    },
+    {
+      "time": "2025-09-23 19:06:42",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "6cf73d29b2747d103158",
+        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다."
+      },
+      "output": {
+        "pseudonymized_text": "김가명님 28세, 서울 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
+        "detection": {
+          "items": [
+            {
+              "type": "이름",
+              "value": "이영희님",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "주소",
+              "value": "대구 중구",
+              "source": "normalizers-주소",
+              "confidence": 0.95
+            },
+            {
+              "type": "나이",
+              "value": "25",
+              "source": "normalizers-나이",
+              "confidence": 1.0
+            },
+            {
+              "type": "주소",
+              "value": "대구",
+              "source": "NER-보완",
+              "confidence": 0.9999872446060181
+            },
+            {
+              "type": "주소",
+              "value": "중구",
+              "source": "NER-보완",
+              "confidence": 0.9999650716781616
+            }
+          ],
+          "count": 5,
+          "contains_pii": true
+        },
+        "processing_time": 1.7424345016479492,
+        "reverse_map": {
+          "서울": "대구 중구",
+          "김가명": "이영희",
+          "김가명님": "이영희님",
+          "28": "25"
+        }
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "이름",
+            "value": "이영희님",
+            "token": "김가명님",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구 중구",
+            "token": "서울",
+            "source": "normalizers-주소",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "나이",
+            "value": "25",
+            "token": "28",
+            "source": "normalizers-나이",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구",
+            "token": "부산",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "중구",
+            "token": "대구",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 5,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-23T19:06:42.220234",
+      "type": "pseudonymize",
+      "request_id": "6cf73d29b2747d103158",
+      "original_text": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
+      "detected_items": 5,
+      "mode": "enhanced_reverse_restoration_fixed",
+      "total_processing_time": 1.7448053359985352
+    },
+    {
+      "time": "2025-09-23 19:11:17",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "debug_test_1758622277630",
+        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다."
+      },
+      "output": {
+        "pseudonymized_text": "이가명님 23세, 인천 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
+        "detection": {
+          "items": [
+            {
+              "type": "이름",
+              "value": "이영희님",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "주소",
+              "value": "대구 중구",
+              "source": "normalizers-주소",
+              "confidence": 0.95
+            },
+            {
+              "type": "나이",
+              "value": "25",
+              "source": "normalizers-나이",
+              "confidence": 1.0
+            },
+            {
+              "type": "주소",
+              "value": "대구",
+              "source": "NER-보완",
+              "confidence": 0.9999872446060181
+            },
+            {
+              "type": "주소",
+              "value": "중구",
+              "source": "NER-보완",
+              "confidence": 0.9999650716781616
+            }
+          ],
+          "count": 5,
+          "contains_pii": true
+        },
+        "processing_time": 0.056810617446899414,
+        "reverse_map": {
+          "인천": "대구 중구",
+          "이가명": "이영희",
+          "이가명님": "이영희님",
+          "23": "25"
+        }
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "이름",
+            "value": "이영희님",
+            "token": "이가명님",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구 중구",
+            "token": "인천",
+            "source": "normalizers-주소",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "나이",
+            "value": "25",
+            "token": "23",
+            "source": "normalizers-나이",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구",
+            "token": "광주",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "중구",
+            "token": "대전",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 5,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-23T19:11:17.694332",
+      "type": "pseudonymize",
+      "request_id": "debug_test_1758622277630",
+      "original_text": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
+      "detected_items": 5,
+      "mode": "enhanced_reverse_restoration_fixed",
+      "total_processing_time": 0.059813499450683594
+    },
+    {
+      "time": "2025-09-23 19:11:32",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "23ba4843c7d0ebd7011d",
+        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다."
+      },
+      "output": {
+        "pseudonymized_text": "박무명님 30세, 울산 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
+        "detection": {
+          "items": [
+            {
+              "type": "이름",
+              "value": "이영희님",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "주소",
+              "value": "대구 중구",
+              "source": "normalizers-주소",
+              "confidence": 0.95
+            },
+            {
+              "type": "나이",
+              "value": "25",
+              "source": "normalizers-나이",
+              "confidence": 1.0
+            },
+            {
+              "type": "주소",
+              "value": "대구",
+              "source": "NER-보완",
+              "confidence": 0.9999872446060181
+            },
+            {
+              "type": "주소",
+              "value": "중구",
+              "source": "NER-보완",
+              "confidence": 0.9999650716781616
+            }
+          ],
+          "count": 5,
+          "contains_pii": true
+        },
+        "processing_time": 0.06361794471740723,
+        "reverse_map": {
+          "울산": "대구 중구",
+          "박무명": "이영희",
+          "박무명님": "이영희님",
+          "30": "25"
+        }
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "이름",
+            "value": "이영희님",
+            "token": "박무명님",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구 중구",
+            "token": "울산",
+            "source": "normalizers-주소",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "나이",
+            "value": "25",
+            "token": "30",
+            "source": "normalizers-나이",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구",
+            "token": "세종",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "중구",
+            "token": "경기",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 5,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-23T19:11:32.716774",
+      "type": "pseudonymize",
+      "request_id": "23ba4843c7d0ebd7011d",
+      "original_text": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
+      "detected_items": 5,
+      "mode": "enhanced_reverse_restoration_fixed",
+      "total_processing_time": 0.06661748886108398
+    },
+    {
+      "time": "2025-09-23 19:14:32",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "input": {
+        "id": "9b726b66b42e24aec077",
+        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다."
+      },
+      "output": {
+        "pseudonymized_text": "최가명님 21세, 강원 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
+        "detection": {
+          "items": [
+            {
+              "type": "이름",
+              "value": "이영희님",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "주소",
+              "value": "대구 중구",
+              "source": "normalizers-주소",
+              "confidence": 0.95
+            },
+            {
+              "type": "나이",
+              "value": "25",
+              "source": "normalizers-나이",
+              "confidence": 1.0
+            },
+            {
+              "type": "주소",
+              "value": "대구",
+              "source": "NER-보완",
+              "confidence": 0.9999872446060181
+            },
+            {
+              "type": "주소",
+              "value": "중구",
+              "source": "NER-보완",
+              "confidence": 0.9999650716781616
+            }
+          ],
+          "count": 5,
+          "contains_pii": true
+        },
+        "processing_time": 0.07652521133422852,
+        "reverse_map": {
+          "강원": "대구 중구",
+          "최가명": "이영희",
+          "최가명님": "이영희님",
+          "21": "25"
+        }
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "이름",
+            "value": "이영희님",
+            "token": "최가명님",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구 중구",
+            "token": "강원",
+            "source": "normalizers-주소",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "나이",
+            "value": "25",
+            "token": "21",
+            "source": "normalizers-나이",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구",
+            "token": "충북",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "중구",
+            "token": "충남",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 5,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-23T19:14:32.054466",
+      "type": "pseudonymize",
+      "request_id": "9b726b66b42e24aec077",
+      "original_text": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
+      "detected_items": 5,
+      "mode": "enhanced_reverse_restoration_fixed",
+      "total_processing_time": 0.07852530479431152
+    },
+    {
+      "time": "2025-09-23 19:25:40",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "request_id": "debug_test_1758623138807",
+      "input": {
+        "id": "debug_test_1758623138807",
+        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다."
+      },
+      "output": {
+        "pseudonymized_text": "김가명님 23세, 서울 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
+        "detection": {
+          "items": [
+            {
+              "type": "이름",
+              "value": "이영희님",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "주소",
+              "value": "대구 중구",
+              "source": "normalizers-주소",
+              "confidence": 0.95
+            },
+            {
+              "type": "나이",
+              "value": "25",
+              "source": "normalizers-나이",
+              "confidence": 1.0
+            },
+            {
+              "type": "주소",
+              "value": "대구",
+              "source": "NER-보완",
+              "confidence": 0.9999872446060181
+            },
+            {
+              "type": "주소",
+              "value": "중구",
+              "source": "NER-보완",
+              "confidence": 0.9999650716781616
+            }
+          ],
+          "count": 5,
+          "contains_pii": true
+        },
+        "processing_time": 1.7789127826690674,
+        "reverse_map": {
+          "서울": "대구 중구",
+          "김가명": "이영희",
+          "김가명님": "이영희님",
+          "23": "25"
+        }
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "이름",
+            "value": "이영희님",
+            "token": "김가명님",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구 중구",
+            "token": "서울",
+            "source": "normalizers-주소",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "나이",
+            "value": "25",
+            "token": "23",
+            "source": "normalizers-나이",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구",
+            "token": "부산",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "중구",
+            "token": "대구",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 5,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-23T19:25:40.590596",
+      "type": "pseudonymize",
+      "original_text": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
+      "detected_items": 5,
+      "mode": "file_based_restore",
+      "total_processing_time": 1.7789127826690674
+    },
+    {
+      "time": "2025-09-23 19:25:49",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "request_id": "2bd1207d329e542f3b6a",
+      "input": {
+        "id": "2bd1207d329e542f3b6a",
+        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다."
+      },
+      "output": {
+        "pseudonymized_text": "이가명님 28세, 인천 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
+        "detection": {
+          "items": [
+            {
+              "type": "이름",
+              "value": "이영희님",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "주소",
+              "value": "대구 중구",
+              "source": "normalizers-주소",
+              "confidence": 0.95
+            },
+            {
+              "type": "나이",
+              "value": "25",
+              "source": "normalizers-나이",
+              "confidence": 1.0
+            },
+            {
+              "type": "주소",
+              "value": "대구",
+              "source": "NER-보완",
+              "confidence": 0.9999872446060181
+            },
+            {
+              "type": "주소",
+              "value": "중구",
+              "source": "NER-보완",
+              "confidence": 0.9999650716781616
+            }
+          ],
+          "count": 5,
+          "contains_pii": true
+        },
+        "processing_time": 0.06915831565856934,
+        "reverse_map": {
+          "인천": "대구 중구",
+          "이가명": "이영희",
+          "이가명님": "이영희님",
+          "28": "25"
+        }
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "이름",
+            "value": "이영희님",
+            "token": "이가명님",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구 중구",
+            "token": "인천",
+            "source": "normalizers-주소",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "나이",
+            "value": "25",
+            "token": "28",
+            "source": "normalizers-나이",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구",
+            "token": "광주",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "중구",
+            "token": "대전",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 5,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-23T19:25:49.834259",
+      "type": "pseudonymize",
+      "original_text": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
+      "detected_items": 5,
+      "mode": "file_based_restore",
+      "total_processing_time": 0.0701589584350586
+    },
+    {
+      "time": "2025-09-23 19:30:20",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "request_id": "d6d6e2aaa76ad9d7e8f5",
+      "input": {
+        "id": "d6d6e2aaa76ad9d7e8f5",
+        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다."
+      },
+      "output": {
+        "pseudonymized_text": "박무명님 23세, 울산 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
+        "detection": {
+          "items": [
+            {
+              "type": "이름",
+              "value": "이영희님",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "주소",
+              "value": "대구 중구",
+              "source": "normalizers-주소",
+              "confidence": 0.95
+            },
+            {
+              "type": "나이",
+              "value": "25",
+              "source": "normalizers-나이",
+              "confidence": 1.0
+            },
+            {
+              "type": "주소",
+              "value": "대구",
+              "source": "NER-보완",
+              "confidence": 0.9999872446060181
+            },
+            {
+              "type": "주소",
+              "value": "중구",
+              "source": "NER-보완",
+              "confidence": 0.9999650716781616
+            }
+          ],
+          "count": 5,
+          "contains_pii": true
+        },
+        "processing_time": 0.06496310234069824,
+        "reverse_map": {
+          "울산": "대구 중구",
+          "박무명": "이영희",
+          "박무명님": "이영희님",
+          "23": "25"
+        }
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "이름",
+            "value": "이영희님",
+            "token": "박무명님",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구 중구",
+            "token": "울산",
+            "source": "normalizers-주소",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "나이",
+            "value": "25",
+            "token": "23",
+            "source": "normalizers-나이",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구",
+            "token": "세종",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "중구",
+            "token": "경기",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 5,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-23T19:30:20.303075",
+      "type": "pseudonymize",
+      "original_text": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
+      "detected_items": 5,
+      "mode": "file_based_restore",
+      "total_processing_time": 0.06496310234069824
+    },
+    {
+      "time": "2025-09-23 19:37:57",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "request_id": "4f4a0ad424b817a478b6",
+      "input": {
+        "id": "4f4a0ad424b817a478b6",
+        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다."
+      },
+      "output": {
+        "pseudonymized_text": "최가명님 24세, 강원 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
+        "detection": {
+          "items": [
+            {
+              "type": "이름",
+              "value": "이영희님",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "주소",
+              "value": "대구 중구",
+              "source": "normalizers-주소",
+              "confidence": 0.95
+            },
+            {
+              "type": "나이",
+              "value": "25",
+              "source": "normalizers-나이",
+              "confidence": 1.0
+            },
+            {
+              "type": "주소",
+              "value": "대구",
+              "source": "NER-보완",
+              "confidence": 0.9999872446060181
+            },
+            {
+              "type": "주소",
+              "value": "중구",
+              "source": "NER-보완",
+              "confidence": 0.9999650716781616
+            }
+          ],
+          "count": 5,
+          "contains_pii": true
+        },
+        "processing_time": 0.0698995590209961,
+        "reverse_map": {
+          "강원": "대구 중구",
+          "최가명": "이영희",
+          "최가명님": "이영희님",
+          "24": "25"
+        }
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "이름",
+            "value": "이영희님",
+            "token": "최가명님",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구 중구",
+            "token": "강원",
+            "source": "normalizers-주소",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "나이",
+            "value": "25",
+            "token": "24",
+            "source": "normalizers-나이",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구",
+            "token": "충북",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "중구",
+            "token": "충남",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 5,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-23T19:37:57.609015",
+      "type": "pseudonymize",
+      "original_text": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
+      "detected_items": 5,
+      "mode": "file_based_restore",
+      "total_processing_time": 0.0698995590209961
+    },
+    {
+      "time": "2025-09-23 19:42:30",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "request_id": "cfa1f6ca94da944fd51a",
+      "input": {
+        "id": "cfa1f6ca94da944fd51a",
+        "prompt": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다."
+      },
+      "output": {
+        "pseudonymized_text": "정무명님 29세, 전북 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
+        "detection": {
+          "items": [
+            {
+              "type": "이름",
+              "value": "이영희님",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "주소",
+              "value": "대구 중구",
+              "source": "normalizers-주소",
+              "confidence": 0.95
+            },
+            {
+              "type": "나이",
+              "value": "25",
+              "source": "normalizers-나이",
+              "confidence": 1.0
+            },
+            {
+              "type": "주소",
+              "value": "대구",
+              "source": "NER-보완",
+              "confidence": 0.9999872446060181
+            },
+            {
+              "type": "주소",
+              "value": "중구",
+              "source": "NER-보완",
+              "confidence": 0.9999650716781616
+            }
+          ],
+          "count": 5,
+          "contains_pii": true
+        },
+        "processing_time": 0.07599544525146484,
+        "reverse_map": {
+          "전북": "대구 중구",
+          "정무명": "이영희",
+          "정무명님": "이영희님",
+          "29": "25"
+        }
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "이름",
+            "value": "이영희님",
+            "token": "정무명님",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구 중구",
+            "token": "전북",
+            "source": "normalizers-주소",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "나이",
+            "value": "25",
+            "token": "29",
+            "source": "normalizers-나이",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "대구",
+            "token": "전남",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "중구",
+            "token": "경북",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 5,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-23T19:42:30.769750",
+      "type": "pseudonymize",
+      "original_text": "이영희님 25세, 대구 중구 거주하시는 분이시죠? contact@example.com으로 메일 보내드렸습니다.",
+      "detected_items": 5,
+      "mode": "file_based_restore",
+      "total_processing_time": 0.07699394226074219
+    },
+    {
+      "time": "2025-09-23 19:43:00",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "request_id": "3637e929de62fa319ae3",
+      "input": {
+        "id": "3637e929de62fa319ae3",
+        "prompt": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요."
+      },
+      "output": {
+        "pseudonymized_text": "홍가명 고객님, 경남 예약이 확인되었습니다. 문의사항은 010-0000-0000로 연락 주세요.",
+        "detection": {
+          "items": [
+            {
+              "type": "전화번호",
+              "value": "010-9876-5432",
+              "source": "normalizers-전화번호",
+              "confidence": 0.95
+            },
+            {
+              "type": "이름",
+              "value": "김철수",
+              "source": "normalizers-이름패턴",
+              "confidence": 0.85
+            },
+            {
+              "type": "주소",
+              "value": "부산 해운대구",
+              "source": "normalizers-주소",
+              "confidence": 0.95
+            },
+            {
+              "type": "주소",
+              "value": "부산",
+              "source": "NER-보완",
+              "confidence": 0.9997935891151428
+            },
+            {
+              "type": "주소",
+              "value": "해운대구",
+              "source": "NER-보완",
+              "confidence": 0.9999997615814209
+            },
+            {
+              "type": "전화번호",
+              "value": "010- 9876 - 5432로",
+              "source": "NER-보완",
+              "confidence": 0.9999997615814209
+            }
+          ],
+          "count": 6,
+          "contains_pii": true
+        },
+        "processing_time": 0.08261442184448242,
+        "reverse_map": {
+          "경남": "부산 해운대구",
+          "홍가명": "김철수",
+          "010-0000-0000": "010-9876-5432"
+        }
+      },
+      "detection": {
+        "items": [
+          {
+            "type": "전화번호",
+            "value": "010-9876-5432",
+            "token": "010-0000-0000",
+            "source": "normalizers-전화번호",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "이름",
+            "value": "김철수",
+            "token": "홍가명",
+            "source": "normalizers-이름패턴",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "부산 해운대구",
+            "token": "경남",
+            "source": "normalizers-주소",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "부산",
+            "token": "제주",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "주소",
+            "value": "해운대구",
+            "token": "인천",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          },
+          {
+            "type": "전화번호",
+            "value": "010- 9876 - 5432로",
+            "token": "010-0000-0001",
+            "source": "NER-보완",
+            "start": 0,
+            "end": 0
+          }
+        ],
+        "count": 6,
+        "contains_pii": true
+      },
+      "success": true,
+      "timestamp": "2025-09-23T19:43:00.384475",
+      "type": "pseudonymize",
+      "original_text": "김철수 고객님, 부산 해운대구 예약이 확인되었습니다. 문의사항은 010-9876-5432로 연락 주세요.",
+      "detected_items": 6,
+      "mode": "file_based_restore",
+      "total_processing_time": 0.08361482620239258
+    },
+    {
+      "time": "2025-09-23 19:43:31",
+      "remote_addr": "127.0.0.1",
+      "path": "/pseudonymize",
+      "request_id": "1a35e07cdfa9e3d59400",
+      "input": {
+        "id": "1a35e07cdfa9e3d59400",
+        "prompt": "제 이름이 뭐라고요?"
+      },
+      "output": {
+        "pseudonymized_text": "제 이름이 뭐라고요?",
+        "detection": {
+          "items": [],
+          "count": 0,
+          "contains_pii": false
+        },
+        "processing_time": 0.061034440994262695,
+        "reverse_map": {}
+      },
+      "detection": {
+        "items": [],
+        "count": 0,
+        "contains_pii": false
+      },
+      "success": true,
+      "timestamp": "2025-09-23T19:43:31.257635",
+      "type": "pseudonymize",
+      "original_text": "제 이름이 뭐라고요?",
+      "detected_items": 0,
+      "mode": "file_based_restore",
+      "total_processing_time": 0.061034440994262695
     }
   ]
 }

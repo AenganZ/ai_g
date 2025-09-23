@@ -1,28 +1,51 @@
 {
   "manifest_version": 3,
   "name": "GenAI Pseudonymizer",
-  "version": "0.1.0",
-  "description": "프롬프트는 가명화하여 전송하고 응답은 원복하여 표시합니다.",
-  "permissions": ["storage", "scripting"],
-  "host_permissions": [
-    "https://api.openai.com/*",
-    "https://api.anthropic.com/*",
-    "https://chat.openai.com/*",
-    "https://chat.openai.com/backend-api/*",
-    "https://chatgpt.com/*",
-    "https://chatgpt.com/backend-api/*",
-    "http://127.0.0.1:5000/*"
+  "version": "0.2.0",
+  "description": "프롬프트는 가명화하여 전송하고 응답은 원복하여 표시합니다. (디버깅 강화)",
+  "permissions": [
+    "storage", 
+    "scripting",
+    "activeTab"
   ],
-  "background": { "service_worker": "background.js", "type": "module" },
+  "host_permissions": [
+    "*://api.openai.com/*",
+    "*://api.anthropic.com/*",
+    "*://chat.openai.com/*",
+    "*://chatgpt.com/*",
+    "*://claude.ai/*",
+    "http://127.0.0.1:5000/*",
+    "http://localhost:5000/*"
+  ],
+  "background": { 
+    "service_worker": "background.js", 
+    "type": "module" 
+  },
   "content_scripts": [{
-    "matches": ["<all_urls>"],
+    "matches": [
+      "*://chat.openai.com/*",
+      "*://chatgpt.com/*", 
+      "*://claude.ai/*",
+      "*://api.openai.com/*",
+      "*://api.anthropic.com/*"
+    ],
     "js": ["content.js"],
-    "run_at": "document_start"
+    "run_at": "document_start",
+    "all_frames": true
   }],
   "web_accessible_resources": [{
     "resources": ["injected.js"],
-    "matches": ["<all_urls>"]
+    "matches": [
+      "*://chat.openai.com/*",
+      "*://chatgpt.com/*",
+      "*://claude.ai/*"
+    ]
   }],
-  "action": { "default_popup": "popup.html" },
-  "options_ui": { "page": "options.html", "open_in_tab": true }
+  "action": { 
+    "default_popup": "popup.html" 
+  },
+  "options_ui": { 
+    "page": "options.html", 
+    "open_in_tab": true 
+  }
 }

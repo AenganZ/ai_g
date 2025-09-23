@@ -1,4 +1,4 @@
-// background.js - 역복호화 기능만 집중 강화
+// background.js - Future-Challenge 방식 기반 (검증된 역복호화)
 
 // ===== 전역 상태 =====
 const STATE = {
@@ -18,7 +18,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     const startedAt = new Date().toISOString();
     const requestId = cryptoRandomId();
     
-    console.log(`🚀 [${requestId}] 요청 시작`);
+    console.log(`🚀🚀🚀 [${requestId}] 요청 시작 🚀🚀🚀`);
     
     const logEntry = {
       id: requestId,
@@ -46,26 +46,28 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       }
       
       const { joinedText, adapter } = extractTextForPseudonymization(url, reqBody);
+      console.log(`📝 [${requestId}] 추출된 프롬프트: "${joinedText.substring(0, 100)}..."`);
 
       // 2) 서버에 가명화 요청
       const id20 = await makeId20(joinedText + '|' + startedAt);
+      console.log(`🔄 [${requestId}] 서버 가명화 요청 시작...`);
+      
       const pseudoResult = await postToLocalPseudonymize(joinedText || '', id20);
       
       console.log(`📝 [${requestId}] 가명화 결과:`, {
-        original: joinedText,
-        masked: pseudoResult.masked_prompt,
-        reverse_map: pseudoResult.reverse_map
+        masked_prompt: pseudoResult.masked_prompt.substring(0, 100) + "...",
+        reverse_map_size: Object.keys(pseudoResult.reverse_map || {}).length
       });
 
       // 3) ⭐ reverse_map 저장 (복원용) - 핵심!
       const reverseMap = pseudoResult.reverse_map || {};
-      console.log(`🔑 [${requestId}] reverse_map 확인:`, reverseMap);
+      console.log(`🔑🔑🔑 [${requestId}] reverse_map 상세:`, reverseMap);
       
       if (Object.keys(reverseMap).length > 0) {
         STATE.activeMappings.set(id20, reverseMap);
-        console.log(`✅ [${requestId}] reverse_map 저장 완료 [${id20}]:`, reverseMap);
+        console.log(`✅✅✅ [${requestId}] reverse_map 저장 완료 [${id20}]:`, reverseMap);
       } else {
-        console.log(`❌ [${requestId}] reverse_map이 비어있음!`);
+        console.log(`❌❌❌ [${requestId}] reverse_map이 비어있음!`);
       }
 
       // 4) AI 서비스로 가명화된 요청 전송
@@ -74,16 +76,27 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
       console.log(`🤖 [${requestId}] AI 서비스로 전송:`, {
         url: url,
-        masked_prompt: pseudoResult.masked_prompt
+        masked_prompt_preview: pseudoResult.masked_prompt.substring(0, 100) + "..."
       });
 
       // 5) AI 서비스 응답 수신
-      const res = await fetch(url, { method, headers, body: bodyOut });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 120000); // 2분
+
+      const res = await fetch(url, { 
+        method, 
+        headers, 
+        body: bodyOut,
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      
       let responseText = await res.text();
 
-      console.log(`📨 [${requestId}] AI 응답 수신:`, {
+      console.log(`📨📨📨 [${requestId}] AI 응답 수신:`, {
         status: res.status,
-        response_preview: responseText.substring(0, 200) + '...'
+        response_preview: responseText.substring(0, 200) + '...',
+        response_length: responseText.length
       });
 
       // 6) ⭐⭐⭐ 핵심: AI 응답 복원 ⭐⭐⭐
@@ -91,27 +104,27 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       console.log(`🔍 [${requestId}] 복원 시작:`, {
         has_stored_map: !!storedReverseMap,
         stored_map: storedReverseMap,
-        original_response: responseText
+        original_response_preview: responseText.substring(0, 100) + '...'
       });
       
       if (storedReverseMap && Object.keys(storedReverseMap).length > 0) {
-        console.log(`🔄 [${requestId}] 복원 실행 중...`);
+        console.log(`🔄🔄🔄 [${requestId}] 복원 실행 중...`);
         
         const restoredText = performRestore(responseText, storedReverseMap, requestId);
         
         if (restoredText !== responseText) {
-          console.log(`✅ [${requestId}] 복원 성공!`);
+          console.log(`✅✅✅ [${requestId}] 복원 성공!`);
           console.log(`📝 복원 전: "${responseText.substring(0, 100)}..."`);
           console.log(`📝 복원 후: "${restoredText.substring(0, 100)}..."`);
           responseText = restoredText;
         } else {
-          console.log(`⚠️ [${requestId}] 복원할 내용 없음 (AI가 가명을 언급하지 않았을 수 있음)`);
+          console.log(`⚠️⚠️⚠️ [${requestId}] 복원할 내용이 없었음 (AI가 가명을 언급하지 않았을 수 있음)`);
         }
         
         // 매핑 정리
         STATE.activeMappings.delete(id20);
       } else {
-        console.log(`❌ [${requestId}] 복원 불가 - reverse_map이 없음`);
+        console.log(`❌❌❌ [${requestId}] 복원 불가 - reverse_map이 없음`);
       }
 
       // 7) 응답 기록
@@ -122,7 +135,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
       pushLog(logEntry);
 
-      console.log(`🎉 [${requestId}] 요청 처리 완료`);
+      console.log(`🎉🎉🎉 [${requestId}] 요청 처리 완료`);
 
       return sendResponse({
         ok: true,
@@ -132,8 +145,15 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       });
       
     } catch (e) {
-      console.error(`❌ [${requestId}] 오류:`, e);
-      logEntry.error = String(e?.message || e);
+      console.error(`❌❌❌ [${requestId}] 오류:`, e);
+      
+      if (e.name === 'AbortError') {
+        console.error(`⏰⏰⏰ [${requestId}] 타임아웃 발생 (2분 초과)`);
+        logEntry.error = 'Request timeout (2 minutes)';
+      } else {
+        logEntry.error = String(e?.message || e);
+      }
+      
       pushLog(logEntry);
       return sendResponse({ ok: false, error: logEntry.error });
     }
@@ -142,10 +162,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   return true;
 });
 
-// ⭐⭐⭐ 핵심 복원 함수 ⭐⭐⭐
+// ⭐⭐⭐ Future-Challenge 방식 복원 함수 ⭐⭐⭐
 function performRestore(aiResponseText, reverseMap, requestId) {
-  console.log(`🔄 [${requestId}] === 복원 함수 시작 ===`);
-  console.log(`원본 AI 응답:`, aiResponseText);
+  console.log(`🔄🔄🔄 [${requestId}] === 복원 함수 시작 ===`);
+  console.log(`원본 AI 응답: "${aiResponseText.substring(0, 200)}..."`);
   console.log(`사용할 reverse_map:`, reverseMap);
 
   if (!aiResponseText || !reverseMap) {
@@ -190,9 +210,9 @@ function performRestore(aiResponseText, reverseMap, requestId) {
     }
   }
 
-  console.log(`🔄 [${requestId}] === 복원 함수 완료 ===`);
+  console.log(`🔄🔄🔄 [${requestId}] === 복원 함수 완료 ===`);
   console.log(`총 ${totalChanges}개 항목이 복원됨`);
-  console.log(`최종 복원된 텍스트:`, restoredText);
+  console.log(`최종 복원된 텍스트: "${restoredText.substring(0, 200)}..."`);
 
   return restoredText;
 }
@@ -238,29 +258,56 @@ async function makeId20(input) {
 async function postToLocalPseudonymize(prompt, id) {
   const payload = { prompt: String(prompt || ''), id: String(id || '') };
   
-  const resp = await fetch('http://127.0.0.1:5000/pseudonymize', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
+  console.log(`🌐 서버 요청 시작:`, { prompt: prompt.substring(0, 50) + '...', id });
   
-  const text = await resp.text();
-  if (!resp.ok) {
-    throw new Error(`pseudonymize HTTP ${resp.status}: ${text.slice(0,200)}`);
-  }
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000); // 30초 타임아웃
+  
+  try {
+    const resp = await fetch('http://127.0.0.1:5000/pseudonymize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
+    
+    const text = await resp.text();
+    console.log(`🌐 서버 응답 수신:`, { status: resp.status, responseLength: text.length });
+    
+    if (!resp.ok) {
+      throw new Error(`pseudonymize HTTP ${resp.status}: ${text.slice(0,200)}`);
+    }
 
-  let obj = {};
-  try { 
-    obj = JSON.parse(text); 
-  } catch { 
-    obj = {};
+    let obj = {};
+    try { 
+      obj = JSON.parse(text); 
+      console.log(`📊 서버 응답 파싱 성공:`, { 
+        masked_prompt_length: (obj?.masked_prompt || '').length,
+        reverse_map_keys: Object.keys(obj?.reverse_map || {}),
+        reverse_map_size: Object.keys(obj?.reverse_map || {}).length
+      });
+    } catch (parseError) { 
+      console.error(`❌ 서버 응답 파싱 실패:`, parseError);
+      obj = {};
+    }
+    
+    return {
+      masked_prompt: obj?.masked_prompt || obj?.pseudonymized_text || payload.prompt,
+      reverse_map: obj?.reverse_map || {},
+      mapping: obj?.mapping || []
+    };
+  } catch (e) {
+    clearTimeout(timeoutId);
+    if (e.name === 'AbortError') {
+      console.error(`⏰ 서버 요청 타임아웃 (30초)`);
+      throw new Error('서버 요청 타임아웃');
+    } else {
+      console.error(`❌ 서버 통신 오류:`, e);
+      throw e;
+    }
   }
-  
-  return {
-    masked_prompt: obj?.masked_prompt || obj?.pseudonymized_text || payload.prompt,
-    reverse_map: obj?.reverse_map || {},
-    mapping: obj?.mapping || []
-  };
 }
 
 // 벤더별 어댑터

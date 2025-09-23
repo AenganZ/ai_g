@@ -1,4 +1,4 @@
-# app.py - 모듈화된 Flask 서버 (강화된 디버깅 버전)
+# app.py - 파일 기반 역복호화 API 추가
 import os
 import json
 import time
@@ -64,6 +64,16 @@ def add_log(entry):
         logs_data["logs"] = logs_data["logs"][-MAX_LOGS:]
     save_logs(logs_data)
 
+def build_reverse_map_from_detection(detection_items):
+    """detection items에서 reverse_map 생성"""
+    reverse_map = {}
+    for item in detection_items:
+        token = item.get("token", "")
+        original = item.get("value", "")
+        if token and original and token != original:
+            reverse_map[token] = original
+    return reverse_map
+
 # Flask 라우트
 @app.route("/", methods=["GET", "OPTIONS"])
 def root():
@@ -95,19 +105,18 @@ def root():
         stats = {"error": f"통계 정보 로드 실패: {e}"}
     
     return jsonify({
-        "service": "GenAI Pseudonymizer (AenganZ Enhanced)",
-        "version": "4.0.1",
+        "service": "GenAI Pseudonymizer (파일 기반 역복호화)",
+        "version": "4.1.0",
         "status": "running",
         "manager_ready": manager_initialized,
         "features": {
-            "modular_design": True,
+            "file_based_restore": True,
             "real_names_mode": True,
             "enhanced_filtering": True,
             "email_detection": True,
             "smart_address": True,
             "ner_model": "KPF/KPF-bert-ner",
-            "reverse_restoration": True,
-            "enhanced_debugging": True  # 강화된 디버깅 활성화
+            "persistent_reverse_mapping": True
         },
         "stats": stats
     })
@@ -134,7 +143,7 @@ def pseudonymize():
         text = data["prompt"]
         request_id = data.get("id", f"req_{int(time.time())}")
         
-        debug_log(f"가명화 요청 시작 [{request_id}]", {
+        debug_log(f"⭐ 파일 기반 가명화 요청 시작 [{request_id}]", {
             "prompt": text[:100] + "..." if len(text) > 100 else text,
             "prompt_length": len(text),
             "request_ip": request.remote_addr
@@ -156,9 +165,9 @@ def pseudonymize():
                 return response, 500
         
         # 비동기 가명화 처리
-        debug_log(f"pseudonymize_text_with_fake 호출 시작 [{request_id}]")
+        debug_log(f"🚀 pseudonymize_text_with_fake 호출 시작 [{request_id}]")
         result = asyncio.run(pseudonymize_text_with_fake(text))
-        debug_log(f"pseudonymize_text_with_fake 호출 완료 [{request_id}]")
+        debug_log(f"🚀 pseudonymize_text_with_fake 호출 완료 [{request_id}]")
         
         pseudonymized_text = result.get("pseudonymized_text", text)
         detected_items = result.get("detected_items", 0)
@@ -168,7 +177,7 @@ def pseudonymize():
         
         processing_time = time.time() - start_time
         
-        debug_log(f"가명화 처리 완료 [{request_id}]", {
+        debug_log(f"✅ 가명화 처리 완료 [{request_id}]", {
             "original_text": text[:50] + "..." if len(text) > 50 else text,
             "pseudonymized_text": pseudonymized_text[:50] + "..." if len(pseudonymized_text) > 50 else pseudonymized_text,
             "detected_items": detected_items,
@@ -177,41 +186,12 @@ def pseudonymize():
             "processing_time": processing_time
         })
         
-        # ⭐ reverse_map 검증 및 보장
-        if detected_items > 0 and not reverse_map:
-            debug_error(f"경고: PII가 탐지되었지만 reverse_map이 비어있음 [{request_id}]", {
-                "detected_items": detected_items,
-                "mapping": mapping[:3]  # 처음 3개만 로그
-            })
-            
-            # mapping에서 reverse_map 재구성 시도
-            reconstructed_reverse_map = {}
-            for item in mapping:
-                token = item.get("token", "")
-                original = item.get("original", "")
-                if token and original and token != original:
-                    reconstructed_reverse_map[token] = original
-            
-            if reconstructed_reverse_map:
-                reverse_map = reconstructed_reverse_map
-                debug_log(f"reverse_map 재구성 완료 [{request_id}]", reverse_map)
-            else:
-                debug_error(f"reverse_map 재구성 실패 [{request_id}]")
-        
-        # 최종 검증
-        debug_log(f"최종 응답 준비 [{request_id}]", {
-            "pseudonymized_length": len(pseudonymized_text),
-            "reverse_map_entries": len(reverse_map),
-            "mapping_entries": len(mapping),
-            "has_pii": detected_items > 0,
-            "final_reverse_map": reverse_map
-        })
-        
-        # 로그 저장 (브라우저 익스텐션 호환 형식)
+        # ⭐ 파일 기반 저장을 위한 로그 엔트리
         log_entry = {
             "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "remote_addr": request.remote_addr,
-            "path": "/pseudonymize",
+            "path": "/pseudonymize", 
+            "request_id": request_id,  # ⭐ 핵심: request_id 저장
             "input": {
                 "id": request_id,
                 "prompt": text
@@ -220,7 +200,7 @@ def pseudonymize():
                 "pseudonymized_text": pseudonymized_text,
                 "detection": detection_details,
                 "processing_time": processing_time,
-                "reverse_map": reverse_map
+                "reverse_map": reverse_map  # ⭐ reverse_map도 저장
             },
             "detection": {
                 "items": [
@@ -240,15 +220,14 @@ def pseudonymize():
             "success": True,
             "timestamp": datetime.now().isoformat(),
             "type": "pseudonymize",
-            "request_id": request_id,
             "original_text": text,
             "detected_items": detected_items,
-            "mode": "modular_enhanced",
+            "mode": "file_based_restore",
             "total_processing_time": time.time() - request_start_time
         }
         add_log(log_entry)
         
-        # ⭐ 브라우저 익스텐션 호환 응답 형식
+        # ⭐ 브라우저 익스텐션 호환 응답 형식 + 파일 기반
         response_data = {
             "pseudonymized_text": pseudonymized_text,
             "masked_prompt": pseudonymized_text,
@@ -256,16 +235,17 @@ def pseudonymize():
             "processing_time": processing_time,
             "success": True,
             "timestamp": datetime.now().isoformat(),
-            "mode": "modular_enhanced",
+            "mode": "file_based_restore",
             "mapping": mapping,
-            "reverse_map": reverse_map,  # ⭐ 핵심: reverse_map 보장
-            "id": request_id,
+            "reverse_map": reverse_map,  # ⭐ reverse_map 제공 (호환성)
+            "request_id": request_id,    # ⭐ request_id 제공 (파일 기반용)
             "detected_count": detected_items
         }
         
-        debug_log(f"응답 전송 [{request_id}]", {
+        debug_log(f"📤 응답 전송 [{request_id}]", {
             "response_size": len(json.dumps(response_data, ensure_ascii=False)),
             "reverse_map_confirmed": bool(reverse_map),
+            "request_id_confirmed": bool(request_id),
             "total_time": time.time() - request_start_time
         })
         
@@ -289,8 +269,9 @@ def pseudonymize():
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response, 500
 
-@app.route("/restore", methods=["POST", "OPTIONS"])
-def restore():
+@app.route("/get_reverse_map", methods=["POST", "OPTIONS"])
+def get_reverse_map():
+    """⭐ 새로운 API: request_id로 reverse_map 조회"""
     if request.method == "OPTIONS":
         response = jsonify({"message": "CORS preflight OK"})
         response.headers.add('Access-Control-Allow-Origin', '*')
@@ -300,60 +281,186 @@ def restore():
     
     try:
         data = request.get_json()
-        pseudonymized_text = data.get('pseudonymized_text', '')
-        reverse_map = data.get('reverse_map', {})
+        request_id = data.get("request_id", "")
         
-        debug_log("복원 요청 수신", {
-            "pseudonymized_length": len(pseudonymized_text),
-            "reverse_map": reverse_map,
-            "reverse_map_size": len(reverse_map)
-        })
-        
-        if not pseudonymized_text or not reverse_map:
-            debug_error("복원 요청 오류 - 필수 필드 누락")
-            response = jsonify({"error": "pseudonymized_text와 reverse_map 필드가 필요합니다"})
+        if not request_id:
+            response = jsonify({"error": "request_id가 필요합니다", "reverse_map": {}})
             response.headers.add('Access-Control-Allow-Origin', '*')
             return response, 400
         
-        start_time = time.time()
+        debug_log(f"🔍 reverse_map 조회 요청", {"request_id": request_id})
         
-        # ⭐ 강화된 복원 로직
-        restored_text = pseudonymized_text
-        sorted_reverse_mappings = sorted(reverse_map.items(), key=lambda x: len(x[0]), reverse=True)
+        # 로그 파일에서 해당 request_id 찾기
+        logs_data = load_logs()
+        logs = logs_data.get("logs", [])
         
-        replacement_count = 0
-        replacement_details = []
+        # 최근 로그부터 역순으로 검색
+        for log_entry in reversed(logs):
+            if log_entry.get("request_id") == request_id:
+                reverse_map = log_entry.get("output", {}).get("reverse_map", {})
+                detection_items = log_entry.get("detection", {}).get("items", [])
+                
+                # reverse_map이 없으면 detection items에서 생성
+                if not reverse_map and detection_items:
+                    reverse_map = build_reverse_map_from_detection(detection_items)
+                
+                debug_log(f"✅ reverse_map 찾음", {
+                    "request_id": request_id,
+                    "reverse_map": reverse_map,
+                    "map_size": len(reverse_map)
+                })
+                
+                response_data = {
+                    "success": True,
+                    "request_id": request_id,
+                    "reverse_map": reverse_map,
+                    "found": True,
+                    "timestamp": datetime.now().isoformat()
+                }
+                
+                response = jsonify(response_data)
+                response.headers.add('Access-Control-Allow-Origin', '*')
+                return response
         
-        debug_log("복원 시작", {
-            "mappings_to_process": len(sorted_reverse_mappings),
-            "sorted_mappings": sorted_reverse_mappings
+        # 찾지 못한 경우 - 최근 로그 사용 (fallback)
+        if logs:
+            latest_log = logs[-1]
+            reverse_map = latest_log.get("output", {}).get("reverse_map", {})
+            detection_items = latest_log.get("detection", {}).get("items", [])
+            
+            if not reverse_map and detection_items:
+                reverse_map = build_reverse_map_from_detection(detection_items)
+            
+            debug_log(f"⚠️ request_id 못 찾음, 최근 로그 사용", {
+                "requested_id": request_id,
+                "latest_id": latest_log.get("request_id", "unknown"),
+                "reverse_map": reverse_map
+            })
+            
+            response_data = {
+                "success": True,
+                "request_id": request_id,
+                "reverse_map": reverse_map,
+                "found": False,
+                "used_latest": True,
+                "timestamp": datetime.now().isoformat()
+            }
+        else:
+            response_data = {
+                "success": False,
+                "request_id": request_id,
+                "reverse_map": {},
+                "found": False,
+                "error": "로그가 없습니다",
+                "timestamp": datetime.now().isoformat()
+            }
+        
+        response = jsonify(response_data)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+        
+    except Exception as e:
+        debug_error("reverse_map 조회 중 오류", e)
+        response = jsonify({
+            "success": False,
+            "reverse_map": {},
+            "error": f"reverse_map 조회 오류: {str(e)}",
+            "timestamp": datetime.now().isoformat()
+        })
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response, 500
+
+@app.route("/restore_text", methods=["POST", "OPTIONS"])
+def restore_text():
+    """⭐ 새로운 API: 텍스트 복원 (서버에서 처리)"""
+    if request.method == "OPTIONS":
+        response = jsonify({"message": "CORS preflight OK"})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', '*')
+        response.headers.add('Access-Control-Allow-Methods', '*')
+        return response
+    
+    try:
+        data = request.get_json()
+        ai_response_text = data.get('ai_response_text', '')
+        request_id = data.get('request_id', '')
+        
+        debug_log("📝 텍스트 복원 요청", {
+            "request_id": request_id,
+            "text_length": len(ai_response_text),
+            "text_preview": ai_response_text[:100] + "..." if len(ai_response_text) > 100 else ai_response_text
         })
         
-        for fake, original in sorted_reverse_mappings:
-            if fake and original and fake in restored_text:
-                before_replace = restored_text
-                restored_text = restored_text.replace(fake, original)
-                if before_replace != restored_text:
-                    replacement_count += 1
-                    detail = {"fake": fake, "original": original}
-                    replacement_details.append(detail)
-                    debug_log(f"복원 성공", detail)
+        if not ai_response_text:
+            response = jsonify({"error": "ai_response_text가 필요합니다", "restored_text": ""})
+            response.headers.add('Access-Control-Allow-Origin', '*')
+            return response, 400
         
-        processing_time = time.time() - start_time
+        # request_id로 reverse_map 찾기
+        logs_data = load_logs()
+        logs = logs_data.get("logs", [])
+        reverse_map = {}
         
-        debug_log("복원 완료", {
-            "total_replacements": replacement_count,
-            "processing_time": processing_time,
-            "original_length": len(pseudonymized_text),
-            "restored_length": len(restored_text),
-            "replacement_details": replacement_details
+        for log_entry in reversed(logs):
+            if log_entry.get("request_id") == request_id:
+                reverse_map = log_entry.get("output", {}).get("reverse_map", {})
+                detection_items = log_entry.get("detection", {}).get("items", [])
+                
+                if not reverse_map and detection_items:
+                    reverse_map = build_reverse_map_from_detection(detection_items)
+                break
+        
+        # reverse_map이 없으면 최근 로그 사용
+        if not reverse_map and logs:
+            latest_log = logs[-1]
+            reverse_map = latest_log.get("output", {}).get("reverse_map", {})
+            detection_items = latest_log.get("detection", {}).get("items", [])
+            
+            if not reverse_map and detection_items:
+                reverse_map = build_reverse_map_from_detection(detection_items)
+        
+        debug_log("🔑 복원용 reverse_map", {
+            "reverse_map": reverse_map,
+            "map_size": len(reverse_map)
+        })
+        
+        # 서버에서 텍스트 복원
+        restored_text = ai_response_text
+        restoration_count = 0
+        restoration_details = []
+        
+        # 길이 순으로 정렬 (긴 것부터)
+        sorted_mappings = sorted(reverse_map.items(), key=lambda x: len(x[0]), reverse=True)
+        
+        for fake_value, original_value in sorted_mappings:
+            if fake_value and original_value and fake_value in restored_text:
+                count_before = restored_text.count(fake_value)
+                if count_before > 0:
+                    restored_text = restored_text.replace(fake_value, original_value)
+                    restoration_count += count_before
+                    restoration_details.append({
+                        "fake": fake_value,
+                        "original": original_value,
+                        "count": count_before
+                    })
+                    debug_log(f"🔄 복원 완료", {
+                        "fake": fake_value,
+                        "original": original_value,
+                        "count": count_before
+                    })
+        
+        debug_log("✅ 텍스트 복원 완료", {
+            "total_restorations": restoration_count,
+            "restoration_details": restoration_details,
+            "restored_preview": restored_text[:100] + "..." if len(restored_text) > 100 else restored_text
         })
         
         response_data = {
+            "success": True,
             "restored_text": restored_text,
-            "processing_time": processing_time,
-            "replacement_count": replacement_count,
-            "replacement_details": replacement_details,
+            "restoration_count": restoration_count,
+            "restoration_details": restoration_details,
+            "reverse_map_used": reverse_map,
             "timestamp": datetime.now().isoformat()
         }
         
@@ -362,9 +469,11 @@ def restore():
         return response
         
     except Exception as e:
-        debug_error("복원 처리 중 오류", e)
+        debug_error("텍스트 복원 중 오류", e)
         response = jsonify({
-            "error": f"복원 처리 중 오류 발생: {str(e)}",
+            "success": False,
+            "restored_text": ai_response_text,
+            "error": f"텍스트 복원 오류: {str(e)}",
             "timestamp": datetime.now().isoformat()
         })
         response.headers.add('Access-Control-Allow-Origin', '*')
@@ -421,9 +530,9 @@ def health():
         "status": "healthy",
         "timestamp": datetime.now().isoformat(),
         "manager_ready": manager_initialized,
-        "version": "4.0.1",
-        "reverse_restoration": True,
-        "enhanced_debugging": True
+        "version": "4.1.0",
+        "file_based_restore": True,
+        "persistent_reverse_mapping": True
     }
     
     response = jsonify(health_status)
@@ -431,14 +540,14 @@ def health():
     return response
 
 if __name__ == "__main__":
-    print("🚀 GenAI Pseudonymizer (AenganZ Enhanced) 서버 시작")
+    print("🚀 GenAI Pseudonymizer (파일 기반 역복호화) 서버 시작")
     print("📝 가명화 모드: 김가명, 이가명 등 실제 가명 사용")
     print("📞 전화번호: 010-0000-0000부터 1씩 증가")
     print("🏠 주소: 시/도만 표시")
     print("📧 이메일: user001@example.com 형태")
     print("🤖 NER 모델: KPF/KPF-bert-ner")
-    print("🔄 역복호화 기능: 활성화")
-    print("🔧 강화된 디버깅: 활성화")
+    print("💾 파일 기반 역복호화: pseudo-log.json 활용")
+    print("🔄 새로운 API: /get_reverse_map, /restore_text")
     print("⚡ 서버 시작 중...")
     
     try:
