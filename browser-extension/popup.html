@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>프롬프트 로그</title>
+  <style>
+    :root{ --bd:#ddd; --muted:#666; --ok:#106b21; --warn:#7a1212; --danger:#dc3545; }
+    body{min-width:420px;max-width:780px;padding:12px;font-family:sans-serif}
+    .hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .muted{color:var(--muted);font-size:12px}
+    .toolbar{display:flex;gap:6px;align-items:center;margin:8px 0}
+    .btn{padding:6px 10px;border:1px solid #ccc;border-radius:6px;background:#f7f7f7;cursor:pointer;font-size:12px}
+    .btn:active{transform:translateY(1px)}
+    .btn:hover{background:#e9e9e9}
+    .btn.danger{background:#dc3545;color:white;border-color:#dc3545}
+    .btn.danger:hover{background:#c82333}
+    .list{border-top:1px solid var(--bd);margin-top:8px}
+    .row{border-bottom:1px solid var(--bd);padding:8px 0}
+    .row summary{cursor:pointer;list-style:none}
+    .row summary::-webkit-details-marker{display:none}
+    .row-head{display:flex;justify-content:space-between;gap:10px;align-items:center}
+    .pill{font-size:11px;border:1px solid var(--bd);border-radius:999px;padding:1px 6px}
+    .ok{border-color:#6c6; color:var(--ok)}
+    .warn{border-color:#c66; color:var(--warn)}
+    .prompt{font-family:ui-monospace,Consolas,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:520px}
+    .time{color:var(--muted);font-size:12px;white-space:nowrap}
+    .mono{font-family:ui-monospace,Consolas,monospace}
+    pre{white-space:pre-wrap;word-wrap:break-word;overflow-wrap:anywhere}
+    .items{margin-top:8px}
+    .item{border:1px solid var(--bd);border-radius:8px;padding:8px;margin:6px 0}
+    .grid{display:grid;grid-template-columns:120px 1fr;gap:6px}
+    .map{margin-top:6px;padding:6px;background:#fafafa;border:1px dashed var(--bd);border-radius:6px}
+    .map-row{display:flex;gap:6px;align-items:center;font-size:13px}
+    .tag{border:1px solid var(--bd);border-radius:6px;padding:0 6px;font-size:12px;background:#fff}
+    .arrow{opacity:.6}
+    .masked-wrap{margin-top:8px}
+    .status{padding:8px;margin:8px 0;border-radius:4px;font-size:12px;text-align:center}
+    .status.success{background:#d4edda;color:#155724;border:1px solid #c3e6cb}
+    .status.error{background:#f8d7da;color:#721c24;border:1px solid #f5c6cb}
+    .confirm-dialog{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:white;border:2px solid #ccc;border-radius:8px;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:1000}
+    .confirm-backdrop{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:999}
+    .confirm-buttons{display:flex;gap:10px;margin-top:15px;justify-content:flex-end}
+  </style>
+</head>
+<body>
+  <div class="hdr">
+    <b>프롬프트 로그</b>
+    <small class="muted" id="ts"></small>
+  </div>
+
+  <div class="toolbar">
+    <button class="btn" id="refresh">새로고침</button>
+    <button class="btn danger" id="clearLogs">로그 삭제</button>
+  </div>
+
+  <div id="statusMessage" class="status" style="display:none;"></div>
+
+  <div class="list" id="reqList"></div>
+
+  <!-- 확인 다이얼로그 -->
+  <div id="confirmDialog" style="display:none;">
+    <div class="confirm-backdrop" id="confirmBackdrop"></div>
+    <div class="confirm-dialog">
+      <h3>로그 삭제 확인</h3>
+      <p>모든 로그를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.</p>
+      <div class="confirm-buttons">
+        <button class="btn" id="confirmCancel">취소</button>
+        <button class="btn danger" id="confirmDelete">삭제</button>
+      </div>
+    </div>
+  </div>
+
+  <template id="row-tpl">
+    <details class="row">
+      <summary class="row-head">
+        <span class="pill" data-badge></span>
+        <span class="prompt" data-prompt></span>
+        <span class="time" data-time></span>
+      </summary>
+
+      <!-- 탐지 상세 -->
+      <div class="items" data-detection></div>
+
+      <!-- 치환 매핑(무엇이 → 무엇으로) -->
+      <div class="map" data-mapping></div>
+
+      <!-- 가명화 미리보기 토글 -->
+      <div class="masked-wrap">
+        <button class="btn" data-toggle-masked>가명화된 문장 보기</button>
+        <pre class="mono" data-masked style="display:none;"></pre>
+      </div>
+    </details>
+  </template>
+
+  <script src="popup.js"></script>
+</body>
+</html>
