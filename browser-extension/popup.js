@@ -97,7 +97,7 @@ function renderLogs(logsObj) {
     promptSpan.textContent = prompt;
     timeSpan.textContent = fmtTime(time);
 
-    // 탐지 상세 테이블
+    // 탐지 상세 테이블 (Index 제거됨)
     if (!items.length) {
       detWrap.innerHTML = `<div class="muted">탐지 결과 없음</div>`;
       mapWrap.innerHTML = '';
@@ -111,7 +111,6 @@ function renderLogs(logsObj) {
             <div><b>#${idx + 1} Type</b></div><div>${it.type || '-'}</div>
             <div><b>Value</b></div><div class="mono">${it.value || ''}</div>
             <div><b>Token</b></div><div class="mono">${it.token || ''}</div>
-            <div><b>Index</b></div><div>${Number.isFinite(it.start) ? it.start : 0} ~ ${Number.isFinite(it.end) ? it.end : 0}</div>
           </div>
         `;
         fragItems.appendChild(box);

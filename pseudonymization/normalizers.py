@@ -1,4 +1,4 @@
-# pseudonymization/normalizers.py - 이름/주소 탐지 강화 버전
+# pseudonymization/normalizers.py - 이름/주소 탐지 강화 버전 (조사 제외 수정, 전화번호 중복 해결)
 import re
 import asyncio
 from typing import Optional, Dict, List, Any
@@ -17,29 +17,29 @@ AGE_RX = re.compile(r"\b(\d{1,3})\s*(?:세|살)?\b")
 PHONE_NUM_ONLY = re.compile(r"\D+")
 PHONE_PATTERN = re.compile(r'010[-\s]?\d{4}[-\s]?\d{4}')
 
-# ⭐⭐⭐ 대폭 강화된 이름 탐지 패턴 ⭐⭐⭐
+# ⭐⭐⭐ 대폭 강화된 이름 탐지 패턴 (조사 제외 수정) ⭐⭐⭐
 NAME_PATTERNS = [
-    # 기존 패턴들
-    re.compile(r'이름은\s*([가-힣]{2,4})(님|씨)?(?![가-힣])'),
-    re.compile(r'저는\s*([가-힣]{2,4})(님|씨)?(?![가-힣])'),
-    re.compile(r'([가-힣]{2,4})(님|씨)?\s*입니다'),
+    # 기존 패턴들 (조사 제외 강화)
+    re.compile(r'이름은\s*([가-힣]{2,4})(?![가-힣]|이고|이에요|입니다|라고)(님|씨)?'),
+    re.compile(r'저는\s*([가-힣]{2,4})(?![가-힣]|이고|이에요|입니다|라고)(님|씨)?'),
+    re.compile(r'([가-힣]{2,4})(?![가-힣]|이고|이에요|라고)(님|씨)?\s*입니다'),
     re.compile(r'([가-힣]{2,4})(이에요|예요|이야|야)'),
     re.compile(r'([가-힣]{2,4})(님|씨)(?![가-힣])'),
-    re.compile(r'안녕하세요,?\s*(?:저는\s*)?([가-힣]{2,4})(님|씨)?'),
-    re.compile(r'([가-힣]{2,4})(님|씨)?\s*고객'),
-    re.compile(r'([가-힣]{2,4})(님|씨)?\s*회원'),
+    re.compile(r'안녕하세요,?\s*(?:저는\s*)?([가-힣]{2,4})(?![가-힣]|이고|이에요|입니다|라고)(님|씨)?'),
+    re.compile(r'([가-힣]{2,4})(?![가-힣]|이고|이에요|입니다|라고)(님|씨)?\s*고객'),
+    re.compile(r'([가-힣]{2,4})(?![가-힣]|이고|이에요|입니다|라고)(님|씨)?\s*회원'),
     
-    # ⭐ 새로 추가된 강화 패턴들 ⭐
-    re.compile(r'나\s*([가-힣]{2,4})인데'),           # "나 오수민인데"
-    re.compile(r'([가-힣]{2,4})이고(?![가-힣])'),     # "김수한이고" (조사 "이고")
-    re.compile(r'([가-힣]{2,4})라고\s*(?:합니다|해요|불러)'),  # "김철수라고 합니다"
+    # ⭐ 새로 추가된 강화 패턴들 (조사 제외 강화) ⭐
+    re.compile(r'나\s*([가-힣]{2,4})(?![가-힣]|이고|이에요|입니다|라고)인데'),           # "나 오수민인데"
+    re.compile(r'([가-힣]{2,4})이고(?![가-힣])'),     # "김수한이고" (조사 "이고") - 이름만 추출
+    re.compile(r'([가-힣]{2,4})(?![가-힣]|이고)라고\s*(?:합니다|해요|불러)'),  # "김철수라고 합니다"
     re.compile(r'([가-힣]{2,4})(?=\s*(?:이|가)\s*(?:말했다|했다|왔다|갔다|있다))'),  # "김철수가 왔다"
     re.compile(r'([가-힣]{2,4})(?=\s*(?:은|는)\s*(?:학생|직장인|의사|선생))'),  # "김철수는 학생"
     re.compile(r'([가-힣]{2,4})(?=\s*(?:을|를)\s*(?:만났다|봤다|찾아))'),      # "김철수를 만났다"
     re.compile(r'([가-힣]{2,4})(?=\s*(?:에게|한테)\s*(?:말했다|줬다|전화))'),   # "김철수에게 전화"
     re.compile(r'([가-힣]{2,4})\s*(?:씨|님)\s*(?:이|가)'),                   # "김철수씨가"
-    re.compile(r'제\s*이름은\s*([가-힣]{2,4})'),                            # "제 이름은 김철수"
-    re.compile(r'내\s*이름은\s*([가-힣]{2,4})'),                            # "내 이름은 김철수"
+    re.compile(r'제\s*이름은\s*([가-힣]{2,3})(?![가-힣]|이고|이에요|입니다|라고)'),  # ⭐ 핵심 수정: "제 이름은 김철수" - 조사 제외
+    re.compile(r'내\s*이름은\s*([가-힣]{2,3})(?![가-힣]|이고|이에요|입니다|라고)'),  # ⭐ 핵심 수정: "내 이름은 김철수" - 조사 제외
     re.compile(r'([가-힣]{2,4})\s*(?:라는|이라는)\s*(?:이름|사람)'),            # "김철수라는 이름"
     re.compile(r'([가-힣]{2,4})\s*(?:이라고|라고)\s*(?:하는데|해서)'),           # "김철수라고 해서"
 ]
@@ -57,27 +57,25 @@ def get_pools():
     return get_pools()
 
 def smart_clean_korean_text(text: str, preserve_context: bool = True) -> str:
-    """스마트 한국어 텍스트 정리 (컨텍스트 보존)"""
+    """스마트 한국어 텍스트 정리 (컨텍스트 보존) - 조사 제거 강화"""
     if not text:
         return text
     
     cleaned = text.strip()
     
-    # ⭐ preserve_context=True이면 조사를 유지
-    if preserve_context:
-        return cleaned
-    
-    # 조사 패턴 (끝에 오는 조사들)
-    particles = ['이', '가', '을', '를', '은', '는', '의', '와', '과', '에', '에게', '에서', '로', '으로']
-    # 존칭은 보존 (님, 씨는 제거하지 않음)
-    
-    # 끝에 있는 조사들만 제거 (존칭은 보존)
-    for particle in sorted(particles, key=len, reverse=True):
-        if cleaned.endswith(particle) and len(cleaned) > len(particle) + 1:  # 최소 2글자는 남겨야 함
-            without_particle = cleaned[:-len(particle)]
-            if len(without_particle) >= 2:
-                cleaned = without_particle
-                break
+    # ⭐ 조사 제거 강화 - preserve_context와 관계없이 명확한 조사는 제거
+    if not preserve_context:
+        # 조사 패턴 (끝에 오는 조사들)
+        particles = ['이고', '이에요', '입니다', '라고', '이', '가', '을', '를', '은', '는', '의', '와', '과', '에', '에게', '에서', '로', '으로']
+        # 존칭은 보존 (님, 씨는 제거하지 않음)
+        
+        # 끝에 있는 조사들만 제거 (존칭은 보존)
+        for particle in sorted(particles, key=len, reverse=True):
+            if cleaned.endswith(particle) and len(cleaned) > len(particle) + 1:  # 최소 2글자는 남겨야 함
+                without_particle = cleaned[:-len(particle)]
+                if len(without_particle) >= 2:
+                    cleaned = without_particle
+                    break
     
     return cleaned
 
@@ -88,13 +86,20 @@ def is_valid_korean_name(name: str, include_honorifics: bool = True) -> bool:
     if not name or len(name) < 2 or len(name) > 5:  # 존칭 포함하면 최대 5글자
         return False
     
-    # 존칭 분리
+    # ⭐ 조사 제거 후 검증 강화
     base_name = name
     has_honorific = False
     
+    # 조사 제거
+    particles_to_remove = ['이고', '이에요', '입니다', '라고']
+    for particle in particles_to_remove:
+        if base_name.endswith(particle):
+            base_name = base_name[:-len(particle)]
+            break
+    
     if include_honorifics:
-        if name.endswith('님') or name.endswith('씨'):
-            base_name = name[:-1]
+        if base_name.endswith('님') or base_name.endswith('씨'):
+            base_name = base_name[:-1]
             has_honorific = True
     
     if len(base_name) < 2 or len(base_name) > 4:
@@ -226,10 +231,11 @@ def detect_emails(text: str) -> List[Dict[str, Any]]:
     return items
 
 def detect_phones(text: str) -> List[Dict[str, Any]]:
-    """전화번호 탐지 (정확도 개선)"""
+    """전화번호 탐지 (정확도 개선, 연속 숫자 형태 포함)"""
     items = []
     seen_phones = set()
     
+    # 1. 기존 패턴 (하이픈/공백 포함)
     for match in PHONE_PATTERN.finditer(text):
         phone = match.group()
         normalized_phone = phone.replace(' ', '').replace('-', '')
@@ -245,8 +251,34 @@ def detect_phones(text: str) -> List[Dict[str, Any]]:
                     "start": match.start(),
                     "end": match.end(),
                     "confidence": 0.95,
-                    "source": "normalizers-전화번호"
+                    "source": "normalizers-전화번호",
+                    "normalized": normalized_phone  # ⭐ 정규화된 값 추가
                 })
+                print(f"  ✅ 전화번호 (패턴): '{phone}' → '{formatted_phone}' (정규화: {normalized_phone})")
+    
+    # 2. ⭐ 연속된 11자리 숫자 패턴 (01012345678)
+    continuous_pattern = re.compile(r'\b(010\d{8})\b')
+    for match in continuous_pattern.finditer(text):
+        phone = match.group()
+        
+        # 이미 위의 패턴으로 탐지된 것과 중복인지 확인
+        if phone not in [item.get("normalized", "") for item in items]:
+            formatted_phone = f"{phone[:3]}-{phone[3:7]}-{phone[7:]}"
+            
+            if formatted_phone not in seen_phones:
+                seen_phones.add(formatted_phone)
+                items.append({
+                    "type": "전화번호",
+                    "value": formatted_phone,  # ⭐ 항상 포맷팅된 형태로 저장
+                    "start": match.start(),
+                    "end": match.end(),
+                    "confidence": 0.95,
+                    "source": "normalizers-전화번호-연속",
+                    "normalized": phone,  # ⭐ 정규화된 값 추가
+                    "original_form": "continuous"  # 원본이 연속 형태였음을 표시
+                })
+                print(f"  ✅ 전화번호 (연속): '{phone}' → '{formatted_phone}' (정규화: {phone})")
+    
     return items
 
 def detect_ages(text: str) -> List[Dict[str, Any]]:
@@ -283,13 +315,13 @@ def detect_ages(text: str) -> List[Dict[str, Any]]:
     return items
 
 def detect_names(text: str) -> List[Dict[str, Any]]:
-    """⭐⭐⭐ 대폭 강화된 이름 탐지 ⭐⭐⭐"""
+    """⭐⭐⭐ 대폭 강화된 이름 탐지 (조사 제외 강화) ⭐⭐⭐"""
     items = []
     detected_names = set()
     
-    print(f"🔍 대폭 강화된 이름 탐지 시작: '{text}'")
+    print(f"🔍 대폭 강화된 이름 탐지 시작 (조사 제외): '{text}'")
     
-    # 1. 패턴 기반 탐지 (대폭 확장됨)
+    # 1. 패턴 기반 탐지 (조사 제외 강화)
     for i, pattern in enumerate(NAME_PATTERNS):
         for match in pattern.finditer(text):
             # 그룹 1: 이름, 그룹 2: 존칭 (옵션)
@@ -301,13 +333,15 @@ def detect_names(text: str) -> List[Dict[str, Any]]:
             except IndexError:
                 honorific = ""
             
-            full_name = base_name + (honorific or "")
+            # ⭐ 조사 제거 후처리 강화
+            cleaned_base_name = smart_clean_korean_text(base_name, preserve_context=False)
+            full_name = cleaned_base_name + (honorific or "")
             
-            print(f"  패턴 {i+1}: '{base_name}' + '{honorific}' = '{full_name}'")
+            print(f"  패턴 {i+1}: 원본 '{base_name}' → 정리 '{cleaned_base_name}' + 존칭 '{honorific}' = '{full_name}'")
             
             # ⭐ 기본 이름으로 유효성 검사 (강화됨)
-            if not is_valid_korean_name(base_name, include_honorifics=False):
-                print(f"    ❌ 유효하지 않은 기본 이름: '{base_name}'")
+            if not is_valid_korean_name(cleaned_base_name, include_honorifics=False):
+                print(f"    ❌ 유효하지 않은 기본 이름: '{cleaned_base_name}'")
                 continue
             
             # ⭐ 존칭이 있는 경우 전체 이름도 검사
@@ -316,26 +350,27 @@ def detect_names(text: str) -> List[Dict[str, Any]]:
                 continue
             
             # 중복 제거 (기본 이름 기준)
-            if base_name in detected_names:
-                print(f"    🔄 중복 제거: '{base_name}'")
+            if cleaned_base_name in detected_names:
+                print(f"    🔄 중복 제거: '{cleaned_base_name}'")
                 continue
             
             # ⭐ 존칭이 있는 경우 전체 이름을 저장, 없으면 기본 이름만
-            final_name = full_name if honorific else base_name
+            final_name = full_name if honorific else cleaned_base_name
             
             items.append({
                 "type": "이름",
                 "value": final_name,
                 "start": match.start(1),
-                "end": match.end(),
+                "end": match.start(1) + len(cleaned_base_name) + len(honorific),  # ⭐ 정확한 end 위치
                 "confidence": 0.85,
                 "source": f"normalizers-이름패턴-{i+1}",
                 "has_honorific": bool(honorific),
-                "base_name": base_name,
-                "honorific": honorific
+                "base_name": cleaned_base_name,
+                "honorific": honorific,
+                "original_match": base_name  # 원본 매치 기록
             })
-            detected_names.add(base_name)  # 기본 이름으로 중복 체크
-            print(f"    ✅ 이름 탐지: '{final_name}' (패턴 {i+1}: 기본 '{base_name}', 존칭 '{honorific}')")
+            detected_names.add(cleaned_base_name)  # 기본 이름으로 중복 체크
+            print(f"    ✅ 이름 탐지: '{final_name}' (패턴 {i+1}: 기본 '{cleaned_base_name}', 존칭 '{honorific}')")
     
     # 2. 실명 목록 기반 탐지 (존칭 포함)
     pools = get_pools()
@@ -358,6 +393,12 @@ def detect_names(text: str) -> List[Dict[str, Any]]:
                 full_name = real_name
                 has_honorific = False
             
+            # ⭐ 뒤에 조사가 있는지 확인하여 제외
+            if end_pos < len(text):
+                next_chars = text[end_pos:end_pos+2]
+                if any(next_chars.startswith(particle) for particle in ['이고', '이에']):
+                    print(f"  ⚠️ 실명 목록: '{real_name}' 뒤에 조사 발견, 이름만 추출")
+            
             items.append({
                 "type": "이름",
                 "value": full_name,
@@ -372,7 +413,7 @@ def detect_names(text: str) -> List[Dict[str, Any]]:
             detected_names.add(real_name)
             print(f"  ✅ 실명 목록: '{full_name}' (기본: '{real_name}')")
     
-    print(f"🔍 대폭 강화된 이름 탐지 완료: {len(items)}개")
+    print(f"🔍 대폭 강화된 이름 탐지 완료 (조사 제외): {len(items)}개")
     return items
 
 def detect_addresses(text: str) -> List[Dict[str, Any]]:
@@ -480,13 +521,14 @@ def detect_addresses(text: str) -> List[Dict[str, Any]]:
     return items
 
 def detect_with_ner_supplement(text: str, existing_items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """NER 모델 보완 탐지 (중복 제거 강화)"""
+    """NER 모델 보완 탐지 (중복 제거 강화, 전화번호 정규화)"""
     if not NER_AVAILABLE:
         return []
     
     try:
         existing_values = set()
         existing_complex_addresses = set()
+        existing_normalized_phones = set()  # ⭐ 전화번호 정규화 값 저장
         
         for item in existing_items:
             # 기본 이름과 존칭 포함 이름 모두 기록
@@ -494,6 +536,13 @@ def detect_with_ner_supplement(text: str, existing_items: List[Dict[str, Any]]) 
                 base_value = item.get("base_name", item["value"])
                 existing_values.add(base_value)
                 existing_values.add(item["value"])
+            # ⭐ 전화번호는 정규화해서 중복 체크 (개선)
+            elif item["type"] == "전화번호":
+                existing_values.add(item["value"])
+                # item에서 normalized 값을 가져오거나 직접 정규화
+                normalized_phone = item.get("normalized") or re.sub(r'[^0-9]', '', item["value"])
+                existing_normalized_phones.add(normalized_phone)
+                print(f"  ⭐ 기존 전화번호 정규화: '{item['value']}' → '{normalized_phone}'")
             else:
                 existing_values.add(item["value"])
                 
@@ -510,6 +559,10 @@ def detect_with_ner_supplement(text: str, existing_items: List[Dict[str, Any]]) 
         for val in sorted(all_existing_values):
             print(f"  제외: '{val}'")
         
+        print(f"🔍 NER 보완: 정규화된 전화번호 제외 - {len(existing_normalized_phones)}개")
+        for phone in sorted(existing_normalized_phones):
+            print(f"  정규화 제외: '{phone}'")
+        
         ner_entities = extract_entities_with_ner(text)
         
         supplementary_items = []
@@ -518,10 +571,26 @@ def detect_with_ner_supplement(text: str, existing_items: List[Dict[str, Any]]) 
             raw_value = entity.get('value', '')
             confidence = entity.get('confidence', 0.0)
             
-            # ⭐ 스마트 정리 (컨텍스트 보존)
-            clean_value = smart_clean_korean_text(raw_value, preserve_context=True)
+            # ⭐ 스마트 정리 (조사 제거)
+            clean_value = smart_clean_korean_text(raw_value, preserve_context=False)
             
-            # ⭐ 강화된 중복 체크
+            # ⭐ 전화번호 중복 체크 및 정규화 강화
+            if entity_type == "전화번호":
+                # 숫자만 추출해서 정규화
+                normalized_ner_phone = re.sub(r'[^0-9]', '', clean_value)
+                if normalized_ner_phone in existing_normalized_phones:
+                    print(f"    NER 제외: '{clean_value}' (정규화된 전화번호 중복: '{normalized_ner_phone}')")
+                    continue
+                else:
+                    # ⭐ NER 전화번호도 포맷팅된 형태로 저장
+                    if len(normalized_ner_phone) == 11 and normalized_ner_phone.startswith('010'):
+                        formatted_ner_phone = f"{normalized_ner_phone[:3]}-{normalized_ner_phone[3:7]}-{normalized_ner_phone[7:]}"
+                        clean_value = formatted_ner_phone
+                        print(f"    ⭐ NER 전화번호 포맷팅: '{raw_value}' → '{formatted_ner_phone}' (정규화: '{normalized_ner_phone}')")
+                    else:
+                        print(f"    ⭐ NER 전화번호 정규화: '{clean_value}' → '{normalized_ner_phone}'")
+            
+            # ⭐ 강화된 중복 체크 (기존 로직)
             if clean_value in all_existing_values or not clean_value:
                 print(f"    NER 제외: '{clean_value}' (기존 항목과 중복)")
                 continue
@@ -542,7 +611,8 @@ def detect_with_ner_supplement(text: str, existing_items: List[Dict[str, Any]]) 
                     base_name = clean_value[:-1]
                     honorific = clean_value[-1]
                 
-                supplementary_items.append({
+                # ⭐ 전화번호인 경우 normalized 값도 추가
+                item_data = {
                     "type": entity_type,
                     "value": clean_value,
                     "start": entity.get('start', 0),
@@ -552,7 +622,13 @@ def detect_with_ner_supplement(text: str, existing_items: List[Dict[str, Any]]) 
                     "has_honorific": bool(honorific),
                     "base_name": base_name,
                     "honorific": honorific
-                })
+                }
+                
+                # ⭐ 전화번호인 경우 normalized 값 추가
+                if entity_type == "전화번호":
+                    item_data["normalized"] = re.sub(r'[^0-9]', '', clean_value)
+                
+                supplementary_items.append(item_data)
                 print(f"    ✅ NER 보완: '{clean_value}' ({entity_type})")
         
         print(f"🔍 NER 보완 완료: {len(supplementary_items)}개 추가")
@@ -563,8 +639,8 @@ def detect_with_ner_supplement(text: str, existing_items: List[Dict[str, Any]]) 
         return []
 
 async def detect_pii_all(text: str) -> List[Dict[str, Any]]:
-    """통합 PII 탐지 함수 (이름/주소 강화)"""
-    print(f"\n🔍 === 강화된 PII 탐지 시작 (이름/주소 강화) ===")
+    """통합 PII 탐지 함수 (이름/주소 강화, 조사 제외)"""
+    print(f"\n🔍 === 강화된 PII 탐지 시작 (이름/주소 강화, 조사 제외) ===")
     print(f"📝 입력: '{text}'")
     
     all_items = []
@@ -572,7 +648,7 @@ async def detect_pii_all(text: str) -> List[Dict[str, Any]]:
     # 1단계: normalizers 기반 주요 탐지 
     all_items.extend(detect_emails(text))
     all_items.extend(detect_phones(text))
-    all_items.extend(detect_names(text))      # ⭐ 대폭 강화됨
+    all_items.extend(detect_names(text))      # ⭐ 조사 제외 강화됨
     all_items.extend(detect_addresses(text))  # ⭐ 중복 제거 강화됨
     all_items.extend(detect_ages(text))
     
@@ -600,7 +676,7 @@ async def detect_pii_all(text: str) -> List[Dict[str, Any]]:
         else:
             print(f"🔄 중복 제거: {item['type']} '{item['value']}'")
     
-    print(f"🔍 === 강화된 PII 탐지 완료 (이름/주소 강화): {len(final_items)}개 ===\n")
+    print(f"🔍 === 강화된 PII 탐지 완료 (이름/주소 강화, 조사 제외): {len(final_items)}개 ===\n")
     return final_items
 
 # ===== 기존 정규화 함수들 (유지) =====

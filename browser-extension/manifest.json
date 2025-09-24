@@ -3,6 +3,9 @@
   "name": "GenAI Pseudonymizer",
   "version": "0.2.0",
   "description": "프롬프트는 가명화하여 전송하고 응답은 원복하여 표시합니다. (디버깅 강화)",
+  "icons": {
+  "128": "icon.png"
+  },
   "permissions": [
     "storage", 
     "scripting",
@@ -43,9 +46,5 @@
   }],
   "action": { 
     "default_popup": "popup.html" 
-  },
-  "options_ui": { 
-    "page": "options.html", 
-    "open_in_tab": true 
   }
 }
